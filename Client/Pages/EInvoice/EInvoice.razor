@@ -1,0 +1,15 @@
+﻿@page "/EInvoice/{Id:decimal}"
+@inherits GeneralComponent
+<PageTitle>EInvoice</PageTitle>
+
+<h3>EInvoice</h3>
+
+@code {
+    [Parameter]
+    public decimal Id { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Layout.ToggleLoader();
+    }
+}

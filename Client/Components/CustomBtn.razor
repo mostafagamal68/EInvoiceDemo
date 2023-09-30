@@ -1,0 +1,37 @@
+﻿<button @ref="Element" class="btn rounded-2 my-auto @Classes" @onclick="@RunAction" id="@Id" style="@Style" disabled="@IsActionRun" type="@Type" @attributes="AdditionalAttributes">
+    @SpanIcon
+    @Text
+    @if (IsActionRun)
+    {
+        <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+    }
+</button>
+
+@code{
+    [Parameter] 
+    public string Text { get; set; } = "";
+    [Parameter] 
+    public string Classes { get; set; } = "";
+    [Parameter] 
+    public string Id { get; set; } = "";
+    [Parameter] 
+    public string Style { get; set; } = "";
+    [Parameter] 
+    public string Type { get; set; } = "button";
+    [Parameter] 
+    public EventCallback ClickAction { get; set; }
+    [Parameter] 
+    public RenderFragment? SpanIcon { get; set; }
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private bool IsActionRun = false;
+    private ElementReference Element;
+        
+    protected async Task RunAction()
+    {
+        IsActionRun = true;
+        await ClickAction.InvokeAsync();
+        IsActionRun = false;
+    }
+}

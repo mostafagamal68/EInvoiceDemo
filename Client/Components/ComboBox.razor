@@ -1,0 +1,88 @@
+﻿@typeparam Type
+
+<div class="dropdown@(AutoComplete ? " input-group" : "")">
+    @if (AutoComplete)
+    {
+        <input class="form-control border-end-0 shadow-none" type="text" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:200px"
+        @bind-value="AutoCompleteValue" @bind-value:event="oninput" @bind-value:after="InvokeGetList" @onclick="InvokeGetList" />
+        <a role="button" class="input-group-text rounded-end-2 bg-white" @onclick="SelectedValueChanged"><span class="bi bi-x"></span></a>
+    }
+    else
+    {
+        <a class="form-select text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:180px" @onclick="@(ReGetOnClick ? InvokeGetList : null)">
+            @(Value ?? "Not Selected")
+        </a>
+    }
+
+    <ul class="dropdown-menu">
+        @if (List is null)
+        {
+            <li><h6 class="dropdown-item my-0">No result</h6></li>
+        }
+        else
+        {
+            if (!AutoComplete)
+            {
+                <li><a class="dropdown-item my-0" role="button" @onclick="SelectedValueChanged">Clear</a></li>
+                <li><hr class="dropdown-divider"></li>
+            }
+            foreach (var item in List)
+            {
+                <li>
+                    <a class="dropdown-item my-0" role="button" @onclick="@(async () => await SelectedValueChanged(item))">
+                        @item?.GetType()?.GetProperty(DisplayPropertyName)?.GetValue(item)
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter]
+    public List<Type>? List { get; set; }
+    [Parameter]
+    public string? Value { get; set; }
+    public string? AutoCompleteValue { get; set; }
+    [Parameter]
+    public string DisplayPropertyName { get; set; } = string.Empty;
+    [Parameter]
+    public bool ReGetOnClick { get; set; } = false;
+    [Parameter]
+    public bool AutoComplete { get; set; } = false;
+    [Parameter]
+    public bool Boolean { get; set; } = false;
+    [Parameter]
+    public EventCallback<Type> ValueChanged { get; set; }
+    [Parameter]
+    public EventCallback<string> GetList { get; set; }
+    protected override void OnInitialized()
+    {
+        if (AutoComplete)
+        {
+            ReGetOnClick = false;
+            AutoCompleteValue = Value;
+        }
+        if (Boolean)
+        {
+            ReGetOnClick = false;
+            AutoComplete = false;
+        }
+    }
+    private async Task InvokeGetList()
+    {
+        await GetList.InvokeAsync(AutoCompleteValue);
+    }
+    private async Task SelectedValueChanged()
+    {
+        if (AutoComplete) AutoCompleteValue = null;
+        if (Boolean) Value = null;
+        await ValueChanged.InvokeAsync();
+    }
+    private async Task SelectedValueChanged(Type? type)
+    {
+        if (AutoComplete) AutoCompleteValue = type?.GetType()?.GetProperty("Value")?.GetValue(type)?.ToString();
+        if (Boolean) Value = type?.GetType()?.GetProperty("Value")?.GetValue(type)?.ToString();
+        await ValueChanged.InvokeAsync(type);
+    }
+}

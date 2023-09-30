@@ -1,0 +1,53 @@
+﻿@page "/EInvoiceType/{Id:decimal?}"
+@inherits GeneralComponent
+@inject IEInvoiceTypesService service
+<h3>EInvoice Type</h3>
+<EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="col-md-6">
+        <div class="row">
+            <label>Name</label>
+            <InputText class="form-control" @bind-Value="dto.EInvoiceTypeName" />
+            <ValidationMessage For="@(() => dto.EInvoiceTypeName)" />
+        </div>
+        <button type="submit" class="btn btn-success">Save</button>
+        <button type="button" class="btn btn-danger">Delete</button>
+    </div>
+</EditForm>
+@code {
+    [Parameter]
+    public decimal? Id { get; set; }
+    EInvoiceTypeDto dto = new();
+    protected override async Task OnInitializedAsync()
+    {
+        // await base.OnInitializedAsync();
+        dto = await service.GetSingle(Id);
+        // Layout.ToggleLoader();
+    }
+    private async Task HandlValidSubmit()
+    {
+        HttpResponseMessage httpResponseMessage;
+        if (!Id.HasValue)
+        {
+            dto.EInvoiceTypeId = Utilites.GetNewDecimalId();
+            httpResponseMessage = await service.Create(dto);
+            if (httpResponseMessage.IsSuccessStatusCode)
+            {
+                GoTo("EInvoiceType", "EInvoice Type", true, dto.EInvoiceTypeId);
+            }
+        }
+        else
+            httpResponseMessage = await service.Edit(dto);
+        await ShowResultMessage(httpResponseMessage);
+    }
+    private async Task Delete()
+    {
+        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice Type?"))
+        {
+            var response = await service.Delete(Id);
+            if (response.IsSuccessStatusCode)
+                GoTo("EInvoiceTypes", "EInvoice Types");
+            await ShowResultMessage(response);
+        }
+    }
+}

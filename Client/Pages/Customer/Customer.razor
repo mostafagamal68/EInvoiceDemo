@@ -1,0 +1,15 @@
+﻿@page "/Customer/{Id:decimal}"
+@inherits GeneralComponent
+<PageTitle>Customer</PageTitle>
+
+<h3>Customer</h3>
+
+@code {
+    [Parameter]
+    public decimal Id { get; set; }
+
+    protected override void OnInitialized()
+    {
+        Layout.ToggleLoader();
+    }
+}

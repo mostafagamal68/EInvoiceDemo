@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+@* @inject Session CurrentSession *@
+@using Blazored.Toast.Configuration
+<PageTitle>@Page</PageTitle>
+
+<BlazoredToasts Position="ToastPosition.BottomRight"
+                Timeout="10"
+                IconType="IconType.FontAwesome"
+                SuccessClass="success-toast-override"
+                SuccessIcon="fa fa-thumbs-up"
+                ErrorIcon="fa fa-bug" />
+
+<div class="page">
+    <div class="sidebar">
+        <NavMenu />
+    </div>
+
+    <main>
+        <div class="top-row px-4">
+            <a href="https://www.codezone-eg.com/" target="_blank">About</a>
+        </div>
+
+        <article class="content px-4">
+            <div class="container">
+                <Loader Toggle="IsLoading" />
+                <CascadingValue Value="this">
+                    @Body
+                </CascadingValue>
+            </div>
+        </article>
+    </main>
+</div>
+@code {
+    string? Page = "";
+    public bool IsLoading = false;
+
+    public void ToggleLoader() => IsLoading = !IsLoading;
+    public void SetTitle() => Page = (string?)Session.Get("PageTitle");
+    
+}

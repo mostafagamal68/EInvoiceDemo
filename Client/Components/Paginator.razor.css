@@ -1,0 +1,13 @@
+﻿::deep a {
+    color: var(--primary-color);
+}
+    ::deep a:hover {
+        color: var(--tertiary-color);
+    }
+
+.active-page>.page-link {
+    z-index: 3;
+    color: var(--secondary-color);
+    background-color: var(--primary-color);
+    border-color: var(--primary-color);
+}

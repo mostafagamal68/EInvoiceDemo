@@ -14,4 +14,9 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.AddBlazoredModal();
 builder.Services.AddBlazoredToast();
 builder.Services.AddScoped<IEInvoiceTypesService, EInvoiceTypesService>();
+builder.Services.AddScoped<IEInvoicesService, EInvoicesService>();
+builder.Services.AddScoped<IItemsService, ItemsService>();
+builder.Services.AddScoped<ITaxesService, TaxesService>();
+builder.Services.AddScoped<ICustomersService, CustomersService>();
+builder.Services.AddScoped<LoaderService>();
 await builder.Build().RunAsync();

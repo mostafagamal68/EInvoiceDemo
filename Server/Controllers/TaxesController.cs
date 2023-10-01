@@ -9,35 +9,36 @@ using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
+using EInvoiceDemo.Client.Pages.Customer;
 
 namespace EInvoiceDemo.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ItemsController : ControllerBase
+    public class TaxesController : ControllerBase
     {
         private readonly EInvoiceContext _context;
 
-        public ItemsController(EInvoiceContext context)
+        public TaxesController(EInvoiceContext context)
         {
             _context = context;
         }
 
-        // GET: api/Items
+        // GET: api/Taxes
         [HttpPost("{filter}")]
-        public async Task<ActionResult<ItemsFilter>> GetItems(ItemsFilter? filter)
+        public async Task<ActionResult<TaxesFilter>> GetTaxes(TaxesFilter filter)
         {
-            var query = _context.Items.AsQueryable();
-            if (filter is null) filter = new ItemsFilter();
-            if (filter.ItemName.HasValue())
-                query = query.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter.ItemName));
+            var query = _context.Taxes.AsQueryable();
+            if (filter is null) filter = new TaxesFilter();
+            if (filter.TaxName.HasValue())
+                query = query.Where(c => (c.TaxCode + " " + c.TaxName).Contains(filter.TaxName));
             var list = await query
-                .Select(c => new ItemDto
+                .Select(c => new TaxDto
                 {
-                    ItemId = c.ItemId,
-                    ItemName = c.ItemName,
-                    ItemCode = c.ItemCode,
-                    ItemDescription = c.ItemDescription,
+                    TaxId = c.TaxId,
+                    TaxName = c.TaxName,
+                    TaxCode = c.TaxCode,
+                    TaxDescription = c.TaxDescription,
                 })
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
@@ -54,40 +55,37 @@ namespace EInvoiceDemo.Server.Controllers
             return filter;
         }
 
-        // GET: api/Items/5
+        // GET: api/Taxes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemDto>> GetItem(Guid id)
+        public async Task<ActionResult<Tax>> GetTax(Guid id)
         {
-            var item = await _context.Items.FindAsync(id);
+            var tax = await _context.Taxes.FindAsync(id);
 
-            if (item == null)
-            {
-                return NotFound();
-            }
+            if (tax == null) return NotFound();
 
-            return new ItemDto
+            return new TaxDto
             {
-                ItemId = item.ItemId,
-                ItemName = item.ItemName,
-                ItemCode = item.ItemCode,
-                ItemDescription = item.ItemDescription,
+                TaxId = c.TaxId,
+                TaxName = c.TaxName,
+                TaxCode = c.TaxCode,
+                TaxDescription = c.TaxDescription,
             };
         }
 
-        // PUT: api/Items/5
+        // PUT: api/Taxes/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
-        public async Task<IActionResult> PutItem(ItemDto dto)
+        public async Task<IActionResult> PutTax(TaxDto dto)
         {
-            var Item = await _context.Items.FindAsync(dto.ItemId);
+            var Tax = await _context.Taxes.FindAsync(dto.TaxId);
 
-            if (Item is null) return BadRequest();
+            if (Tax is null) return BadRequest();
 
-            Item.ItemName = dto.ItemName;
-            Item.ItemCode = dto.ItemCode;
-            Item.ItemDescription = dto.ItemDescription;
+            Tax.TaxName = dto.TaxName;
+            Tax.TaxCode = dto.TaxCode;
+            Tax.TaxDescription = dto.TaxDescription;
 
-            _context.Entry(Item).State = EntityState.Modified;
+            _context.Entry(Tax).State = EntityState.Modified;
 
             try
             {
@@ -95,7 +93,7 @@ namespace EInvoiceDemo.Server.Controllers
             }
             catch (DbUpdateConcurrencyException)
             {
-                if (!ItemExists(dto.ItemId))
+                if (!TaxExists(dto.TaxId))
                 {
                     return NotFound();
                 }
@@ -108,23 +106,23 @@ namespace EInvoiceDemo.Server.Controllers
             return Ok("Saved Successfully");
         }
 
-        // POST: api/Items
+        // POST: api/Taxes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostItem(Item item)
+        public async Task<ActionResult<Tax>> PostTax(Tax tax)
         {
-            if (_context.Items == null)
+            if (_context.Taxes == null)
             {
-                return Problem("Entity set 'EInvoiceContext.Items'  is null.");
+                return Problem("Entity set 'EInvoiceContext.Taxes'  is null.");
             }
-            _context.Items.Add(item);
+            _context.Taxes.Add(tax);
             try
             {
                 await _context.SaveChangesAsync();
             }
             catch (DbUpdateException)
             {
-                if (ItemExists(item.ItemId))
+                if (TaxExists(tax.TaxId))
                 {
                     return Conflict();
                 }
@@ -134,25 +132,25 @@ namespace EInvoiceDemo.Server.Controllers
                 }
             }
 
-            return CreatedAtAction("GetItem", new { id = item.ItemId }, item);
+            return CreatedAtAction("GetTax", new { id = tax.TaxId }, tax);
         }
 
-        // DELETE: api/Items/5
+        // DELETE: api/Taxes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteItem(Guid id)
+        public async Task<IActionResult> DeleteTax(Guid id)
         {
-            var item = await _context.Items.FindAsync(id);
-            if (item == null) return NotFound();
+            var tax = await _context.Taxes.FindAsync(id);
+            if (tax == null) return NotFound();
 
-            _context.Items.Remove(item);
+            _context.Taxes.Remove(tax);
             await _context.SaveChangesAsync();
 
             return Ok("Deleted Successfully");
         }
 
-        private bool ItemExists(Guid id)
+        private bool TaxExists(Guid id)
         {
-            return (_context.Items?.Any(e => e.ItemId == id)).GetValueOrDefault();
+            return (_context.Taxes?.Any(e => e.TaxId == id)).GetValueOrDefault();
         }
     }
 }

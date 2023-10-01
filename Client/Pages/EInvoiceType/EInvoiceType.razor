@@ -5,9 +5,9 @@
 {
     <h3 class="mb-3">E-Invoice Type</h3>
 }
-<EditForm Model="dto" OnValidSubmit="HandlValidSubmit" class="mb-3">
+<EditForm Model="dto" OnValidSubmit="HandlValidSubmit" >
     <DataAnnotationsValidator />
-    <div class="col-md-12">
+    <div class="col-md-12 mb-3">
         <div class="row">
             <div class="col-md-3 my-auto">
                 <label>Name</label>
@@ -23,9 +23,10 @@
     <div class="d-flex justify-content-end">
         @if (Id.HasValue)
         {
-            <a role="button" class="btn btn-danger mx-2" @onclick="Delete">Delete</a>
+            <a role="button" class="btn btn-info mx-1" @onclick="New">New</a>
+            <a role="button" class="btn btn-danger mx-1" @onclick="Delete">Delete</a>
         }
-        <button type="submit" class="btn btn-success border-0">Save</button>
+        <button type="submit" class="btn btn-success mx-1 border-0">Save</button>
     </div>
 </EditForm>
 @code {
@@ -34,10 +35,10 @@
     EInvoiceTypeDto dto = new();
     protected override async Task OnInitializedAsync()
     {
-        Layout.ToggleLoader();
+        LoaderService.ToggleLoader();
         if (Id.HasValue)
             dto = await service.GetSingle(Id);
-        Layout.ToggleLoader();
+        LoaderService.ToggleLoader();
     }
     private async Task HandlValidSubmit()
     {
@@ -47,13 +48,20 @@
             dto.EInvoiceTypeId = Guid.NewGuid();
             httpResponseMessage = await service.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
-                GoTo("EInvoiceType", "EInvoice Type", true, dto.EInvoiceTypeId);
+                Id = dto.EInvoiceTypeId;
+            // GoTo("EInvoiceType", "EInvoice Type", true, dto.EInvoiceTypeId);            
         }
         else
             httpResponseMessage = await service.Edit(dto);
         await ShowResultMessage(httpResponseMessage);
+
     }
-    public async Task Delete()
+    private void New()
+    {
+        Id = null;
+        dto = new EInvoiceTypeDto();
+    }
+    private async Task Delete()
     {
         if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice Type?"))
         {

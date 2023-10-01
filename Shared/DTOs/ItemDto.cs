@@ -11,7 +11,7 @@ namespace EInvoiceDemo.Shared.DTOs;
 public class ItemDto
 {
     [Required]
-    public decimal ItemId { get; set; }
+    public Guid ItemId { get; set; }
 
     [Required]
     [StringLength(50)]

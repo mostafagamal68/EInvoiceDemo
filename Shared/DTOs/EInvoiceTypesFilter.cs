@@ -1,15 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿namespace EInvoiceDemo.Shared.DTOs;
 
-namespace EInvoiceDemo.Shared.DTOs;
-
-public class EInvoiceTypesFilter
+public class EInvoiceTypesFilter : GlobalFilter<EInvoiceTypeDto>
 {
     public string? EInvoiceTypeName { get; set; }
-
-    public List<EInvoiceTypeDto> Items { get; set; } = new();
-    public Pagination Pagination { get; set; } = new();
 }

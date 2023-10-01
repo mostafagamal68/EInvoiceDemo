@@ -23,7 +23,7 @@
         <article class="content px-4">
             <div class="container">
                 <CascadingValue Value="this">
-                    <Loader Toggle="IsLoading" />
+                    <Loader />
                     @Body
                 </CascadingValue>
             </div>
@@ -32,13 +32,13 @@
 </div>
 @code {
     string? Page = "";
-    public bool IsLoading = false;
+    // public bool IsLoading = false;
 
-    public async Task ToggleLoader()
-    {
-        IsLoading = !IsLoading;
-        StateHasChanged();
-    }
+    // public async Task ToggleLoader()
+    // {
+    //     IsLoading = !IsLoading;
+    //     StateHasChanged();
+    // }
     public void SetTitle() => Page = (string?)Session.Get("PageTitle");
 
 }

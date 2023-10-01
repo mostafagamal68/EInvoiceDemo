@@ -1,15 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
 
-namespace EInvoiceDemo.Server.Models;
+namespace EInvoiceDemo.Shared.DTOs;
 
-public class Customer
+public class CustomerDto
 {
-    public Customer()
-    {
-        EInvoices = new List<EInvoice>();
-    }
-
-    [Key]
     public Guid CustomerId { get; set; }
 
     [Required]
@@ -18,6 +12,4 @@ public class Customer
 
     [Required]
     public int CustomerCode { get; set; }
-    public IList<EInvoice> EInvoices { get; set; }
-
 }

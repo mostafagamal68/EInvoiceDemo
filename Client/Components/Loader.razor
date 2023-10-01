@@ -1,4 +1,6 @@
-﻿@if (Toggle)
+﻿@inject LoaderService service
+@implements IDisposable
+@if (service.IsLoading)
 {
     <div class="loader">
         <div class="spinner-border" role="status">
@@ -8,5 +10,13 @@
 }
 
 @code {
-    [Parameter] public bool Toggle { set; get; } = false;
+    protected override void OnInitialized()
+    {
+        service.OnChange += StateHasChanged;
+    }
+    public void Dispose()
+    {
+        service.OnChange -= StateHasChanged;
+    }
+    // [Parameter] public bool Toggle { set; get; } = false;
 }

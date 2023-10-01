@@ -72,11 +72,11 @@ namespace EInvoiceDemo.Server.Controllers
         [HttpPut]
         public async Task<IActionResult> PutEInvoiceType(EInvoiceTypeDto dto)
         {
-            EInvoiceType eInvoiceType = new()
-            {
-                EInvoiceTypeId = dto.EInvoiceTypeId,
-                EInvoiceTypeName = dto.EInvoiceTypeName
-            };
+            var eInvoiceType = await _context.EInvoiceTypes.FindAsync(dto.EInvoiceTypeId);
+
+            if (eInvoiceType is null) return BadRequest();
+
+            eInvoiceType.EInvoiceTypeName = dto.EInvoiceTypeName;
 
             _context.Entry(eInvoiceType).State = EntityState.Modified;
 
@@ -133,8 +133,7 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<IActionResult> DeleteEInvoiceType(Guid id)
         {
             var eInvoiceType = await _context.EInvoiceTypes.FindAsync(id);
-            if (eInvoiceType == null)
-                return NotFound();
+            if (eInvoiceType == null) return NotFound();
 
             _context.EInvoiceTypes.Remove(eInvoiceType);
             await _context.SaveChangesAsync();

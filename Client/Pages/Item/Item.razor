@@ -1,15 +1,96 @@
-﻿@page "/Item/{Id:decimal}"
+﻿@page "/Item/{Id:guid?}"
 @inherits GeneralComponent
-<PageTitle>Item</PageTitle>
-
-<h3>Item</h3>
-
+@inject IItemsService service
+@if (!IsModal)
+{
+    <h3>Item</h3>
+}
+<EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
+    <DataAnnotationsValidator />
+    <div class="col-md-12 my-2">
+        <div class="row my-1">
+            <div class="col-md-3 my-auto">
+                <label>Code</label>
+            </div>
+            <div class="col-md-6">
+                <InputNumber class="form-control" @bind-Value="dto.ItemCode" />
+            </div>
+            <div class="col-md my-auto">
+                <ValidationMessage For="@(() => dto.ItemCode)" />
+            </div>
+        </div>
+        <div class="row my-1">
+            <div class="col-md-3 my-auto">
+                <label>Name</label>
+            </div>
+            <div class="col-md-6">
+                <InputText class="form-control" @bind-Value="dto.ItemName" />
+            </div>
+            <div class="col-md my-auto">
+                <ValidationMessage For="@(() => dto.ItemName)" />
+            </div>
+        </div>
+        <div class="row my-1">
+            <div class="col-md-3 my-auto">
+                <label>Description</label>
+            </div>
+            <div class="col-md-6">
+                <InputTextArea class="form-control" @bind-Value="dto.ItemDescription" />
+            </div>
+            <div class="col-md my-auto">
+                <ValidationMessage For="@(() => dto.ItemDescription)" />
+            </div>
+        </div>
+    </div>
+    <div class="d-flex justify-content-end">
+        @if (Id.HasValue)
+        {
+            <a role="button" class="btn btn-info mx-1" @onclick="New">New</a>
+            <a role="button" class="btn btn-danger mx-1" @onclick="Delete">Delete</a>
+        }
+        <button type="submit" class="btn btn-success mx-1 border-0">Save</button>
+    </div>
+</EditForm>
 @code {
     [Parameter]
-    public decimal Id { get; set; }
-
-    protected override void OnInitialized()
+    public Guid? Id { get; set; }
+    ItemDto dto = new();
+    protected override async Task OnInitializedAsync()
     {
-        Layout.ToggleLoader();
+        LoaderService.ToggleLoader();
+        if (Id.HasValue)
+            dto = await service.GetSingle(Id);
+        LoaderService.ToggleLoader();
+    }
+    private async Task HandlValidSubmit()
+    {
+        HttpResponseMessage httpResponseMessage;
+        if (!Id.HasValue)
+        {
+            dto.ItemId = Guid.NewGuid();
+            httpResponseMessage = await service.Create(dto);
+            if (httpResponseMessage.IsSuccessStatusCode)
+                Id = dto.ItemId;
+            // GoTo("Item", "EInvoice Type", true, dto.ItemId);
+        }
+        else
+            httpResponseMessage = await service.Edit(dto);
+        await ShowResultMessage(httpResponseMessage);
+
+    }
+    private void New()
+    {
+        Id = null;
+        dto = new ItemDto();
+    }
+    private async Task Delete()
+    {
+        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this Item?"))
+        {
+            var response = await service.Delete(Id);
+            if (response.IsSuccessStatusCode)
+                GoTo("Items", "Items");
+            await ShowResultMessage(response);
+        }
     }
 }

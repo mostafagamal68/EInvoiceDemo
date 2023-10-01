@@ -1,5 +1,5 @@
 ﻿namespace EInvoiceDemo.Client.Services;
 
-public class EInvoicesService
+public class EInvoicesService : IEInvoicesService
 {
 }

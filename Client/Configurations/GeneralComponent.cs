@@ -2,6 +2,7 @@
 using Blazored.Modal.Services;
 using Blazored.Toast.Services;
 using EInvoiceDemo.Client.Components;
+using EInvoiceDemo.Client.Pages.EInvoiceType;
 using EInvoiceDemo.Client.Services;
 using EInvoiceDemo.Client.Shared;
 using EInvoiceDemo.Shared.Helpers;
@@ -15,6 +16,9 @@ public class GeneralComponent : ComponentBase
 {
     [Inject]
     public NavigationManager Navigation { get; set; }
+
+    [Inject]
+    public LoaderService LoaderService { get; set; }
 
     //[Inject]
     //public Session CurrentSession { get; set; }
@@ -65,6 +69,15 @@ public class GeneralComponent : ComponentBase
         return result.Confirmed;
     }
 
+    public async Task ShowModal(Type component, string title, Func<Task> afterClose, ModalParameters? parameters = null)
+    {        
+        var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(IsModal), true), ModalOptions);
+        await modal.Result;
+        LoaderService.ToggleLoader();
+        await afterClose.Invoke();
+        LoaderService.ToggleLoader();
+    }
+
     public void GoTo(string PageRoute, string PageName, bool WithId = false, Guid? Id = null)
     {
         Session.Set("PageTitle", (WithId ? !Id.HasValue ? "Add - " : "Edit - " : "") + PageName);
@@ -73,11 +86,4 @@ public class GeneralComponent : ComponentBase
         else
             Navigation.NavigateTo($"/{PageRoute}");
     }
-
-    //protected override async Task OnInitializedAsync()
-    //{
-    //    Layout.ToggleLoader();
-    //    Layout.SetTitle();
-    //    await base.OnInitializedAsync();
-    //}
 }

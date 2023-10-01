@@ -57,7 +57,7 @@ namespace EInvoiceDemo.Server.Controllers
 
         // GET: api/Taxes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Tax>> GetTax(Guid id)
+        public async Task<ActionResult<TaxDto>> GetTax(Guid id)
         {
             var tax = await _context.Taxes.FindAsync(id);
 
@@ -65,10 +65,10 @@ namespace EInvoiceDemo.Server.Controllers
 
             return new TaxDto
             {
-                TaxId = c.TaxId,
-                TaxName = c.TaxName,
-                TaxCode = c.TaxCode,
-                TaxDescription = c.TaxDescription,
+                TaxId = tax.TaxId,
+                TaxName = tax.TaxName,
+                TaxCode = tax.TaxCode,
+                TaxDescription = tax.TaxDescription,
             };
         }
 

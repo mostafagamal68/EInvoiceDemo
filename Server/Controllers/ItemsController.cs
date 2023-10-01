@@ -53,7 +53,7 @@ namespace EInvoiceDemo.Server.Controllers
         // PUT: api/Items/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutItem(decimal id, Item item)
+        public async Task<IActionResult> PutItem(Guid id, Item item)
         {
             if (id != item.ItemId)
             {
@@ -130,7 +130,7 @@ namespace EInvoiceDemo.Server.Controllers
             return NoContent();
         }
 
-        private bool ItemExists(decimal id)
+        private bool ItemExists(Guid id)
         {
             return (_context.Items?.Any(e => e.ItemId == id)).GetValueOrDefault();
         }

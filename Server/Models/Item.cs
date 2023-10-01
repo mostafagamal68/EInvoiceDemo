@@ -11,8 +11,7 @@ public class Item
     }
 
     [Key]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal ItemId { get; set; }
+    public Guid ItemId { get; set; }
 
     [Required]
     [StringLength(50)]

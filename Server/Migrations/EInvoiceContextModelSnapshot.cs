@@ -24,8 +24,9 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.Customer", b =>
                 {
-                    b.Property<decimal>("CustomerId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("CustomerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("CustomerCode")
                         .HasColumnType("int");
@@ -42,11 +43,12 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.EInvoice", b =>
                 {
-                    b.Property<decimal>("EInvoiceId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("EInvoiceId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("CustomerId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("CustomerId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<DateTime>("DateTimeIssued")
                         .HasColumnType("datetime2");
@@ -54,10 +56,10 @@ namespace EInvoiceDemo.Server.Migrations
                     b.Property<int>("EInvoiceCode")
                         .HasColumnType("int");
 
-                    b.Property<decimal>("EInvoiceTypeId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("EInvoiceTypeId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal?>("NetAmount")
+                    b.Property<decimal>("NetAmount")
                         .HasColumnType("decimal(28, 8)");
 
                     b.HasKey("EInvoiceId");
@@ -71,17 +73,18 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.EInvoiceLine", b =>
                 {
-                    b.Property<decimal>("EInvoiceLineId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("EInvoiceLineId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("AmountSold")
                         .HasColumnType("decimal(28, 8)");
 
-                    b.Property<decimal>("EInvoiceId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("EInvoiceId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("ItemId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("ItemId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<decimal>("ItemNetAmount")
                         .HasColumnType("decimal(28, 8)");
@@ -103,14 +106,18 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.EInvoiceLineTax", b =>
                 {
-                    b.Property<decimal>("EInvoiceLineTaxId")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<Guid>("EInvoiceLineTaxId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<decimal>("EInvoiceLineId")
-                        .HasColumnType("decimal(28,8)");
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(28, 8)");
 
-                    b.Property<decimal>("TaxId")
-                        .HasColumnType("decimal(28,8)");
+                    b.Property<Guid>("EInvoiceLineId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("TaxId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("EInvoiceLineTaxId");
 
@@ -123,8 +130,9 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.EInvoiceType", b =>
                 {
-                    b.Property<decimal>("EInvoiceTypeId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("EInvoiceTypeId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("EInvoiceTypeName")
                         .IsRequired()
@@ -138,8 +146,9 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.Item", b =>
                 {
-                    b.Property<decimal>("ItemId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("ItemId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("ItemCode")
                         .HasColumnType("int");
@@ -161,8 +170,9 @@ namespace EInvoiceDemo.Server.Migrations
 
             modelBuilder.Entity("EInvoiceDemo.Server.Models.Tax", b =>
                 {
-                    b.Property<decimal>("TaxId")
-                        .HasColumnType("decimal(28, 8)");
+                    b.Property<Guid>("TaxId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<int>("TaxCode")
                         .HasColumnType("int");

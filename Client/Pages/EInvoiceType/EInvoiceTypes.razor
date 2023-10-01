@@ -2,16 +2,18 @@
 @inherits GeneralComponent
 @inject IEInvoiceTypesService service
 @* <PageTitle>EInvoice Types</PageTitle> *@
+<div class="d-flex justify-content-between align-content-center mb-3">
+    <h3>EInvoice Types</h3>
+    <a role="button" class="btn btn-primary" @onclick="@(()=>Modal.Show<EInvoiceType>("E-Invoice Type", new ModalParameters().Add(nameof(EInvoiceType.IsModal), true), ModalOptions))"><i class="bi bi-plus-circle mx-1"></i>Add</a>
+    @* <a role="button" class="btn btn-primary my-auto" @onclick="@(()=>GoTo("EInvoiceType", "E-Invoice Type", true))"><i class="bi bi-plus-circle mx-1"></i>Add</a> *@
+</div>
 
-<h3>EInvoice Types</h3>
-<a role="button" class="btn btn-primary" @onclick="@(()=>GoTo("EInvoiceType", "E-Invoice Type", true))"><i class="bi bi-plus-circle mx-1"></i>Add</a>
-
-@* @if (!Layout.IsLoading)
-{ *@
+@if (eInvoiceTypes is not null)
+{
     @if (eInvoiceTypes?.Items.Count() == 0)
     {
         <div class="d-flex alert alert-warning align-items-center">
-            <h5>No Subscriptions</h5>
+            <h5><i class="bi bi-exclamation-triangle mx-2"></i>No E-Invoice Types</h5>
         </div>
     }
     else
@@ -26,24 +28,38 @@
                 <td scope="row" class="border-end text-center" style=@(sub.Item2 == sub.Item3 ? "border-bottom-left-radius:20px" : "")>@sub.Item2</td>
                 <td class="border-end">@sub.Item1.EInvoiceTypeName</td>
                 <td style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
-                <button class="btn" type="button" @onclick="@(() => GoTo("EInvoiceType", "EInvoice Type", true, sub.Item1.EInvoiceTypeId))">
+                    <a role="button" class="btn btn-warning" type="button" @onclick="@(() => Modal.Show<EInvoiceType>("E-Invoice Type", new ModalParameters().Add(nameof(EInvoiceType.IsModal), true).Add(nameof(EInvoiceType.Id), sub.Item1.EInvoiceTypeId), ModalOptions))">
                         <i class="bi bi-pencil-square"></i>
-                    </button>
+                    </a>
+                    <a role="button" class="btn btn-danger" type="button" @onclick="@(() => DeleteRow(sub.Item1.EInvoiceTypeId))">
+                        <i class="bi bi-trash"></i>
+                    </a>
                 </td>
             </RowTemplate>
         </TableTemplate>
     }
 
     <Paginator Type="EInvoiceTypesFilter" Filter="eInvoiceTypes" Pagination="eInvoiceTypes?.Pagination" GetPage="GetEInvoiceTypesFiltered"></Paginator>
-@* } *@
+}
 @code {
-    public EInvoiceTypesFilter? eInvoiceTypes = new();
+    EInvoiceTypesFilter? eInvoiceTypes;
     protected override async Task OnInitializedAsync()
     {
-        // Layout.ToggleLoader();
+        // await Layout.ToggleLoader();
         // Layout.SetTitle();
         await GetEInvoiceTypesFiltered();
-        // Layout.ToggleLoader();
+        // await Layout.ToggleLoader();
     }
-    public async Task GetEInvoiceTypesFiltered() => eInvoiceTypes = await service.GetList(eInvoiceTypes);
+    private async Task GetEInvoiceTypesFiltered() => eInvoiceTypes = await service.GetList(eInvoiceTypes);
+    private async Task DeleteRow(Guid Id)
+    {
+        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice Type?"))
+        {
+            var response = await service.Delete(Id);
+            if (response.IsSuccessStatusCode)
+                eInvoiceTypes.Items.Remove(eInvoiceTypes.Items.First(c => c.EInvoiceTypeId == Id));
+            await ShowResultMessage(response);
+        }
+    }
+
 }

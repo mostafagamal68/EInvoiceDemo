@@ -11,8 +11,7 @@ public class Tax
     }
 
     [Key]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal TaxId { get; set; }
+    public Guid TaxId { get; set; }
 
     [Required]
     [StringLength(50)]

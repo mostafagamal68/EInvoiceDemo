@@ -54,7 +54,7 @@ namespace EInvoiceDemo.Server.Controllers
 
         // GET: api/EInvoiceTypes/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<EInvoiceTypeDto>> GetEInvoiceType(decimal id)
+        public async Task<ActionResult<EInvoiceTypeDto>> GetEInvoiceType(Guid? id)
         {
             var eInvoiceType = await _context.EInvoiceTypes.FindAsync(id);
 
@@ -96,13 +96,13 @@ namespace EInvoiceDemo.Server.Controllers
                 }
             }
 
-            return Content("Saved Successfully");
+            return Ok("Saved Successfully");
         }
 
         // POST: api/EInvoiceTypes
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<EInvoiceType>> PostEInvoiceType(EInvoiceType eInvoiceType)
+        public async Task<IActionResult> PostEInvoiceType(EInvoiceType eInvoiceType)
         {
             if (_context.EInvoiceTypes == null)
             {
@@ -130,7 +130,7 @@ namespace EInvoiceDemo.Server.Controllers
 
         // DELETE: api/EInvoiceTypes/5
         [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteEInvoiceType(decimal id)
+        public async Task<IActionResult> DeleteEInvoiceType(Guid id)
         {
             var eInvoiceType = await _context.EInvoiceTypes.FindAsync(id);
             if (eInvoiceType == null)
@@ -139,10 +139,10 @@ namespace EInvoiceDemo.Server.Controllers
             _context.EInvoiceTypes.Remove(eInvoiceType);
             await _context.SaveChangesAsync();
 
-            return Content("Deleted Successfully");
+            return Ok("Deleted Successfully");
         }
 
-        private bool EInvoiceTypeExists(decimal id)
+        private bool EInvoiceTypeExists(Guid id)
         {
             return (_context.EInvoiceTypes?.Any(e => e.EInvoiceTypeId == id)).GetValueOrDefault();
         }

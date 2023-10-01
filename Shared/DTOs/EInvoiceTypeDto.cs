@@ -11,7 +11,7 @@ namespace EInvoiceDemo.Shared.DTOs;
 public class EInvoiceTypeDto
 {
     [Required]
-    public decimal EInvoiceTypeId { get; set; }
+    public Guid EInvoiceTypeId { get; set; }
     [Required]
     [StringLength(50)]
     public string? EInvoiceTypeName { get; set; }

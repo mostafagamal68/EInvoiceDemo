@@ -7,12 +7,12 @@
     <tbody>
         @{
             var last = Items.Count.ToString();
-        }
-        @foreach (var (item, index) in Items.Select((value, i) => (value, i + 1)))
-        {
-            if (RowTemplate is not null)
+            foreach (var (item, index) in Items.Select((value, i) => (value, i + 1)))
             {
-                <tr class="align-middle text-left">@RowTemplate((item,index.ToString(),last))</tr>
+                if (RowTemplate is not null)
+                {
+                    <tr class="align-middle text-left">@RowTemplate((item,index.ToString(),last))</tr>
+                }
             }
         }
     </tbody>
@@ -23,7 +23,7 @@
     public RenderFragment? TableHeader { get; set; }
 
     [Parameter]
-    public RenderFragment<(TItem ,string, string)> RowTemplate { get; set; }
+    public RenderFragment<(TItem, string, string)> RowTemplate { get; set; }
 
     [Parameter, AllowNull]
     public IReadOnlyList<TItem> Items { get; set; }

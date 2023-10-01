@@ -9,16 +9,14 @@ public class EInvoiceLine
     {
         EInvoiceLineTaxes = new List<EInvoiceLineTax>();
     }
-    [Key]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal EInvoiceLineId { get; set; }
 
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal ItemId { get; set; }
+    [Key]
+    public Guid EInvoiceLineId { get; set; }
+
+    public Guid ItemId { get; set; }
     public Item? Item { get; set; }
 
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal EInvoiceId { get; set; }
+    public Guid EInvoiceId { get; set; }
     public EInvoice? EInvoice { get; set; }
 
     [Column(TypeName = "decimal(28, 8)")]

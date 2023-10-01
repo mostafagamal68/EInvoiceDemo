@@ -11,8 +11,7 @@ public class EInvoiceType
     }
 
     [Key]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal EInvoiceTypeId { get; set; }
+    public Guid EInvoiceTypeId { get; set; }
     [Required]
     [StringLength(50)]
     public string? EInvoiceTypeName { get; set; }

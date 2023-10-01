@@ -15,7 +15,7 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "Customers",
                 columns: table => new
                 {
-                    CustomerId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     CustomerName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     CustomerCode = table.Column<int>(type: "int", nullable: false)
                 },
@@ -28,7 +28,7 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "EInvoiceTypes",
                 columns: table => new
                 {
-                    EInvoiceTypeId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    EInvoiceTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EInvoiceTypeName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
@@ -40,7 +40,7 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "Items",
                 columns: table => new
                 {
-                    ItemId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     ItemName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     ItemDescription = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     ItemCode = table.Column<int>(type: "int", nullable: false)
@@ -54,7 +54,7 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "Taxes",
                 columns: table => new
                 {
-                    TaxId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    TaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     TaxName = table.Column<string>(type: "nvarchar(50)", maxLength: 50, nullable: false),
                     TaxDescription = table.Column<string>(type: "nvarchar(150)", maxLength: 150, nullable: false),
                     TaxCode = table.Column<int>(type: "int", nullable: false)
@@ -68,10 +68,10 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "EInvoices",
                 columns: table => new
                 {
-                    EInvoiceId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    EInvoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     EInvoiceCode = table.Column<int>(type: "int", nullable: false),
-                    EInvoiceTypeId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
-                    CustomerId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    EInvoiceTypeId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    CustomerId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     DateTimeIssued = table.Column<DateTime>(type: "datetime2", nullable: false),
                     NetAmount = table.Column<decimal>(type: "decimal(28,8)", nullable: false)
                 },
@@ -96,9 +96,9 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "EInvoiceLines",
                 columns: table => new
                 {
-                    EInvoiceLineId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
-                    ItemId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
-                    EInvoiceId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
+                    EInvoiceLineId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    ItemId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EInvoiceId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
                     Quantity = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
                     AmountSold = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
                     Total = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
@@ -125,9 +125,10 @@ namespace EInvoiceDemo.Server.Migrations
                 name: "EInvoiceLineTaxes",
                 columns: table => new
                 {
-                    EInvoiceLineTaxId = table.Column<decimal>(type: "decimal(18,2)", nullable: false),
-                    TaxId = table.Column<decimal>(type: "decimal(28,8)", nullable: false),
-                    EInvoiceLineId = table.Column<decimal>(type: "decimal(28,8)", nullable: false)
+                    EInvoiceLineTaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    TaxId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    EInvoiceLineId = table.Column<Guid>(type: "uniqueidentifier", nullable: false),
+                    Amount = table.Column<decimal>(type: "decimal(28,8)", nullable: false)
                 },
                 constraints: table =>
                 {

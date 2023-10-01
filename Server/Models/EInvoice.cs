@@ -11,21 +11,18 @@ public class EInvoice
     }
 
     [Key]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal EInvoiceId { get; set; }
+    public Guid EInvoiceId { get; set; }
 
     [Required]
     public int EInvoiceCode { get; set; }
 
     [Required]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal EInvoiceTypeId { get; set;}
+    public Guid EInvoiceTypeId { get; set;}
 
     public EInvoiceType? EInvoiceType { get; set;}
 
     [Required]
-    [Column(TypeName = "decimal(28, 8)")]
-    public decimal CustomerId { get; set;}
+    public Guid CustomerId { get; set;}
 
     public Customer? Customer { get; set;}
 

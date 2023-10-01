@@ -21,12 +21,12 @@ public class EInvoiceTypesService : IEInvoiceTypesService
         var content = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<EInvoiceTypesFilter>(content, _options);
     }
-    public async Task<EInvoiceTypeDto?> GetSingle(decimal? Id)
+    public async Task<EInvoiceTypeDto> GetSingle(Guid? Id)
         => await _httpClient.GetFromJsonAsync<EInvoiceTypeDto>($"{api}/{Id}");
     public async Task<HttpResponseMessage> Create(EInvoiceTypeDto dto)
         => await _httpClient.PostAsJsonAsync(api, dto);
     public async Task<HttpResponseMessage> Edit(EInvoiceTypeDto dto)
         => await _httpClient.PutAsJsonAsync(api, dto);
-    public async Task<HttpResponseMessage> Delete(decimal? Id)
+    public async Task<HttpResponseMessage> Delete(Guid? Id)
         => await _httpClient.DeleteAsync($"{api}/{Id}");
 }

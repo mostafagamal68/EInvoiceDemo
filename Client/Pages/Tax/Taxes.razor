@@ -2,7 +2,7 @@
 @inherits GeneralComponent
 @inject ITaxesService service
 @* <PageTitle>Taxes</PageTitle> *@
-<div class="d-flex justify-content-between align-Taxs-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Taxes</h3>
     <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Tax), "Tax", afterClose: GetTaxesFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>

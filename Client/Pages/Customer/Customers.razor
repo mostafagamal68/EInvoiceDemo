@@ -2,7 +2,7 @@
 @inherits GeneralComponent
 @inject ICustomersService service
 @* <PageTitle>Customers</PageTitle> *@
-<div class="d-flex justify-content-between align-Customers-center mb-3">
+<div class="d-flex justify-content-between align-items-center mb-3">
     <h3>Customers</h3>
     <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Customer), "Customer", afterClose: GetCustomersFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>

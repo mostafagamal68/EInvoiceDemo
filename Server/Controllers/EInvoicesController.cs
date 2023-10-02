@@ -9,6 +9,8 @@ using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Models;
+using System.Data.Common;
+using EInvoiceDemo.Shared.Helpers;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -25,13 +27,13 @@ namespace EInvoiceDemo.Server.Controllers
 
         private IQueryable<EInvoice> Query()
             => _context.EInvoices.Include(c => c.Customer).Include(c => c.EInvoiceType)
-            .Include(c => c.EInvoiceLines).ThenInclude(c => c.EInvoiceLineTaxes)
+            .Include(c => c.EInvoiceLines).ThenInclude(c => c.EInvoiceLineTaxes).ThenInclude(c => c.Tax)
+            .Include(c => c.EInvoiceLines).ThenInclude(c => c.Item)
             .AsQueryable();
 
 
         // GET: api/EInvoices/Code
-        [HttpGet]
-        [Route("Code")]
+        [HttpGet("Code")]
         public async Task<ActionResult<int>> GetEInvoiceCode()
             => (await _context.EInvoices?.MaxAsync(c => (int?)c.EInvoiceCode) ?? 0) + 1;
 
@@ -40,7 +42,18 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<ActionResult<EInvoicesFilter>> GetEInvoices(EInvoicesFilter? filter)
         {
             var query = Query();
-
+            if (filter is null) filter = new EInvoicesFilter();
+            else
+            {
+                if (filter.CustomerId.HasValue)
+                    query = query.Where(c => c.CustomerId == filter.CustomerId);
+                if (filter.EInvoiceTypeId.HasValue)
+                    query = query.Where(c => c.EInvoiceTypeId == filter.EInvoiceTypeId);
+                if (filter.DateTimeIssuedFrom.HasValue)
+                    query = query.Where(c => c.DateTimeIssued >= filter.DateTimeIssuedFrom);
+                if (filter.DateTimeIssuedTo.HasValue)
+                    query = query.Where(c => c.DateTimeIssued <= filter.DateTimeIssuedTo);
+            }
             var list = await query
                 .Select(c => new EInvoiceDto
                 {
@@ -88,6 +101,27 @@ namespace EInvoiceDemo.Server.Controllers
                 DateTimeIssued = eInvoice.DateTimeIssued,
                 EInvoiceCode = eInvoice.EInvoiceCode,
                 NetAmount = eInvoice.NetAmount,
+                EInvoiceLines = eInvoice.EInvoiceLines.Select(c => new EInvoiceLineDto
+                {
+                    EInvoiceLineId = c.EInvoiceLineId,
+                    EInvoiceId = c.EInvoiceId,
+                    ItemId = c.ItemId,
+                    ItemName = c.Item.ItemName,
+                    AmountSold = c.AmountSold,
+                    Quantity = c.Quantity,
+                    Total = c.Total,
+                    ItemNetAmount = c.ItemNetAmount,
+                    EInvoiceLineTaxes = c.EInvoiceLineTaxes.Select(x => new EInvoiceLineTaxDto
+                    {
+                        EInvoiceLineTaxId = x.EInvoiceLineTaxId,
+                        EInvoiceLineId = x.EInvoiceLineId,
+                        TaxId = x.TaxId,
+                        TaxName = x.Tax.TaxName,
+                        Amount = x.Amount
+                    })
+                    .ToList()
+                })
+                .ToList()
             };
         }
 
@@ -100,22 +134,18 @@ namespace EInvoiceDemo.Server.Controllers
 
             if (eInvoice is null) return BadRequest();
 
-            _context.Entry(dto).State = EntityState.Modified;
+            _context.Entry(eInvoice).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
             }
-            catch (DbUpdateConcurrencyException)
+            catch (DbException ex)
             {
                 if (!EInvoiceExists(dto.EInvoiceId))
-                {
-                    return NotFound();
-                }
+                    return NotFound("EInvoice not found!");
                 else
-                {
-                    throw;
-                }
+                    BadRequest(ex.Message);
             }
 
             return Content("Saved Successfully");
@@ -124,16 +154,60 @@ namespace EInvoiceDemo.Server.Controllers
         // POST: api/EInvoices
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<IActionResult> PostEInvoice(EInvoice eInvoice)
+        public async Task<IActionResult> PostEInvoice(EInvoiceDto dto)
         {
             if (_context.EInvoices == null)
             {
                 return Problem("Entity set 'EInvoiceContext.EInvoices'  is null.");
             }
+            EInvoice eInvoice = new()
+            {
+                EInvoiceId = dto.EInvoiceId,
+                CustomerId = dto.CustomerId.Value,
+                EInvoiceCode = dto.EInvoiceCode,
+                DateTimeIssued = dto.DateTimeIssued,
+                EInvoiceTypeId = dto.EInvoiceTypeId.Value,
+                NetAmount = dto.NetAmount,
+            };
+            foreach (var line in dto.EInvoiceLines)
+            {
+                EInvoiceLine eInvoiceLine = new()
+                {
+                    EInvoiceLineId = line.EInvoiceLineId.Value,
+                    EInvoiceId = line.EInvoiceId.Value,
+                    AmountSold = line.AmountSold.Value,
+                    ItemId = line.ItemId.Value,
+                    Quantity = line.Quantity.Value,
+                    Total = line.Total.Value,
+                    ItemNetAmount = line.ItemNetAmount.Value,
+                };
+                foreach (var tax in line.EInvoiceLineTaxes)
+                {
+                    EInvoiceLineTax eInvoiceLineTax = new()
+                    {
+                        EInvoiceLineTaxId = tax.EInvoiceLineTaxId,
+                        EInvoiceLineId = tax.EInvoiceLineId.Value,
+                        TaxId = tax.TaxId.Value,
+                        Amount = tax.Amount.Value,
+                    };
+                    eInvoiceLine.EInvoiceLineTaxes.Add(eInvoiceLineTax);
+                }
+                eInvoice.EInvoiceLines.Add(eInvoiceLine);
+            }
             _context.EInvoices.Add(eInvoice);
-            await _context.SaveChangesAsync();
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                if (EInvoiceExists(dto.EInvoiceId))
+                    return Conflict("EInvoice is invalid!");
+                else
+                    BadRequest(ex.Message);
+            }
 
-            return CreatedAtAction("GetEInvoice", new { id = eInvoice.EInvoiceId }, eInvoice);
+            return CreatedAtAction("GetEInvoice", new { id = dto.EInvoiceId }, dto);
         }
 
         // DELETE: api/EInvoices/5

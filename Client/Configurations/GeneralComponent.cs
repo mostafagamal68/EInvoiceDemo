@@ -20,9 +20,6 @@ public class GeneralComponent : ComponentBase
     [Inject]
     public LoaderService LoaderService { get; set; }
 
-    //[Inject]
-    //public Session CurrentSession { get; set; }
-
     [Inject]
     public IJSRuntime JS { get; set; }
 
@@ -85,7 +82,6 @@ public class GeneralComponent : ComponentBase
 
     public void GoTo(string PageRoute, string PageName, bool WithId = false, Guid? Id = null)
     {
-        Session.Set("PageTitle", (WithId ? !Id.HasValue ? "Add - " : "Edit - " : "") + PageName);
         if (WithId)
             Navigation.NavigateTo($"/{PageRoute}/{Id}");
         else

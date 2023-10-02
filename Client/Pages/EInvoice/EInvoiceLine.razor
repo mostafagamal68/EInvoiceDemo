@@ -1,4 +1,5 @@
-﻿@inject IItemsService item
+﻿@inherits GeneralComponent
+@inject IItemsService item
 @inject ITaxesService tax
 <EditForm Model="dto" OnValidSubmit="Save">
     <DataAnnotationsValidator />
@@ -75,8 +76,8 @@
                         <div class="col-md-2 my-auto">
                             <label>Total</label>
                         </div>
-                        <div class="col-md-5">
-                            <InputNumber class="form-control" @bind-Value="dto.Total" disabled />
+                        <div class="col-md-5 my-auto">
+                            <h5>@dto.Total</h5>
                         </div>
                     </div>
                 }
@@ -92,7 +93,6 @@
             </div>
             <div class="col-md-5 my-auto">
                 <h5>@dto.ItemNetAmount</h5>
-                @* <InputNumber class="form-control" @bind-Value="dto.ItemNetAmount" disabled /> *@
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.ItemNetAmount)" />
@@ -137,6 +137,7 @@
     }
     private void Save()
     {
+        LoaderService.ToggleLoader();
         if (List.Any(c => c.EInvoiceLineId == Id))
         {
             var eInvoiceLine = List.First(c => c.EInvoiceLineId == dto.EInvoiceLineId);
@@ -160,12 +161,15 @@
                     eInvoiceLine.EInvoiceLineTaxes.Add(item);
                 }
             }
+            ToastService.ShowSuccess("Edited Successfully");
         }
         else
         {
             List.Add((EInvoiceLineDto)dto.Clone());
             Id = dto.EInvoiceLineId;
+            ToastService.ShowSuccess("Added Successfully");
         }
+        LoaderService.ToggleLoader();
     }
     private async Task GetItems(string? filter)
         => itemsList = await item.GetKeyValue(filter);

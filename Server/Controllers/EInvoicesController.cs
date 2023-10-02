@@ -9,6 +9,7 @@ using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Models;
+using EInvoiceDemo.Client.Pages.Customer;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -130,8 +131,24 @@ namespace EInvoiceDemo.Server.Controllers
             {
                 return Problem("Entity set 'EInvoiceContext.EInvoices'  is null.");
             }
+
             _context.EInvoices.Add(eInvoice);
-            await _context.SaveChangesAsync();
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateException)
+            {
+                if (EInvoiceExists(eInvoice.CustomerId))
+                {
+                    return Conflict();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
             return CreatedAtAction("GetEInvoice", new { id = eInvoice.EInvoiceId }, eInvoice);
         }

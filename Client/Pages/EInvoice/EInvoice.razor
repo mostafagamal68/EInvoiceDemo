@@ -9,6 +9,7 @@
 }
 <EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
     <DataAnnotationsValidator />
+    <ValidationSummary/>
     <div class="col-md-12 mb-3">
         <div class="row my-1">
             <div class="col-md-2 my-auto">
@@ -59,7 +60,7 @@
                 <div class="col-md-3 mb-1">
                     <a role="button" class="btn btn-primary"
                         @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
-                        new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }.Clone()), async () => Calculate()))">
+                        new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
                         <i class="bi bi-check-circle me-1"></i>
                         Add Item
                     </a>
@@ -103,8 +104,8 @@
             <div class="col-md-2 my-auto">
                 <label>Net Amount</label>
             </div>
-            <div class="col-md-5">
-                <InputNumber class="form-control" @bind-Value="dto.NetAmount" disabled />
+            <div class="col-md-5 my-auto">
+                <h5>@dto.NetAmount</h5>
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.NetAmount)" />
@@ -123,20 +124,25 @@
 @code {
     [Parameter]
     public Guid? Id { get; set; }
+
     EInvoiceDto dto = new();
     List<KeyValue>? customersList;
     List<KeyValue>? typesList;
+
     protected override async Task OnInitializedAsync()
     {
         await GetEInvoice();
-        if (!Id.HasValue)        
-            dto.EInvoiceId = Guid.NewGuid();
     }
     private async Task GetEInvoice()
     {
         LoaderService.ToggleLoader();
-        if (Id.HasValue) dto = await service.GetSingle(Id);
-        else dto.EInvoiceCode = await service.GetCode();
+        if (Id.HasValue)
+            dto = await service.GetSingle(Id);
+        else
+        {
+            dto.EInvoiceId = Guid.NewGuid();
+            dto.EInvoiceCode = await service.GetCode();
+        }
         LoaderService.ToggleLoader();
     }
     private async Task HandlValidSubmit()

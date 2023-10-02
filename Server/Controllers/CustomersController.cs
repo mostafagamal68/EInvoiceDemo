@@ -8,8 +8,8 @@ using Microsoft.EntityFrameworkCore;
 using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
-using EInvoiceDemo.Client.Pages.EInvoiceType;
 using EInvoiceDemo.Shared.Helpers;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -24,8 +24,29 @@ namespace EInvoiceDemo.Server.Controllers
             _context = context;
         }
 
+        // GET: api/Customers/KeyValue
+        [HttpGet("KeyValue")]
+        public async Task<ActionResult<List<KeyValue>>> GetKeyValue([FromQuery] string? filter)
+        {
+            var data = _context.Customers.AsQueryable();
+            if (filter.HasValue())
+                data = data.Where(c => (c.CustomerCode + " " + c.CustomerName).Contains(filter));
+            return await data
+            .Select(c => new KeyValue
+            {
+                Key = c.CustomerId,
+                Value = c.CustomerCode + " - " + c.CustomerName
+            }).Take(30).ToListAsync();
+
+        }
+
+        // GET: api/Customers/Code
+        [HttpGet("Code")]
+        public async Task<ActionResult<int>> GetCustomerCode()
+            => (await _context.Customers?.MaxAsync(c => (int?)c.CustomerCode) ?? 0) + 1;
+
         // GET: api/Customers
-        [HttpPut("{filter}")]
+        [HttpPost("{filter}")]
         public async Task<ActionResult<CustomersFilter>> GetCustomers(CustomersFilter? filter)
         {
             var query = _context.Customers.AsQueryable();

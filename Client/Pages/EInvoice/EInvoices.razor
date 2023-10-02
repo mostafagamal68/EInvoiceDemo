@@ -1,12 +1,80 @@
 ﻿@page "/EInvoices"
 @inherits GeneralComponent
-<PageTitle>EInvoices</PageTitle>
+@inject IEInvoicesService service
+@* <PageTitle>EInvoices</PageTitle> *@
+<div class="d-flex justify-content-between align-EInvoices-center mb-3">
+    <h3>EInvoices</h3>
+    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>GoTo("EInvoice","EInvoice",true))">
+        <i class="bi bi-plus-circle mx-1"></i>
+        Add
+    </a>
+</div>
+<div class="d-flex justify-content-start mb-3">
+    <div>
+        <label>Customer</label>
+        <input class="form-control" @bind="EInvoicesFilter.CustomerId" @bind:event="oninput" @bind:after="GetEInvoicesFiltered" />
+    </div>
+</div>
+@if (!LoaderService.IsLoading)
+{
+    @if (EInvoicesFilter?.Items.Count() == 0)
+    {
+        <div class="d-flex alert alert-warning align-EInvoices-center">
+            <h5><i class="bi bi-exclamation-triangle mx-2"></i>No EInvoices</h5>
+        </div>
+    }
+    else
+    {
+        <TableTemplate Items="EInvoicesFilter?.Items" Context="sub" class="table table-striped table-hover">
+            <TableHeader>
+                <th scope="col" class="border-end text-center" style="border-top-left-radius:20px">#</th>
+                <th scope="col" class="border-end">Code</th>
+                <th scope="col" class="border-end">Customer</th>
+                <th scope="col" class="border-end">Type</th>
+                <th scope="col" class="border-end">Date</th>
+                <th scope="col" class="border-end">Net Amount</th>
+                <th class="text-end" style="border-top-right-radius:20px">Actions</th>
+            </TableHeader>
+            <RowTemplate>
+                <td scope="row" class="border-end text-center" style=@(sub.Item2 == sub.Item3 ? "border-bottom-left-radius:20px" : "")>@sub.Item2</td>
+                <td class="border-end">@sub.Item1.EInvoiceCode</td>
+                <td class="border-end">@sub.Item1.CustomerName</td>
+                <td class="border-end">@sub.Item1.EInvoiceTypeName</td>
+                <td class="border-end">@sub.Item1.DateTimeIssued</td>
+                <td class="border-end">@sub.Item1.NetAmount</td>
+                <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
+                    <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
+                        @onclick="@(() => GoTo("EInvoice","EInvoice",true, sub.Item1.EInvoiceId))">
+                        <i class="bi bi-pencil-square"></i>
+                    </a>
+                    <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1.EInvoiceId))">
+                        <i class="bi bi-trash"></i>
+                    </a>
+                </td>
+            </RowTemplate>
+        </TableTemplate>
+    }
 
-<h3>EInvoices</h3>
-
+    <Paginator Type="EInvoicesFilter" Filter="EInvoicesFilter" Pagination="EInvoicesFilter?.Pagination" GetPage="GetEInvoicesFiltered"></Paginator>
+}
 @code {
-    // protected override void OnInitialized()
-    // {
-    //     Layout.ToggleLoader();
-    // }
+    EInvoicesFilter EInvoicesFilter = new();
+    protected override async Task OnInitializedAsync()
+    {
+        LoaderService.ToggleLoader();
+        await GetEInvoicesFiltered();
+        LoaderService.ToggleLoader();
+    }
+    private async Task GetEInvoicesFiltered() => EInvoicesFilter = await service.GetList(EInvoicesFilter);
+    private async Task DeleteRow(Guid Id)
+    {
+        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this EInvoice?"))
+        {
+            var response = await service.Delete(Id);
+            if (response.IsSuccessStatusCode)
+                EInvoicesFilter.Items.Remove(EInvoicesFilter.Items.First(c => c.EInvoiceId == Id));
+            await ShowResultMessage(response);
+        }
+    }
+
 }

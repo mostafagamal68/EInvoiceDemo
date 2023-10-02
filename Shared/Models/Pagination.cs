@@ -1,4 +1,4 @@
-﻿namespace EInvoiceDemo.Shared.DTOs;
+﻿namespace EInvoiceDemo.Shared.Models;
 
 public class Pagination
 {

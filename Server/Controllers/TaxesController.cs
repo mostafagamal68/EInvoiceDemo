@@ -9,7 +9,7 @@ using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
-using EInvoiceDemo.Client.Pages.Customer;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -23,6 +23,27 @@ namespace EInvoiceDemo.Server.Controllers
         {
             _context = context;
         }
+
+        // GET: api/Taxes/KeyValue
+        [HttpGet("KeyValue")]
+        public async Task<ActionResult<List<KeyValue>>> GetKeyValue([FromQuery] string? filter)
+        {
+            var data = _context.Taxes.AsQueryable();
+            if (filter.HasValue())
+                data = data.Where(c => (c.TaxCode + " " + c.TaxName).Contains(filter));
+            return await data
+            .Select(c => new KeyValue
+            {
+                Key = c.TaxId,
+                Value = c.TaxCode + " - " + c.TaxName
+            }).Take(30).ToListAsync();
+
+        }
+
+        // GET: api/Taxes/Code
+        [HttpGet("Code")]
+        public async Task<ActionResult<int>> GetTaxCode()
+            => (await _context.Taxes?.MaxAsync(c => (int?)c.TaxCode) ?? 0) + 1;
 
         // GET: api/Taxes
         [HttpPost("{filter}")]

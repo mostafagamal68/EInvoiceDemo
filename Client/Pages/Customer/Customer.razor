@@ -9,10 +9,10 @@
     <DataAnnotationsValidator />
     <div class="col-md-12 my-2">
         <div class="row my-1">
-            <div class="col-md-3 my-auto">
+            <div class="col-md-2 my-auto">
                 <label>Code</label>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <InputNumber class="form-control" @bind-Value="dto.CustomerCode" />
             </div>
             <div class="col-md my-auto">
@@ -20,10 +20,10 @@
             </div>
         </div>
         <div class="row my-1">
-            <div class="col-md-3 my-auto">
+            <div class="col-md-2 my-auto">
                 <label>Name</label>
             </div>
-            <div class="col-md-6">
+            <div class="col-md-5">
                 <InputText class="form-control" @bind-Value="dto.CustomerName" />
             </div>
             <div class="col-md my-auto">
@@ -46,10 +46,14 @@
     CustomerDto dto = new();
     protected override async Task OnInitializedAsync()
     {
+        await GetCustomer();
+    }
+    private async Task GetCustomer()
+    {
         LoaderService.ToggleLoader();
-        if (Id.HasValue)
-            dto = await service.GetSingle(Id);
-        LoaderService.ToggleLoader();
+        if (Id.HasValue) dto = await service.GetSingle(Id);
+        else dto.CustomerCode = await service.GetCode();
+        LoaderService.ToggleLoader();        
     }
     private async Task HandlValidSubmit()
     {
@@ -67,10 +71,11 @@
         await ShowResultMessage(httpResponseMessage);
 
     }
-    private void New()
+    private async Task New()
     {
         Id = null;
         dto = new CustomerDto();
+        await GetCustomer();
     }
     private async Task Delete()
     {

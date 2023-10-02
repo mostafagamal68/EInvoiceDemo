@@ -9,6 +9,7 @@ using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -22,6 +23,27 @@ namespace EInvoiceDemo.Server.Controllers
         {
             _context = context;
         }
+
+        // GET: api/Items/KeyValue
+        [HttpGet("KeyValue")]
+        public async Task<ActionResult<List<KeyValue>>> GetKeyValue([FromQuery] string? filter)
+        {
+            var data = _context.Items.AsQueryable();
+            if (filter.HasValue())
+                data = data.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter));
+            return await data
+            .Select(c => new KeyValue
+            {
+                Key = c.ItemId,
+                Value = c.ItemCode + " - " + c.ItemName
+            }).Take(30).ToListAsync();
+
+        }
+
+        // GET: api/Items/Code
+        [HttpGet("Code")]
+        public async Task<ActionResult<int>> GetItemCode()
+            => (await _context.Items?.MaxAsync(c => (int?)c.ItemCode) ?? 0) + 1;
 
         // GET: api/Items
         [HttpPost("{filter}")]

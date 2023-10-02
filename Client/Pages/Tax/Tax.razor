@@ -57,10 +57,14 @@
     TaxDto dto = new();
     protected override async Task OnInitializedAsync()
     {
+        await GetTax();
+    }
+    private async Task GetTax()
+    {
         LoaderService.ToggleLoader();
-        if (Id.HasValue)
-            dto = await service.GetSingle(Id);
-        LoaderService.ToggleLoader();
+        if (Id.HasValue) dto = await service.GetSingle(Id);
+        else dto.TaxCode = await service.GetCode();
+        LoaderService.ToggleLoader();        
     }
     private async Task HandlValidSubmit()
     {
@@ -78,10 +82,11 @@
         await ShowResultMessage(httpResponseMessage);
 
     }
-    private void New()
+    private async Task New()
     {
         Id = null;
         dto = new TaxDto();
+        await GetTax();
     }
     private async Task Delete()
     {

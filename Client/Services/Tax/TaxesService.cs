@@ -1,4 +1,5 @@
 ﻿using EInvoiceDemo.Shared.DTOs;
+using EInvoiceDemo.Shared.Models;
 using System.Net.Http.Json;
 using System.Text.Json;
 
@@ -20,8 +21,12 @@ public class TaxesService : ITaxesService
         var content = await response.Content.ReadAsStringAsync();
         return JsonSerializer.Deserialize<TaxesFilter>(content, _options);
     }
+    public async Task<List<KeyValue>?> GetKeyValue(string? filter)
+        => await _httpClient.GetFromJsonAsync<List<KeyValue>>($"{api}/KeyValue?filter={filter}"); 
     public async Task<TaxDto> GetSingle(Guid? Id)
         => await _httpClient.GetFromJsonAsync<TaxDto>($"{api}/{Id}");
+    public async Task<int> GetCode()
+        => await _httpClient.GetFromJsonAsync<int>($"{api}/Code");
     public async Task<HttpResponseMessage> Create(TaxDto dto)
         => await _httpClient.PostAsJsonAsync(api, dto);
     public async Task<HttpResponseMessage> Edit(TaxDto dto)

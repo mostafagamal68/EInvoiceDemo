@@ -53,6 +53,8 @@
     [Parameter]
     public bool Boolean { get; set; } = false;
     [Parameter]
+    public Guid? Id { get; set; } = null;
+    [Parameter]
     public EventCallback<Type> ValueChanged { get; set; }
     [Parameter]
     public EventCallback<string> GetList { get; set; }
@@ -83,6 +85,7 @@
     {
         if (AutoComplete) AutoCompleteValue = type?.GetType()?.GetProperty("Value")?.GetValue(type)?.ToString();
         if (Boolean) Value = type?.GetType()?.GetProperty("Value")?.GetValue(type)?.ToString();
+        if (Id.HasValue) type?.GetType()?.GetProperty("Id")?.SetValue(type,Id);
         await ValueChanged.InvokeAsync(type);
     }
 }

@@ -43,6 +43,7 @@ public class GeneralComponent : ComponentBase
         ActivateFocusTrap = true,
         AnimationType = ModalAnimationType.FadeInOut,
         Position = ModalPosition.Middle,
+        Size = ModalSize.Large,
     };
 
     public async Task ShowResultMessage(HttpResponseMessage result)
@@ -69,13 +70,17 @@ public class GeneralComponent : ComponentBase
         return result.Confirmed;
     }
 
-    public async Task ShowModal(Type component, string title, Func<Task> afterClose, ModalParameters? parameters = null)
+    public async Task ShowModal(Type component, string title, ModalParameters? parameters = null, Func<Task>? afterClose = null)
     {        
         var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(IsModal), true), ModalOptions);
         await modal.Result;
-        LoaderService.ToggleLoader();
-        await afterClose.Invoke();
-        LoaderService.ToggleLoader();
+        if (afterClose is not null)
+        {
+            LoaderService.ToggleLoader();
+            await afterClose.Invoke();
+            LoaderService.ToggleLoader();
+        }
+        else StateHasChanged();
     }
 
     public void GoTo(string PageRoute, string PageName, bool WithId = false, Guid? Id = null)

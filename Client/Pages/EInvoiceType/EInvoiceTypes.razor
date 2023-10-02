@@ -4,7 +4,7 @@
 @* <PageTitle>EInvoice Types</PageTitle> *@
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h3>EInvoice Types</h3>
-    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(EInvoiceType), "E-Invoice Type", GetEInvoiceTypesFiltered))">
+    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(EInvoiceType), "E-Invoice Type", afterClose: GetEInvoiceTypesFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -36,7 +36,7 @@
                 <td class="border-end">@sub.Item1.EInvoiceTypeName</td>
                 <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                     <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
-                    @onclick="@(() => ShowModal(typeof(EInvoiceType), "E-Invoice Type", GetEInvoiceTypesFiltered, new ModalParameters().Add(nameof(EInvoiceType.IsModal), true).Add(nameof(EInvoiceType.Id), sub.Item1.EInvoiceTypeId)))">
+                    @onclick="@(() => ShowModal(typeof(EInvoiceType), "E-Invoice Type", new ModalParameters().Add(nameof(EInvoiceType.IsModal), true).Add(nameof(EInvoiceType.Id), sub.Item1.EInvoiceTypeId), GetEInvoiceTypesFiltered))">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                     <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1.EInvoiceTypeId))">

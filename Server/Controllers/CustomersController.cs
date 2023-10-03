@@ -51,8 +51,11 @@ namespace EInvoiceDemo.Server.Controllers
         {
             var query = _context.Customers.AsQueryable();
             if (filter is null) filter = new CustomersFilter();
-            if (filter.CustomerName.HasValue())
-                query = query.Where(c => (c.CustomerCode + " " + c.CustomerName).Contains(filter.CustomerName));
+            else
+            {
+                if (filter.CustomerName.HasValue())
+                    query = query.Where(c => (c.CustomerCode + " " + c.CustomerName).Contains(filter.CustomerName));
+            }
             var list = await query
                 .Select(c => new CustomerDto
                 {

@@ -9,7 +9,7 @@
 }
 <EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
     <DataAnnotationsValidator />
-    <ValidationSummary/>
+    <ValidationSummary />
     <div class="col-md-12 mb-3">
         <div class="row my-1">
             <div class="col-md-2 my-auto">
@@ -49,7 +49,7 @@
                 <label>Date</label>
             </div>
             <div class="col-md-5">
-                <InputDate class="form-control" @bind-Value="dto.DateTimeIssued" />
+                <input type="datetime-local" class="form-control" @bind="dto.DateTimeIssued" />
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.DateTimeIssued)" />
@@ -59,7 +59,7 @@
             <div class="card-body">
                 <div class="col-md-3 mb-1">
                     <a role="button" class="btn btn-primary"
-                        @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
+                    @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                         new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
                         <i class="bi bi-check-circle me-1"></i>
                         Add Item
@@ -86,7 +86,7 @@
                             <td class="border-end">@sub.Item1.ItemNetAmount</td>
                             <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                                 <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
-                                    @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
+                                @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                                     new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), sub.Item1.Clone()), async () => Calculate()))">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>

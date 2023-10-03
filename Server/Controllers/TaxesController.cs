@@ -51,8 +51,11 @@ namespace EInvoiceDemo.Server.Controllers
         {
             var query = _context.Taxes.AsQueryable();
             if (filter is null) filter = new TaxesFilter();
-            if (filter.TaxName.HasValue())
-                query = query.Where(c => (c.TaxCode + " " + c.TaxName).Contains(filter.TaxName));
+            else
+            {
+                if (filter.TaxName.HasValue())
+                    query = query.Where(c => (c.TaxCode + " " + c.TaxName).Contains(filter.TaxName));
+            }
             var list = await query
                 .Select(c => new TaxDto
                 {

@@ -118,6 +118,9 @@
     List<KeyValue>? itemsList;
     List<KeyValue>? taxesList;
 
+    [CascadingParameter] 
+    BlazoredModalInstance BlazoredModal { get; set; } = default!;
+
     protected override void OnInitialized()
     {
         if (dto.EInvoiceLineId.HasValue) Id = dto.EInvoiceLineId;
@@ -127,9 +130,11 @@
     {
         dto.EInvoiceLineTaxes.Add(new EInvoiceLineTaxDto() { EInvoiceLineTaxId = Guid.NewGuid(), EInvoiceLineId = dto.EInvoiceLineId });
     }
-    private void Delete()
+    private async Task Delete()
     {
-        List.Remove(dto);
+        List.Remove(List.First(c => c.EInvoiceLineId == Id));
+        ToastService.ShowSuccess("Deleted Successfully");
+        await BlazoredModal.CancelAsync(); 
     }
     private void DeleteRow(EInvoiceLineTaxDto TaxDto)
     {

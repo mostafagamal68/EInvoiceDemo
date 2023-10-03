@@ -51,8 +51,11 @@ namespace EInvoiceDemo.Server.Controllers
         {
             var query = _context.Items.AsQueryable();
             if (filter is null) filter = new ItemsFilter();
-            if (filter.ItemName.HasValue())
-                query = query.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter.ItemName));
+            else
+            {
+                if (filter.ItemName.HasValue())
+                    query = query.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter.ItemName));
+            }
             var list = await query
                 .Select(c => new ItemDto
                 {

@@ -7,12 +7,11 @@ public class EInvoicesFilter : GlobalFilter<EInvoiceDto>
     public int EInvoiceCode { get; set; }
 
     public Guid? EInvoiceTypeId { get; set; }
+    public string? EInvoiceTypeName { get; set; }
 
     public Guid? CustomerId { get; set; }
+    public string? CustomerName { get; set; }
 
-    public Guid? ItemId { get; set; }
-
-    public Guid? TaxId { get; set; }
-
-    public DateTime? DateTimeIssued { get; set; }
+    public DateTime? DateTimeIssuedFrom { get; set; }
+    public DateTime? DateTimeIssuedTo { get; set; }
 }

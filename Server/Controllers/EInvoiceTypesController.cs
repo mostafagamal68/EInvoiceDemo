@@ -46,8 +46,11 @@ namespace EInvoiceDemo.Server.Controllers
         {
             var query = _context.EInvoiceTypes.AsQueryable();
             if (filter is null) filter = new EInvoiceTypesFilter();
-            if (filter.EInvoiceTypeName.HasValue())
-                query = query.Where(c => c.EInvoiceTypeName.Contains(filter.EInvoiceTypeName));
+            else
+            {
+                if (filter.EInvoiceTypeName.HasValue())
+                    query = query.Where(c => c.EInvoiceTypeName.Contains(filter.EInvoiceTypeName));
+            }
             var list = await query
                 .Select(c => new EInvoiceTypeDto
                 {

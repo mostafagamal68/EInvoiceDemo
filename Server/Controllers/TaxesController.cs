@@ -10,7 +10,6 @@ using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Server.Logic;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -58,7 +57,7 @@ namespace EInvoiceDemo.Server.Controllers
                     query = query.Where(c => (c.TaxCode + " " + c.TaxName).Contains(filter.TaxName));
             }
 
-            filter.Pagination = PaginationLogic<Tax, TaxDto>.GetPagination(query, filter);
+            filter.Pagination = Pagination.GetPagination<Tax, TaxesFilter, TaxDto>(query, filter);
 
             filter.Items = await query
                 .Select(c => new TaxDto
@@ -68,6 +67,7 @@ namespace EInvoiceDemo.Server.Controllers
                     TaxCode = c.TaxCode,
                     TaxDescription = c.TaxDescription,
                 })
+                .OrderWith(filter.SortField, filter.SortApproach)
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
                 .ToListAsync();
@@ -160,7 +160,11 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<IActionResult> DeleteTax(Guid id)
         {
             var tax = await _context.Taxes.FindAsync(id);
-            if (tax == null) return NotFound();
+
+            if (tax == null)
+                return NotFound();
+            if (_context.EInvoiceLineTaxes.Any(c => c.EInvoiceLineTaxId == id))
+                return BadRequest("This Tax used with E-Invoice line taxes and cannot be deleted.");
 
             _context.Taxes.Remove(tax);
             await _context.SaveChangesAsync();

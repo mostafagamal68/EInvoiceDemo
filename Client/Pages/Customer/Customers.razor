@@ -3,7 +3,7 @@
 @inject ICustomersService service
 
 <div class="d-flex justify-content-end align-items-center mb-3">
-    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Customer), "Add - Customer", afterClose: GetCustomersFiltered))">
+    <a role="button" class="btn btn-violet rounded-3" @onclick="@(()=>ShowModal(typeof(Customer), "Add - Customer", afterClose: GetCustomersFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -27,8 +27,8 @@
         <TableTemplate Items="CustomersFilter?.Items" Context="sub" class="table table-striped table-hover">
             <TableHeader>
                 <th scope="col" class="border-end text-center" style="border-top-left-radius:20px">#</th>
-                <th scope="col" class="border-end">Code</th>
-                <th scope="col" class="border-end">Name</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("CustomerCode"))">Code</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("CustomerName"))">Name</th>
                 <th class="text-end" style="border-top-right-radius:20px">Actions</th>
             </TableHeader>
             <RowTemplate>
@@ -69,6 +69,12 @@
                 CustomersFilter.Items.Remove(CustomersFilter.Items.First(c => c.CustomerId == Id));
             await ShowResultMessage(response);
         }
+    }
+    private async Task SortBy(string Field)
+    {
+        CustomersFilter.SortField = Field;
+        CustomersFilter.SortApproach = !CustomersFilter.SortApproach;
+        await GetCustomersFiltered();
     }
 
 }

@@ -5,7 +5,7 @@
 @inject IEInvoiceTypesService type
 
 <div class="d-flex justify-content-end align-items-center mb-3">
-    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>GoTo("EInvoice","EInvoice",true))">
+    <a role="button" class="btn btn-violet rounded-3" @onclick="@(()=>GoTo("EInvoice","EInvoice",true))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -29,8 +29,8 @@
     </div>
 </div>
 <div class="d-flex justify-content-end align-items-center my-2">
-    <a role="button" class="btn btn-warning mx-1" @onclick="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}"><i class="bi bi-x me-1"></i>Clear</a>
-    <a role="button" class="btn btn-success" @onclick="GetEInvoicesFiltered"><i class="bi bi-search me-1"></i>Search</a>
+    <a role="button" class="btn btn-primary rounded-3 mx-1" @onclick="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}"><i class="bi bi-x me-1"></i>Clear</a>
+    <a role="button" class="btn btn-success rounded-3" @onclick="GetEInvoicesFiltered"><i class="bi bi-search me-1"></i>Search</a>
 </div>
 @if (!LoaderService.IsLoading)
 {
@@ -57,7 +57,7 @@
                 <td class="border-end">@sub.Item1.EInvoiceCode</td>
                 <td class="border-end">@sub.Item1.CustomerName</td>
                 <td class="border-end">@sub.Item1.EInvoiceTypeName</td>
-                <td class="border-end">@sub.Item1.DateTimeIssued.ToDateString()</td>
+                <td class="border-end">@sub.Item1.DateTimeIssued?.ToDateString()</td>
                 <td class="border-end">@sub.Item1.NetAmount</td>
                 <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                     <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
@@ -98,14 +98,14 @@
     }
     private async Task GetCustomers(string? filter)
         => customersList = await customer.GetKeyValue(filter);
-    private async Task CustomerChanged(KeyValue? keyValue)
+    private void CustomerChanged(KeyValue? keyValue)
     {
         EInvoicesFilter.CustomerId = keyValue?.Key;
         EInvoicesFilter.CustomerName = keyValue?.Value;
     }
     private async Task GetTypes(string? filter)
         => typesList = await type.GetKeyValue(filter);
-    private async Task TypeChanged(KeyValue? keyValue)
+    private void TypeChanged(KeyValue? keyValue)
     {
         EInvoicesFilter.EInvoiceTypeId = keyValue?.Key;
         EInvoicesFilter.EInvoiceTypeName = keyValue?.Value;

@@ -5,8 +5,10 @@
                 Timeout="10"
                 IconType="IconType.FontAwesome"
                 SuccessClass="success-toast-override"
-                SuccessIcon="fa fa-thumbs-up"
-                ErrorIcon="fa fa-bug" />
+                SuccessIcon="bi bi-check-circle"
+                ErrorIcon="bi bi-bug"
+                InfoIcon="bi bi-info-circle"
+                WarningIcon="bi bi-exclamation-triangle" />
 
 <div class="page">
     <div class="sidebar">
@@ -16,7 +18,7 @@
     <main>
         <Header />
 
-        <article class="content px-4">
+        <article class="content px-4 bi bi-tick">
             <div class="container">
                 <Loader />
                 @Body

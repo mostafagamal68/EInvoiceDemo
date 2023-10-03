@@ -10,7 +10,6 @@ using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Server.Logic;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -53,7 +52,7 @@ namespace EInvoiceDemo.Server.Controllers
                     query = query.Where(c => c.EInvoiceTypeName.Contains(filter.EInvoiceTypeName));
             }
 
-            filter.Pagination = PaginationLogic<EInvoiceType, EInvoiceTypeDto>.GetPagination(query, filter);
+            filter.Pagination = Pagination.GetPagination<EInvoiceType, EInvoiceTypesFilter, EInvoiceTypeDto>(query, filter);
 
             filter.Items = await query
                 .Select(c => new EInvoiceTypeDto
@@ -61,6 +60,7 @@ namespace EInvoiceDemo.Server.Controllers
                     EInvoiceTypeId = c.EInvoiceTypeId,
                     EInvoiceTypeName = c.EInvoiceTypeName,
                 })
+                .OrderWith(filter.SortField, filter.SortApproach)
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
                 .ToListAsync();
@@ -149,7 +149,11 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<IActionResult> DeleteEInvoiceType(Guid id)
         {
             var eInvoiceType = await _context.EInvoiceTypes.FindAsync(id);
-            if (eInvoiceType == null) return NotFound();
+
+            if (eInvoiceType == null)
+                return NotFound();
+            if (_context.EInvoices.Any(c => c.EInvoiceTypeId == id))
+                return BadRequest("This type used with E-Invoice and cannot be deleted.");
 
             _context.EInvoiceTypes.Remove(eInvoiceType);
             await _context.SaveChangesAsync();

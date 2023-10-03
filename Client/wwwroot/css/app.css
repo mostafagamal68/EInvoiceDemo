@@ -1,41 +1,57 @@
 @import url('open-iconic/font/css/open-iconic-bootstrap.min.css');
+
 :root {
     --primary-color: #4a0d67;
     --secondary-color: #8332ac;
     --tertiary-color: #caa8f5;
 }
+
 html, body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
-label{
+
+label {
     font-weight: bold;
-}
-h1:focus {
-    outline: none;
 }
 
 h1, h2, h3, h4, h5, h6 {
     color: var(--primary-color);
 }
 
+.btn-violet {
+    background-color: var(--secondary-color);
+    color: white;
+    border: 2px solid var(--secondary-color);
+}
+
+.btn-violet:hover {
+    background-color: var(--primary-color);
+    color: white;
+    border: 2px solid var(--primary-color);
+}
+
+h1:focus {
+    outline: none;
+}
+
 a, .btn-link {
     color: var(--secondary-color);
 }
 
-.bg-primary{
+.bg-primary {
     background-color: var(--primary-color)
 }
 
-.bg-secondary{
+.bg-secondary {
     background-color: var(--secondary-color)
 }
 
-.bg-tertiary{
+.bg-tertiary {
     background-color: var(--tertiary-color)
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
 .content {

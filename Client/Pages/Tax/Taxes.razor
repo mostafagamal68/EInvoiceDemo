@@ -3,7 +3,7 @@
 @inject ITaxesService service
 
 <div class="d-flex justify-content-end align-items-center mb-3">
-    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Tax), "Add - Tax", afterClose: GetTaxesFiltered))">
+    <a role="button" class="btn btn-violet rounded-3" @onclick="@(()=>ShowModal(typeof(Tax), "Add - Tax", afterClose: GetTaxesFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -27,9 +27,9 @@
         <TableTemplate Items="TaxesFilter?.Items" Context="sub" class="table table-striped table-hover">
             <TableHeader>
                 <th scope="col" class="border-end text-center" style="border-top-left-radius:20px">#</th>
-                <th scope="col" class="border-end">Code</th>
-                <th scope="col" class="border-end">Name</th>
-                <th scope="col" class="border-end">Description</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("TaxCode"))">Code</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("TaxName"))">Name</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("TaxDescription"))">Description</th>
                 <th class="text-end" style="border-top-right-radius:20px">Actions</th>
             </TableHeader>
             <RowTemplate>
@@ -71,6 +71,12 @@
                 TaxesFilter.Items.Remove(TaxesFilter.Items.First(c => c.TaxId == Id));
             await ShowResultMessage(response);
         }
+    }
+    private async Task SortBy(string Field)
+    {
+        TaxesFilter.SortField = Field;
+        TaxesFilter.SortApproach = !TaxesFilter.SortApproach;
+        await GetTaxesFiltered();
     }
 
 }

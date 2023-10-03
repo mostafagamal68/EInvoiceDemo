@@ -10,7 +10,6 @@ using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Server.Logic;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -58,7 +57,7 @@ namespace EInvoiceDemo.Server.Controllers
                     query = query.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter.ItemName));
             }
 
-            filter.Pagination = PaginationLogic<Item, ItemDto>.GetPagination(query, filter);
+            filter.Pagination = Pagination.GetPagination<Item, ItemsFilter, ItemDto>(query, filter);
 
             filter.Items = await query
                 .Select(c => new ItemDto
@@ -68,6 +67,7 @@ namespace EInvoiceDemo.Server.Controllers
                     ItemCode = c.ItemCode,
                     ItemDescription = c.ItemDescription,
                 })
+                .OrderWith(filter.SortField, filter.SortApproach)
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
                 .ToListAsync();
@@ -163,7 +163,11 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<IActionResult> DeleteItem(Guid id)
         {
             var item = await _context.Items.FindAsync(id);
-            if (item == null) return NotFound();
+
+            if (item == null)
+                return NotFound();
+            if (_context.EInvoiceLines.Any(c => c.ItemId == id))
+                return BadRequest("This Item used with E-Invoice line and cannot be deleted.");
 
             _context.Items.Remove(item);
             await _context.SaveChangesAsync();

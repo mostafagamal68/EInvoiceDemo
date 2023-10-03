@@ -4,23 +4,23 @@ namespace EInvoiceDemo.Shared.DTOs;
 
 public class EInvoiceLineDto : ICloneable
 {
-    [Required]
+    [Required(ErrorMessage = "*")]
     public Guid? EInvoiceLineId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public Guid? EInvoiceId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public Guid? ItemId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public string? ItemName { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? Quantity { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? AmountSold { get; set; }
 

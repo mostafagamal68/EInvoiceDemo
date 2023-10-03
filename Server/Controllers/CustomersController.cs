@@ -10,7 +10,6 @@ using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Server.Logic;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -57,7 +56,7 @@ namespace EInvoiceDemo.Server.Controllers
                 if (filter.CustomerName.HasValue())
                     query = query.Where(c => (c.CustomerCode + " " + c.CustomerName).Contains(filter.CustomerName));
             }
-            filter.Pagination = PaginationLogic<Customer, CustomerDto>.GetPagination(query, filter);
+            filter.Pagination = Pagination.GetPagination<Customer, CustomersFilter, CustomerDto>(query, filter);
 
             filter.Items = await query
                 .Select(c => new CustomerDto
@@ -66,6 +65,7 @@ namespace EInvoiceDemo.Server.Controllers
                     CustomerName = c.CustomerName,
                     CustomerCode = c.CustomerCode,
                 })
+                .OrderWith(filter.SortField, filter.SortApproach)
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
                 .ToListAsync();
@@ -156,7 +156,11 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<IActionResult> DeleteCustomer(Guid id)
         {
             var customer = await _context.Customers.FindAsync(id);
-            if (customer == null) return NotFound();
+
+            if (customer == null)
+                return NotFound();
+            if (_context.EInvoices.Any(c => c.CustomerId == id))
+                return BadRequest("This Customer used with E-Invoice and cannot be deleted.");
 
             _context.Customers.Remove(customer);
             await _context.SaveChangesAsync();

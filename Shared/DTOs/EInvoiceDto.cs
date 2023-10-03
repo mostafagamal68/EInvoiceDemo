@@ -4,26 +4,26 @@ namespace EInvoiceDemo.Shared.DTOs;
 
 public class EInvoiceDto
 {
-    [Required]
+    [Required(ErrorMessage = "*")]
     public Guid EInvoiceId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public int EInvoiceCode { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public Guid? EInvoiceTypeId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public string? EInvoiceTypeName { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public Guid? CustomerId { get; set; }
 
-    [Required]
+    [Required(ErrorMessage = "*")]
     public string? CustomerName { get; set; }
 
-    [Required]
-    public DateTime DateTimeIssued { get; set; } = DateTime.Now;
+    [Required(ErrorMessage = "*")]
+    public DateTime? DateTimeIssued { get; set; } = DateTime.Now;
 
     public decimal NetAmount { get; set; }
 

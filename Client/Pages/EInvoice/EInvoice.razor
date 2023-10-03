@@ -54,7 +54,7 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <a role="button" class="btn btn-primary"
+                    <a role="button" class="btn btn-violet rounded-3"
                     @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                         new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
                         <i class="bi bi-check-circle me-1"></i>
@@ -111,10 +111,10 @@
     <div class="d-flex justify-content-end">
         @if (Id.HasValue)
         {
-            <a role="button" class="btn btn-info mx-1" @onclick="New">New</a>
-            <a role="button" class="btn btn-danger mx-1" @onclick="Delete">Delete</a>
+            <a role="button" class="btn btn-info rounded-3 mx-1" @onclick="New">New</a>
+            <a role="button" class="btn btn-danger rounded-3 mx-1" @onclick="Delete">Delete</a>
         }
-        <button type="submit" class="btn btn-success mx-1 border-0">Save</button>
+        <button type="submit" class="btn btn-success rounded-3 mx-1 border-0">Save</button>
     </div>
 </EditForm>
 @code {

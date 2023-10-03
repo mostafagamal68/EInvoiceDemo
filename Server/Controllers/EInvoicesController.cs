@@ -9,7 +9,7 @@ using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Server.Logic;
+using EInvoiceDemo.Shared.Helpers;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -54,7 +54,7 @@ namespace EInvoiceDemo.Server.Controllers
                     query = query.Where(c => c.DateTimeIssued <= filter.DateTimeIssuedTo);
             }
 
-            filter.Pagination = PaginationLogic<EInvoice, EInvoiceDto>.GetPagination(query, filter);
+            filter.Pagination = Pagination.GetPagination<EInvoice, EInvoicesFilter, EInvoiceDto>(query, filter);
 
             filter.Items = await query
                 .Select(c => new EInvoiceDto
@@ -135,7 +135,7 @@ namespace EInvoiceDemo.Server.Controllers
                 eInvoice.EInvoiceId = dto.EInvoiceId;
                 eInvoice.CustomerId = dto.CustomerId.Value;
                 eInvoice.EInvoiceCode = dto.EInvoiceCode;
-                eInvoice.DateTimeIssued = dto.DateTimeIssued;
+                eInvoice.DateTimeIssued = dto.DateTimeIssued.Value;
                 eInvoice.EInvoiceTypeId = dto.EInvoiceTypeId.Value;
                 eInvoice.NetAmount = dto.NetAmount;
 
@@ -261,7 +261,7 @@ namespace EInvoiceDemo.Server.Controllers
                     EInvoiceId = dto.EInvoiceId,
                     CustomerId = dto.CustomerId.Value,
                     EInvoiceCode = dto.EInvoiceCode,
-                    DateTimeIssued = dto.DateTimeIssued,
+                    DateTimeIssued = dto.DateTimeIssued.Value,
                     EInvoiceTypeId = dto.EInvoiceTypeId.Value,
                     NetAmount = dto.NetAmount,
                 };

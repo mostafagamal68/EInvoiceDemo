@@ -44,7 +44,7 @@
     }
     private async Task RowsChanged(ChangeEventArgs e)
     {
-        Pagination.RowsCount = int.Parse(e.Value.ToString());
+        Pagination.RowsCount = Convert.ToInt32(e.Value);
         await GetPage.InvokeAsync();
     }
 }

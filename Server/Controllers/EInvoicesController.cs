@@ -68,6 +68,7 @@ namespace EInvoiceDemo.Server.Controllers
                     EInvoiceCode = c.EInvoiceCode,
                     NetAmount = c.NetAmount,
                 })
+                .OrderWith(filter.SortField, filter.SortApproach)
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
                 .ToListAsync();

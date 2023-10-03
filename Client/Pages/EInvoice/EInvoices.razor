@@ -45,11 +45,11 @@
         <TableTemplate Items="EInvoicesFilter?.Items" Context="sub" class="table table-striped table-hover">
             <TableHeader>
                 <th scope="col" class="border-end text-center" style="border-top-left-radius:20px">#</th>
-                <th scope="col" class="border-end">Code</th>
-                <th scope="col" class="border-end">Customer</th>
-                <th scope="col" class="border-end">Type</th>
-                <th scope="col" class="border-end">Date</th>
-                <th scope="col" class="border-end">Net Amount</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("EInvoiceCode"))">Code</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("CustomerName"))">Customer</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("EInvoiceTypeName"))">Type</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("DateTimeIssued"))">Date</th>
+                <th scope="col" class="border-end" style="cursor: pointer;" @onclick="@(async () => await SortBy("NetAmount"))">Net Amount</th>
                 <th class="text-end" style="border-top-right-radius:20px">Actions</th>
             </TableHeader>
             <RowTemplate>
@@ -109,5 +109,11 @@
     {
         EInvoicesFilter.EInvoiceTypeId = keyValue?.Key;
         EInvoicesFilter.EInvoiceTypeName = keyValue?.Value;
+    }
+    private async Task SortBy(string Field)
+    {
+        EInvoicesFilter.SortField = Field;
+        EInvoicesFilter.SortApproach = !EInvoicesFilter.SortApproach;
+        await GetEInvoicesFiltered();
     }
 }

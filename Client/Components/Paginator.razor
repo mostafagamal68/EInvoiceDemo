@@ -1,58 +1,50 @@
-﻿@typeparam Type
-
-@if (Pagination?.TotalRows > 10)
-{
-    <div>
-        <ul class="pagination pagination-sm justify-content-end">
-            <li class="page-item @(Pagination.PageNo == 0 ? "disabled" : "")">
-                <a role="button" class="page-link" @onclick="@(() => Get(0))">First</a>
+﻿<div>
+    <ul class="pagination pagination-sm justify-content-end">
+        <li class="page-item @(Pagination.PageNo == 0 ? "disabled" : "")">
+            <a role="button" class="page-link" @onclick="@(() => Get(0))">First</a>
+        </li>
+        <li class="page-item @(Pagination.PageNo == 0 ? "disabled" : "")">
+            <a role="button" class="page-link" @onclick="@(() => Get(Pagination.CurrentPage-1))">Previous</a>
+        </li>
+        @foreach (int p in Enumerable.Range(1, Pagination.PagesCount > 10 ? 10 : Pagination.PagesCount))
+        {
+            <li class="page-item @($"{(p-1 == Pagination.CurrentPage ? "active-page" : "")}")">
+                <a role="button" class="page-link" @onclick="@(() => Get(p-1))">@(p)</a>
             </li>
-            <li class="page-item @(Pagination.PageNo == 0 ? "disabled" : "")">
-                <a role="button" class="page-link" @onclick="@(() => Get(Pagination.CurrentPage-1))">Previous</a>
-            </li>
-            @foreach (int p in Enumerable.Range(1, Pagination.PagesCount > 10 ? 10 : Pagination.PagesCount))
-            {
-                <li class="page-item @($"{(p-1 == Pagination.CurrentPage ? "active-page" : "")}")">
-                    <a role="button" class="page-link" @onclick="@(() => Get(p-1))">@(p)</a>
-                </li>
-            }
-            <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
-                <a role="button" class="page-link" @onclick="@(() => Get(Pagination.CurrentPage+1))">Next</a>
-            </li>
-            <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
-                <a role="button" class="page-link" @onclick="@(() => Get(Pagination.PagesCount-1))">Last</a>
-            </li>
-            <li>
-                <select class="form-select form-select-sm shadow-none" @onchange="RowsChanged">
-                    <option value="10">10</option>
-                    <option value="25">25</option>
-                    <option value="50">50</option>
-                    <option value="100">100</option>
-                    <option value="200">200</option>
-                </select>
-            </li>
-        </ul>
-    </div>
-}
+        }
+        <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
+            <a role="button" class="page-link" @onclick="@(() => Get(Pagination.CurrentPage+1))">Next</a>
+        </li>
+        <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
+            <a role="button" class="page-link" @onclick="@(() => Get(Pagination.PagesCount-1))">Last</a>
+        </li>
+        <li>
+            <select class="form-select form-select-sm shadow-none" @onchange="RowsChanged">
+                <option value="10">10</option>
+                <option value="25">25</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+                <option value="200">200</option>
+            </select>
+        </li>
+    </ul>
+</div>
 
 @code {
     [Parameter]
-    public Pagination? Pagination { get; set; } = new();
+    public Pagination Pagination { get; set; } = new();
 
     [Parameter]
     public EventCallback GetPage { get; set; }
 
-    [Parameter]
-    public Type? Filter { get; set; }
-
     private async Task Get(int page)
     {
-        Filter?.GetType().GetProperty("PageNo")?.SetValue(Filter, page);
+        Pagination.PageNo = page;
         await GetPage.InvokeAsync();
     }
     private async Task RowsChanged(ChangeEventArgs e)
     {
-        Filter?.GetType().GetProperty("RowsCount")?.SetValue(Filter, int.Parse(e.Value.ToString()));
+        Pagination.RowsCount = int.Parse(e.Value.ToString());
         await GetPage.InvokeAsync();
     }
 }

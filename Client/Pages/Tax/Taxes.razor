@@ -1,10 +1,9 @@
 ﻿@page "/Taxes"
 @inherits GeneralComponent
 @inject ITaxesService service
-@* <PageTitle>Taxes</PageTitle> *@
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Taxes</h3>
-    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Tax), "Tax", afterClose: GetTaxesFiltered))">
+
+<div class="d-flex justify-content-end align-items-center mb-3">
+    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Tax), "Add - Tax", afterClose: GetTaxesFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -40,7 +39,7 @@
                 <td class="border-end">@sub.Item1.TaxDescription</td>
                 <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                     <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
-                    @onclick="@(() => ShowModal(typeof(Tax), "Tax", new ModalParameters().Add(nameof(Tax.IsModal), true).Add(nameof(Tax.Id), sub.Item1.TaxId), GetTaxesFiltered))">
+                    @onclick="@(() => ShowModal(typeof(Tax), "Edit - Tax", new ModalParameters().Add(nameof(Tax.IsModal), true).Add(nameof(Tax.Id), sub.Item1.TaxId), GetTaxesFiltered))">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                     <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1.TaxId))">
@@ -51,12 +50,13 @@
         </TableTemplate>
     }
 
-    <Paginator Type="TaxesFilter" Filter="TaxesFilter" Pagination="TaxesFilter?.Pagination" GetPage="GetTaxesFiltered"></Paginator>
+    <Paginator Pagination="TaxesFilter?.Pagination" GetPage="GetTaxesFiltered"></Paginator>
 }
 @code {
     TaxesFilter TaxesFilter = new();
     protected override async Task OnInitializedAsync()
     {
+        HeaderService.ChangeHeaderAndTitle("Taxes");
         LoaderService.ToggleLoader();
         await GetTaxesFiltered();
         LoaderService.ToggleLoader();

@@ -3,9 +3,8 @@
 @inject IEInvoicesService service
 @inject ICustomersService customer
 @inject IEInvoiceTypesService type
-@* <PageTitle>EInvoices</PageTitle> *@
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>EInvoices</h3>
+
+<div class="d-flex justify-content-end align-items-center mb-3">
     <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>GoTo("EInvoice","EInvoice",true))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
@@ -30,6 +29,7 @@
     </div>
 </div>
 <div class="d-flex justify-content-end align-items-center my-2">
+    <a role="button" class="btn btn-warning mx-1" @onclick="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}"><i class="bi bi-x me-1"></i>Clear</a>
     <a role="button" class="btn btn-success" @onclick="GetEInvoicesFiltered"><i class="bi bi-search me-1"></i>Search</a>
 </div>
 @if (!LoaderService.IsLoading)
@@ -72,7 +72,7 @@
         </TableTemplate>
     }
 
-    <Paginator Type="EInvoicesFilter" Filter="EInvoicesFilter" Pagination="EInvoicesFilter?.Pagination" GetPage="GetEInvoicesFiltered"></Paginator>
+    <Paginator Pagination="EInvoicesFilter?.Pagination" GetPage="GetEInvoicesFiltered"></Paginator>
 }
 @code {
     EInvoicesFilter EInvoicesFilter = new();
@@ -80,6 +80,7 @@
     List<KeyValue>? typesList;
     protected override async Task OnInitializedAsync()
     {
+        HeaderService.ChangeHeaderAndTitle("E-Invoices");
         LoaderService.ToggleLoader();
         await GetEInvoicesFiltered();
         LoaderService.ToggleLoader();

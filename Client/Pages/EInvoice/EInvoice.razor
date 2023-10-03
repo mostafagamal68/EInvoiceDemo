@@ -3,10 +3,7 @@
 @inject IEInvoicesService service
 @inject ICustomersService customer
 @inject IEInvoiceTypesService type
-@if (!IsModal)
-{
-    <h3 class="mb-3">E-Invoice</h3>
-}
+
 <EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
     <DataAnnotationsValidator />
     <ValidationSummary />
@@ -135,6 +132,7 @@
     }
     private async Task GetEInvoice()
     {
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " E-Invoice");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
             dto = await service.GetSingle(Id);

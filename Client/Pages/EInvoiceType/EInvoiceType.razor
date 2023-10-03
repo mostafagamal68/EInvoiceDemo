@@ -1,10 +1,7 @@
 ﻿@page "/EInvoiceType/{Id:guid?}"
 @inherits GeneralComponent
 @inject IEInvoiceTypesService service
-@if (!IsModal)
-{
-    <h3 class="mb-3">E-Invoice Type</h3>
-}
+
 <EditForm Model="dto" OnValidSubmit="HandlValidSubmit" >
     <DataAnnotationsValidator />
     <div class="col-md-12 mb-3">
@@ -35,6 +32,7 @@
     EInvoiceTypeDto dto = new();
     protected override async Task OnInitializedAsync()
     {
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " E-Invoice Type");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
             dto = await service.GetSingle(Id);

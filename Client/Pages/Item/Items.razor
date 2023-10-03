@@ -1,10 +1,9 @@
 ﻿@page "/Items"
 @inherits GeneralComponent
 @inject IItemsService service
-@* <PageTitle>Items</PageTitle> *@
-<div class="d-flex justify-content-between align-items-center mb-3">
-    <h3>Items</h3>
-    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Item), "Item", afterClose: GetItemsFiltered))">
+
+<div class="d-flex justify-content-end align-items-center mb-3">
+    <a role="button" class="btn btn-primary rounded-3" @onclick="@(()=>ShowModal(typeof(Item), "Add - Item", afterClose: GetItemsFiltered))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -40,7 +39,7 @@
                 <td class="border-end">@sub.Item1.ItemDescription</td>
                 <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                     <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
-                    @onclick="@(() => ShowModal(typeof(Item), "Item", new ModalParameters().Add(nameof(Item.IsModal), true).Add(nameof(Item.Id), sub.Item1.ItemId), GetItemsFiltered))">
+                    @onclick="@(() => ShowModal(typeof(Item), "Edit - Item", new ModalParameters().Add(nameof(Item.IsModal), true).Add(nameof(Item.Id), sub.Item1.ItemId), GetItemsFiltered))">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                     <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1.ItemId))">
@@ -51,12 +50,13 @@
         </TableTemplate>
     }
 
-    <Paginator Type="ItemsFilter" Filter="ItemsFilter" Pagination="ItemsFilter?.Pagination" GetPage="GetItemsFiltered"></Paginator>
+    <Paginator Pagination="ItemsFilter?.Pagination" GetPage="GetItemsFiltered"></Paginator>
 }
 @code {
     ItemsFilter ItemsFilter = new();
     protected override async Task OnInitializedAsync()
     {
+        HeaderService.ChangeHeaderAndTitle("Items");
         LoaderService.ToggleLoader();
         await GetItemsFiltered();
         LoaderService.ToggleLoader();

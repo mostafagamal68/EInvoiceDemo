@@ -21,6 +21,9 @@ public class GeneralComponent : ComponentBase
     public LoaderService LoaderService { get; set; }
 
     [Inject]
+    public HeaderService HeaderService { get; set; }
+
+    [Inject]
     public IJSRuntime JS { get; set; }
 
     [Inject]

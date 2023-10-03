@@ -7,10 +7,7 @@ using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
-public class EInvoiceTypesFilter
+public class EInvoiceTypesFilter : GlobalFilter<EInvoiceTypeDto>
 {
     public string? EInvoiceTypeName { get; set; }
-
-    public List<EInvoiceTypeDto> Items { get; set; } = new();
-    public Pagination Pagination { get; set; } = new();
 }

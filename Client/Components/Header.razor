@@ -1,13 +1,10 @@
-﻿@inject LoaderService service
+﻿@inject HeaderService service
 @implements IDisposable
-@if (service.IsLoading)
-{
-    <div class="loader">
-        <div class="spinner-border" role="status">
-            <span class="sr-only"></span>
-        </div>
-    </div>
-}
+<PageTitle>@service.Title</PageTitle>
+<div class="top-row px-4">
+    <h3>@service.Title</h3>
+    <a href="https://www.codezone-eg.com/" target="_blank">About</a>
+</div>
 
 @code {
     protected override void OnInitialized()

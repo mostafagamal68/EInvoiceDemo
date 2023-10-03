@@ -1,6 +1,5 @@
 ﻿@page "/"
 @inherits GeneralComponent
-<PageTitle>Home</PageTitle>
 
 <h1>E-Invoice</h1>
 
@@ -46,10 +45,9 @@
         </div>
     </div>
 </div>
-@* @code{
-    protected override async Task OnInitializedAsync()
+@code{
+    protected override void OnInitialized()
     {
-        await base.OnInitializedAsync();
-        Layout.ToggleLoader();
+        HeaderService.ChangeHeaderAndTitle("Home");
     }
-} *@
+}

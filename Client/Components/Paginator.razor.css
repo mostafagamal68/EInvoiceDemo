@@ -2,12 +2,13 @@
     color: var(--primary-color);
 }
     ::deep a:hover {
+        background-color: var(--secondary-color);
         color: var(--tertiary-color);
     }
 
-.active-page>.page-link {
+.active-page > .page-link {
     z-index: 3;
-    color: var(--secondary-color);
+    color: var(--tertiary-color);
     background-color: var(--primary-color);
     border-color: var(--primary-color);
 }

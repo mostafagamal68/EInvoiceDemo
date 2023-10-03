@@ -1,10 +1,7 @@
 ﻿@page "/Tax/{Id:decimal}"
 @inherits GeneralComponent
 @inject ITaxesService service
-@if (!IsModal)
-{
-    <h3>Tax</h3>
-}
+
 <EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
     <DataAnnotationsValidator />
     <div class="col-md-12 my-2">
@@ -61,6 +58,7 @@
     }
     private async Task GetTax()
     {
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " Tax");
         LoaderService.ToggleLoader();
         if (Id.HasValue) dto = await service.GetSingle(Id);
         else dto.TaxCode = await service.GetCode();

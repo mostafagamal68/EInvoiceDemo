@@ -10,6 +10,7 @@ using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
+using EInvoiceDemo.Server.Logic;
 
 namespace EInvoiceDemo.Server.Controllers
 {
@@ -56,7 +57,9 @@ namespace EInvoiceDemo.Server.Controllers
                 if (filter.CustomerName.HasValue())
                     query = query.Where(c => (c.CustomerCode + " " + c.CustomerName).Contains(filter.CustomerName));
             }
-            var list = await query
+            filter.Pagination = PaginationLogic<Customer, CustomerDto>.GetPagination(query, filter);
+
+            filter.Items = await query
                 .Select(c => new CustomerDto
                 {
                     CustomerId = c.CustomerId,
@@ -66,15 +69,7 @@ namespace EInvoiceDemo.Server.Controllers
                 .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
                 .Take(filter.Pagination.RowsCount)
                 .ToListAsync();
-            filter.Items = list;
-            filter.Pagination = new Pagination
-            {
-                PageNo = filter.Pagination.PageNo,
-                CurrentPage = filter.Pagination.PageNo,
-                RowsCount = filter.Pagination.RowsCount,
-                TotalRows = query.Count(),
-                PagesCount = (int)Math.Ceiling((decimal)query.Count() / filter.Pagination.RowsCount)
-            };
+
             return filter;
         }
 

@@ -1,10 +1,7 @@
 ﻿@page "/Item/{Id:guid?}"
 @inherits GeneralComponent
 @inject IItemsService service
-@if (!IsModal)
-{
-    <h3>Item</h3>
-}
+
 <EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
     <DataAnnotationsValidator />
     <div class="col-md-12 my-2">
@@ -61,6 +58,7 @@
     }
     private async Task GetItem()
     {
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " Item");
         LoaderService.ToggleLoader();
         if (Id.HasValue) dto = await service.GetSingle(Id);
         else dto.ItemCode = await service.GetCode();

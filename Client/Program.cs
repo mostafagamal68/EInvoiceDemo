@@ -19,4 +19,5 @@ builder.Services.AddScoped<IItemsService, ItemsService>();
 builder.Services.AddScoped<ITaxesService, TaxesService>();
 builder.Services.AddScoped<ICustomersService, CustomersService>();
 builder.Services.AddScoped<LoaderService>();
+builder.Services.AddScoped<HeaderService>();
 await builder.Build().RunAsync();

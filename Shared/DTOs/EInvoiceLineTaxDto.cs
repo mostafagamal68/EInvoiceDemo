@@ -16,6 +16,7 @@ public class EInvoiceLineTaxDto
     [Required]
     public string? TaxName { get; set; }
 
+    [Required]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? Amount { get; set; }
 }

@@ -16,9 +16,11 @@ public class EInvoiceLineDto : ICloneable
     [Required]
     public string? ItemName { get; set; }
 
+    [Required]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? Quantity { get; set; }
 
+    [Required]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? AmountSold { get; set; }
 
@@ -28,7 +30,7 @@ public class EInvoiceLineDto : ICloneable
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? ItemNetAmount { get; set; }
 
-    public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = new();
+    [ValidateComplexType] public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = new();
     public object Clone()
     {
         return (EInvoiceLineDto)MemberwiseClone();

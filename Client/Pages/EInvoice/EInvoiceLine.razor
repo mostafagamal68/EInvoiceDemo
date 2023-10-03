@@ -2,8 +2,7 @@
 @inject IItemsService item
 @inject ITaxesService tax
 <EditForm Model="dto" OnValidSubmit="Save">
-    <DataAnnotationsValidator />
-    <ValidationSummary />
+    <ObjectGraphDataAnnotationsValidator />
     <div class="col-md-12 mb-3">
         <div class="row my-1">
             <div class="col-md-2 my-auto">
@@ -48,30 +47,32 @@
                 </div>
                 @if (dto.EInvoiceLineTaxes.Any())
                 {
-                    <TableTemplate Items="dto.EInvoiceLineTaxes" Context="sub" class="table table-striped table-hover">
-                        <TableHeader>
-                            <th scope="col" class="border-end text-center" style="border-top-left-radius:20px">#</th>
-                            <th scope="col" class="border-end">Tax</th>
-                            <th scope="col" class="border-end">Amount</th>
-                            <th class="text-end" style="border-top-right-radius:20px">Actions</th>
-                        </TableHeader>
-                        <RowTemplate>
-                            <td scope="row" class="border-end text-center" style=@(sub.Item2 == sub.Item3 ? "border-bottom-left-radius:20px" : "")>@sub.Item2</td>
-                            <td class="border-end">
-                                <ComboBox Id="@(sub.Item1.EInvoiceLineTaxId)" Type="KeyValue" ReGetOnClick="true" DisplayPropertyName="@("Value")" Value="@sub.Item1.TaxName" List="taxesList" GetList="GetTaxes" ValueChanged="TaxChanged"></ComboBox>
-                                <ValidationMessage For="@(() => sub.Item1.TaxName)" />
-                            </td>
-                            <td class="border-end">
-                                <InputNumber @bind-Value="sub.Item1.Amount" class="form-control" @bind-Value:after="Calculate" />
-                                <ValidationMessage For="@(() => sub.Item1.Amount)" />
-                            </td>
-                            <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
-                                <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1))">
-                                    <i class="bi bi-trash"></i>
-                                </a>
-                            </td>
-                        </RowTemplate>
-                    </TableTemplate>
+                    @* <EditForm Model="dto.EInvoiceLineTaxes"> *@
+                        <TableTemplate Items="dto.EInvoiceLineTaxes" Context="sub" class="table table-striped table-hover">
+                            <TableHeader>
+                                <th scope="col" class="border-end text-center" style="border-top-left-radius:20px">#</th>
+                                <th scope="col" class="border-end">Tax</th>
+                                <th scope="col" class="border-end">Amount</th>
+                                <th class="text-end" style="border-top-right-radius:20px">Actions</th>
+                            </TableHeader>
+                            <RowTemplate>
+                                <td scope="row" class="border-end text-center" style=@(sub.Item2 == sub.Item3 ? "border-bottom-left-radius:20px" : "")>@sub.Item2</td>
+                                <td class="border-end">
+                                    <ComboBox Id="@(sub.Item1.EInvoiceLineTaxId)" Type="KeyValue" ReGetOnClick="true" DisplayPropertyName="@("Value")" Value="@sub.Item1.TaxName" List="taxesList" GetList="GetTaxes" ValueChanged="TaxChanged"></ComboBox>
+                                    <ValidationMessage For="@(() => sub.Item1.TaxName)" />
+                                </td>
+                                <td class="border-end">
+                                    <InputNumber @bind-Value="sub.Item1.Amount" class="form-control" @bind-Value:after="Calculate" />
+                                    <ValidationMessage For="@(() => sub.Item1.Amount)" />
+                                </td>
+                                <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
+                                    <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1))">
+                                        <i class="bi bi-trash"></i>
+                                    </a>
+                                </td>
+                            </RowTemplate>
+                        </TableTemplate>
+                    @* </EditForm> *@
                     <div class="row my-1">
                         <div class="col-md-2 my-auto">
                             <label>Total</label>

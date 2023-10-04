@@ -1,4 +1,6 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using EInvoiceDemo.Shared.DTOs;
+using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,5 +21,11 @@ public static class Extensions
            source.OrderByDescending(c => EF.Property<object>(c, Field))
            : 
            source;
+
+    public static T CloneJson<T>(this T source)
+    {
+        var deserializeSettings = new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace };
+        return JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), deserializeSettings);
+    }
 
 }

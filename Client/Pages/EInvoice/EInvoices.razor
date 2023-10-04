@@ -29,8 +29,12 @@
     </div>
 </div>
 <div class="d-flex justify-content-end align-items-center my-2">
-    <a role="button" class="btn btn-primary rounded-3 mx-1" @onclick="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}"><i class="bi bi-x me-1"></i>Clear</a>
-    <a role="button" class="btn btn-success rounded-3" @onclick="GetEInvoicesFiltered"><i class="bi bi-search me-1"></i>Search</a>
+    <Btn Classes="btn-primary" Text="Clear" ClickAction="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}">
+        <SpanIcon><i class="bi bi-x me-1"></i></SpanIcon>
+    </Btn>
+    <Btn Classes="btn-success" Text="Search" ClickAction="GetEInvoicesFiltered">
+        <SpanIcon><i class="bi bi-search me-1"></i></SpanIcon>
+    </Btn>
 </div>
 @if (!LoaderService.IsLoading)
 {

@@ -40,10 +40,9 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <a role="button" class="btn btn-violet rounded-3" @onclick="Add">
-                        <i class="bi bi-check-circle me-1"></i>
-                        Add Tax
-                    </a>
+                    <Btn Classes="btn-violet" Text="Add Tax" ValidateEditContext="false" ClickAction="Add">
+                        <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
+                    </Btn>
                 </div>
                 @if (dto.EInvoiceLineTaxes.Any())
                 {
@@ -101,9 +100,10 @@
     <div class="d-flex justify-content-end">
         @if (Id.HasValue)
         {
-            <a role="button" class="btn btn-danger rounded-3 mx-1" @onclick="Delete">Remove</a>
+            <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <button type="submit" class="btn btn-success rounded-3 mx-1 border-0">Apply</button>
+        <button type="submit" class="btn btn-success rounded-3 mx-1">Save</button>
+        @* <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="Save"></Btn> *@
     </div>
 </EditForm>
 
@@ -118,7 +118,7 @@
     List<KeyValue>? taxesList;
 
     [CascadingParameter]
-    BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    BlazoredModalInstance BlazoredModal { get; set; } = new();
 
     protected override void OnInitialized()
     {
@@ -131,9 +131,12 @@
     }
     private async Task Delete()
     {
-        List.Remove(List.First(c => c.EInvoiceLineId == Id));
-        ToastService.ShowSuccess("Deleted Successfully");
-        await BlazoredModal.CancelAsync();
+        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice ?"))
+        {
+            List?.Remove(List.First(c => c.EInvoiceLineId == Id));
+            ToastService.ShowSuccess("Deleted Successfully");
+            await BlazoredModal.CancelAsync();
+        }
     }
     private void DeleteRow(EInvoiceLineTaxDto TaxDto)
     {
@@ -145,11 +148,10 @@
         var messages = new List<string>();
         foreach (var item in dto.EInvoiceLineTaxes.GroupBy(x => x.TaxId).Select(x => new { x.Key, Taxes = x }))
         {
-            if (item.Taxes.Count() > 1) messages.Add($"{item.Taxes.Select(c => c.TaxName).First()} Tax is duplicated.");
+            if (item.Taxes.Count() > 1) messages.Add($"{item.Taxes.Select(c => c.TaxName).First()} is duplicated.");
         }
         if (!messages.Any())
         {
-
             if (List.Any(c => c.EInvoiceLineId == Id))
             {
                 var eInvoiceLine = List.First(c => c.EInvoiceLineId == dto.EInvoiceLineId);
@@ -159,24 +161,24 @@
                 eInvoiceLine.ItemName = dto.ItemName;
                 eInvoiceLine.ItemNetAmount = dto.ItemNetAmount;
                 eInvoiceLine.Total = dto.Total;
-                foreach (var item in eInvoiceLine.EInvoiceLineTaxes)
+                foreach (var lineTax in eInvoiceLine.EInvoiceLineTaxes)
                 {
-                    if (eInvoiceLine.EInvoiceLineTaxes.Any(c => c.EInvoiceLineTaxId == item.EInvoiceLineTaxId))
+                    if (eInvoiceLine.EInvoiceLineTaxes.Any(c => c.EInvoiceLineTaxId == lineTax.EInvoiceLineTaxId))
                     {
-                        var eInvoiceLineTax = eInvoiceLine.EInvoiceLineTaxes.First(c => c.EInvoiceLineTaxId == item.EInvoiceLineTaxId);
-                        eInvoiceLineTax.TaxId = item.TaxId;
-                        eInvoiceLineTax.TaxName = item.TaxName;
-                        eInvoiceLineTax.Amount = item.Amount;
+                        var eInvoiceLineTax = eInvoiceLine.EInvoiceLineTaxes.First(c => c.EInvoiceLineTaxId == lineTax.EInvoiceLineTaxId);
+                        eInvoiceLineTax.TaxId = lineTax.TaxId;
+                        eInvoiceLineTax.TaxName = lineTax.TaxName;
+                        eInvoiceLineTax.Amount = lineTax.Amount;
                     }
                     else
                     {
-                        eInvoiceLine.EInvoiceLineTaxes.Add(item);
+                        eInvoiceLine.EInvoiceLineTaxes.Add(lineTax);
                     }
                 }
             }
             else
             {
-                List.Add((EInvoiceLineDto)dto.Clone());
+                List.Add((EInvoiceLineDto)dto.CloneJson());
                 Id = dto.EInvoiceLineId;
             }
             ToastService.ShowSuccess("Line applied to this E-Invoice Successfully");

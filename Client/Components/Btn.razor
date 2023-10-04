@@ -1,4 +1,4 @@
-﻿<button @ref="Element" class="btn rounded-2 my-auto @Classes" @onclick="@RunAction" id="@Id" style="@Style" disabled="@IsActionRun" type="@Type" @attributes="AdditionalAttributes">
+﻿<button @ref="Element" class="btn rounded-3 mx-1 border-0 shadow-none @Classes" @onclick="@RunAction" disabled="@IsActionRun" type="@Type" @attributes="AdditionalAttributes">
     @SpanIcon
     @Text
     @if (IsActionRun)
@@ -7,31 +7,40 @@
     }
 </button>
 
-@code{
-    [Parameter] 
+@code {
+    [Parameter]
     public string Text { get; set; } = "";
-    [Parameter] 
+    [Parameter]
     public string Classes { get; set; } = "";
-    [Parameter] 
-    public string Id { get; set; } = "";
-    [Parameter] 
-    public string Style { get; set; } = "";
-    [Parameter] 
+    [Parameter]
     public string Type { get; set; } = "button";
-    [Parameter] 
+    [Parameter]
     public EventCallback ClickAction { get; set; }
-    [Parameter] 
+    [Parameter]
     public RenderFragment? SpanIcon { get; set; }
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    [Parameter]
+    public bool ValidateEditContext { get; set; } = true;
+    [CascadingParameter]
+    public EditContext? EditContext { get; set; }
 
     private bool IsActionRun = false;
     private ElementReference Element;
-        
-    protected async Task RunAction()
+
+    public async Task RunAction()
     {
-        IsActionRun = true;
-        await ClickAction.InvokeAsync();
-        IsActionRun = false;
+        if (EditContext == null || !ValidateEditContext || EditContext.Validate())
+        {
+            IsActionRun = true;
+            try
+            {
+                await ClickAction.InvokeAsync();
+            }
+            finally
+            {
+                IsActionRun = false;
+            }
+        }
     }
 }

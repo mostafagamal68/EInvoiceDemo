@@ -55,6 +55,7 @@ public class GeneralComponent : ComponentBase
         else
             ToastService.ShowError(await result.Content.ReadAsStringAsync());
     }
+
     public async Task<bool> ShowConfirm(string title, string message)
     {
         var confirm = Modal.Show<ConfirmDialog>(title,

@@ -1,11 +1,9 @@
 ﻿@typeparam Type
-
 <div class="dropdown">
     @if (AutoComplete)
     {
-        <input class="form-control shadow-none" type="text" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:200px"
+        <input class="form-control" type="text" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:200px"
         @bind-value="AutoCompleteValue" @bind-value:event="oninput" @bind-value:after="GetFilteredList" @onclick="GetAll" />
-        @* <a role="button" class="input-group-text rounded-end-2 bg-white" @onclick="SelectedValueChanged"><span class="bi bi-x"></span></a> *@
     }
     else
     {

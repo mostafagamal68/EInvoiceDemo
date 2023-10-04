@@ -4,7 +4,7 @@
 @inject ICustomersService customer
 @inject IEInvoiceTypesService type
 
-<EditForm Model="dto" OnValidSubmit="HandlValidSubmit">
+<EditForm Model="dto">
     <DataAnnotationsValidator />
     <div class="col-md-12 mb-3">
         <div class="row my-1">
@@ -45,7 +45,7 @@
                 <label>Date</label>
             </div>
             <div class="col-md-5">
-                <input type="datetime-local" class="form-control" @bind="dto.DateTimeIssued" />
+                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="dto.DateTimeIssued" class="form-control" />
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.DateTimeIssued)" />
@@ -54,12 +54,11 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <a role="button" class="btn btn-violet rounded-3"
-                    @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
+                    <Btn Classes="btn-violet" Text="Add Item" ValidateEditContext="false"
+                        ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                         new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
-                        <i class="bi bi-check-circle me-1"></i>
-                        Add Item
-                    </a>
+                        <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
+                    </Btn>
                 </div>
                 @if (dto.EInvoiceLines.Any())
                 {
@@ -83,7 +82,7 @@
                             <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                                 <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
                                 @onclick="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
-                                    new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), sub.Item1.Clone()), async () => Calculate()))">
+                                    new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)sub.Item1.Clone()), async () => Calculate()))">
                                     <i class="bi bi-pencil-square"></i>
                                 </a>
                             </td>
@@ -111,10 +110,10 @@
     <div class="d-flex justify-content-end">
         @if (Id.HasValue)
         {
-            <a role="button" class="btn btn-info rounded-3 mx-1" @onclick="New">New</a>
-            <a role="button" class="btn btn-danger rounded-3 mx-1" @onclick="Delete">Delete</a>
+            <Btn ValidateEditContext="false" Classes="btn-info" Text="New" ClickAction="New"></Btn>
+            <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <button type="submit" class="btn btn-success rounded-3 mx-1 border-0">Save</button>
+        <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="HandlValidSubmit"></Btn>
     </div>
 </EditForm>
 @code {

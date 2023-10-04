@@ -1,8 +1,9 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
-public class EInvoiceLineTaxDto
+public class EInvoiceLineTaxDto : ICloneable
 {
     [Required(ErrorMessage = "*")]
     public Guid EInvoiceLineTaxId { get; set; }
@@ -19,4 +20,9 @@ public class EInvoiceLineTaxDto
     [Required(ErrorMessage = "*")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? Amount { get; set; }
+
+    public object Clone()
+    {
+        return (EInvoiceLineTaxDto)MemberwiseClone();
+    }
 }

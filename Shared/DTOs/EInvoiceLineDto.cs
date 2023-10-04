@@ -1,4 +1,6 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+using System.Text.Json;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
@@ -33,6 +35,17 @@ public class EInvoiceLineDto : ICloneable
     [ValidateComplexType] public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = new();
     public object Clone()
     {
-        return (EInvoiceLineDto)MemberwiseClone();
+        EInvoiceLineDto l = (EInvoiceLineDto)MemberwiseClone(); //This clones value types
+
+        //List<EInvoiceLineTaxDto> copyObjectList = new ();
+
+        //foreach (EInvoiceLineTaxDto o in EInvoiceLineTaxes)
+        //{
+        //    EInvoiceLineTaxDto co = (EInvoiceLineTaxDto)o.Clone(); //I want something like this
+        //    copyObjectList.Add(co);
+        //}
+
+        //l.EInvoiceLineTaxes = copyObjectList;
+        return l;
     }
 }

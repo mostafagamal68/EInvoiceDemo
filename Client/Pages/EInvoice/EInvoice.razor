@@ -23,7 +23,9 @@
                 <label>Type</label>
             </div>
             <div class="col-md-5">
-                <ComboBox Type="KeyValue" ReGetOnClick="true" DisplayPropertyName="@("Value")" Value="@dto.EInvoiceTypeName" List="typesList" GetList="GetTypes" ValueChanged="TypeChanged"></ComboBox>
+                @* <Select @bind-Value="dto.EInvoiceTypeName" List="typesList" GetList="GetTypes" /> *@
+                <ComboBox Value="@dto.EInvoiceTypeName" List="typesList" GetList="GetTypes" ValueChanged="TypeChanged"></ComboBox>
+                @* <DropdownList Value="@dto.EInvoiceTypeName" ValueExpression="()=>dto.EInvoiceTypeName" List="typesList" GetList="GetTypes" ValueChanged="TypeChanged"></DropdownList>              *@
             </div>
             <div class="col-md-3 my-auto">
                 <ValidationMessage For="@(() => dto.EInvoiceTypeName)" />
@@ -34,7 +36,7 @@
                 <label>Customer</label>
             </div>
             <div class="col-md-5">
-                <ComboBox AutoComplete="true" Type="KeyValue" DisplayPropertyName="@("Value")" Value="@dto.CustomerName" List="customersList" GetList="GetCustomers" ValueChanged="CustomerChanged"></ComboBox>
+                <ComboBox AutoComplete="true" Value="@dto.CustomerName" List="customersList" GetList="GetCustomers" ValueChanged="CustomerChanged"></ComboBox>
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.CustomerName)" />
@@ -55,7 +57,7 @@
             <div class="card-body">
                 <div class="col-md-3 mb-1">
                     <Btn Classes="btn-violet" Text="Add Item" ValidateEditContext="false"
-                        ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
+                         ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                         new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
                     </Btn>
@@ -123,11 +125,10 @@
     EInvoiceDto dto = new();
     List<KeyValue>? customersList;
     List<KeyValue>? typesList;
-
+    
     protected override async Task OnInitializedAsync()
-    {
-        await GetEInvoice();
-    }
+        => await GetEInvoice();
+
     private async Task GetEInvoice()
     {
         if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " E-Invoice");
@@ -168,7 +169,7 @@
         {
             var response = await service.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo("EInvoices", "EInvoices");
+                GoTo("EInvoices");
             await ShowResultMessage(response);
         }
     }
@@ -187,7 +188,5 @@
         dto.EInvoiceTypeName = keyValue?.Value;
     }
     private void Calculate()
-    {
-        dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
-    }
+        => dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
 }

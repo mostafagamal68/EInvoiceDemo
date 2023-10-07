@@ -81,7 +81,7 @@
         {
             var response = await service.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo("Customers", "Customers");
+                GoTo("Customers");
             await ShowResultMessage(response);
         }
     }

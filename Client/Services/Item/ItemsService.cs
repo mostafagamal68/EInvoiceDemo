@@ -16,11 +16,7 @@ public class ItemsService : IItemsService
         _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
     public async Task<ItemsFilter?> GetList(ItemsFilter? filter)
-    {
-        var response = await _httpClient.PostAsJsonAsync($"{api}/Filter", filter);
-        var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<ItemsFilter>(content, _options);
-    }
+        => await (await _httpClient.PostAsJsonAsync($"{api}/Filter", filter)).Content.ReadFromJsonAsync<ItemsFilter>(_options);
     public async Task<List<KeyValue>?> GetKeyValue(string? filter)
         => await _httpClient.GetFromJsonAsync<List<KeyValue>>($"{api}/KeyValue?filter={filter}"); 
     public async Task<ItemDto> GetSingle(Guid? Id)

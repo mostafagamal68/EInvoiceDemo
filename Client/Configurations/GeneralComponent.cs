@@ -84,7 +84,7 @@ public class GeneralComponent : ComponentBase
         else StateHasChanged();
     }
 
-    public void GoTo(string PageRoute, string PageName, bool WithId = false, Guid? Id = null)
+    public void GoTo(string PageRoute, bool WithId = false, Guid? Id = null)
     {
         if (WithId)
             Navigation.NavigateTo($"/{PageRoute}/{Id}");

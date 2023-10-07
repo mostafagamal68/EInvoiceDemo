@@ -1,7 +1,8 @@
 ﻿@inherits GeneralComponent
 @inject IItemsService item
 @inject ITaxesService tax
-<EditForm Model="dto" OnValidSubmit="Save">
+
+<EditForm Model="dto">
     <ObjectGraphDataAnnotationsValidator />
     <div class="col-md-12 mb-3">
         <div class="row my-1">
@@ -9,7 +10,7 @@
                 <label>Item</label>
             </div>
             <div class="col-md-5">
-                <ComboBox AutoComplete="true" Type="KeyValue" DisplayPropertyName="@("Value")" Value="@dto.ItemName" List="itemsList" GetList="GetItems" ValueChanged="ItemChanged"></ComboBox>
+                <ComboBox AutoComplete="true" Value="@dto.ItemName" List="itemsList" GetList="GetItems" ValueChanged="ItemChanged"></ComboBox>
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.ItemName)" />
@@ -56,7 +57,7 @@
                         <RowTemplate>
                             <td scope="row" class="border-end text-center" style=@(sub.Item2 == sub.Item3 ? "border-bottom-left-radius:20px" : "")>@sub.Item2</td>
                             <td class="border-end">
-                                <ComboBox Id="@(sub.Item1.EInvoiceLineTaxId)" Type="KeyValue" ReGetOnClick="true" DisplayPropertyName="@("Value")" Value="@sub.Item1.TaxName" List="taxesList" GetList="GetTaxes" ValueChanged="TaxChanged"></ComboBox>
+                                <ComboBox Id="@(sub.Item1.EInvoiceLineTaxId)" Value="@sub.Item1.TaxName" List="taxesList" GetList="GetTaxes" ValueChanged="TaxChanged"></ComboBox>
                                 <ValidationMessage For="@(() => sub.Item1.TaxName)" />
                             </td>
                             <td class="border-end">
@@ -102,8 +103,7 @@
         {
             <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <button type="submit" class="btn btn-success rounded-3 mx-1">Save</button>
-        @* <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="Save"></Btn> *@
+        <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="Save"></Btn>
     </div>
 </EditForm>
 

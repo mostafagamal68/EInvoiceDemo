@@ -16,11 +16,7 @@ public class TaxesService : ITaxesService
         _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
     public async Task<TaxesFilter?> GetList(TaxesFilter? filter)
-    {
-        var response = await _httpClient.PostAsJsonAsync($"{api}/Filter", filter);
-        var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<TaxesFilter>(content, _options);
-    }
+        => await (await _httpClient.PostAsJsonAsync($"{api}/Filter", filter)).Content.ReadFromJsonAsync<TaxesFilter>(_options);
     public async Task<List<KeyValue>?> GetKeyValue(string? filter)
         => await _httpClient.GetFromJsonAsync<List<KeyValue>>($"{api}/KeyValue?filter={filter}"); 
     public async Task<TaxDto> GetSingle(Guid? Id)

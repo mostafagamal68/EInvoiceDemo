@@ -5,7 +5,7 @@
 @inject IEInvoiceTypesService type
 
 <div class="d-flex justify-content-end align-items-center mb-3">
-    <a role="button" class="btn btn-violet rounded-3" @onclick="@(()=>GoTo("EInvoice","EInvoice",true))">
+    <a role="button" class="btn btn-violet rounded-3" @onclick="@(()=>GoTo("EInvoice", true))">
         <i class="bi bi-plus-circle mx-1"></i>
         Add
     </a>
@@ -13,11 +13,11 @@
 <div class="d-flex justify-content-start my-1">
     <div>
         <label>Type</label>
-        <ComboBox Type="KeyValue" ReGetOnClick="true" DisplayPropertyName="@("Value")" Value="@EInvoicesFilter.EInvoiceTypeName" List="typesList" GetList="GetTypes" ValueChanged="TypeChanged"></ComboBox>
+        <ComboBox Value="@EInvoicesFilter.EInvoiceTypeName" List="typesList" GetList="GetTypes" ValueChanged="TypeChanged"></ComboBox>
     </div>
     <div class="mx-2">
         <label>Customer</label>
-        <ComboBox AutoComplete="true" Type="KeyValue" DisplayPropertyName="@("Value")" List="customersList" GetList="GetCustomers" ValueChanged="CustomerChanged"></ComboBox>
+        <ComboBox AutoComplete="true" List="customersList" GetList="GetCustomers" ValueChanged="CustomerChanged"></ComboBox>
     </div>
     <div class="mx-2">
         <label>Date From</label>
@@ -65,7 +65,7 @@
                 <td class="border-end">@sub.Item1.NetAmount</td>
                 <td class="text-end" style=@(sub.Item2 == sub.Item3 ? "border-bottom-right-radius:20px" : "")>
                     <a role="button" class="btn btn-sm btn-warning rounded-3" type="button"
-                        @onclick="@(() => GoTo("EInvoice","EInvoice",true, sub.Item1.EInvoiceId))">
+                        @onclick="@(() => GoTo("EInvoice", true, sub.Item1.EInvoiceId))">
                         <i class="bi bi-pencil-square"></i>
                     </a>
                     <a role="button" class="btn btn-sm btn-danger rounded-3" type="button" @onclick="@(() => DeleteRow(sub.Item1.EInvoiceId))">

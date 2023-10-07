@@ -92,7 +92,7 @@
         {
             var response = await service.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo("Taxs", "Taxs");
+                GoTo("Taxs");
             await ShowResultMessage(response);
         }
     }

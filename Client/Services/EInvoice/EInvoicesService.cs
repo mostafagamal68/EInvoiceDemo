@@ -15,11 +15,7 @@ public class EInvoicesService : IEInvoicesService
         _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
     }
     public async Task<EInvoicesFilter?> GetList(EInvoicesFilter? filter)
-    {
-        var response = await _httpClient.PostAsJsonAsync($"{api}/Filter", filter);
-        var content = await response.Content.ReadAsStringAsync();
-        return JsonSerializer.Deserialize<EInvoicesFilter>(content, _options);
-    }
+        => await (await _httpClient.PostAsJsonAsync($"{api}/Filter", filter)).Content.ReadFromJsonAsync<EInvoicesFilter>(_options);
     public async Task<EInvoiceDto> GetSingle(Guid? Id)
         => await _httpClient.GetFromJsonAsync<EInvoiceDto>($"{api}/{Id}");
     public async Task<int> GetCode()

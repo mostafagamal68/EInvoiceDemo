@@ -1,13 +1,12 @@
-﻿@typeparam Type
-<div class="dropdown">
+﻿<div class="dropdown">
     @if (AutoComplete)
     {
         <input class="form-control" type="text" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:200px"
-        @bind-value="AutoCompleteValue" @bind-value:event="oninput" @bind-value:after="GetFilteredList" @onclick="GetAll" />
+        @bind-value="Value" @bind-value:event="oninput" @bind-value:after="GetFilteredList" @onclick="GetAll" />
     }
     else
     {
-        <a class="form-select text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:180px" @onclick="@(ReGetOnClick ? GetAll : null)">
+        <a class="form-select text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:180px">
             @(Value ?? "Not Selected")
         </a>
     }
@@ -24,11 +23,11 @@
                 <li><a class="dropdown-item my-0" role="button" @onclick="SelectedValueChanged">Clear</a></li>
                 <li><hr class="dropdown-divider"></li>
             }
-            foreach (var item in List)
+            foreach (KeyValue item in List)
             {
                 <li>
                     <a class="dropdown-item my-0" role="button" @onclick="@(async () => await SelectedValueChanged(item))">
-                        @item?.GetType()?.GetProperty(DisplayPropertyName)?.GetValue(item)
+                        @item?.Value
                     </a>
                 </li>
             }
@@ -37,58 +36,45 @@
 </div>
 
 @code {
-    [Parameter]
-    public List<Type>? List { get; set; }
-    [Parameter]
-    public string? Value { get; set; }
-    public string? AutoCompleteValue { get; set; }
-    [Parameter]
-    public string DisplayPropertyName { get; set; } = string.Empty;
-    [Parameter]
-    public bool ReGetOnClick { get; set; } = false;
-    [Parameter]
-    public bool AutoComplete { get; set; } = false;
-    [Parameter]
-    public bool Boolean { get; set; } = false;
-    [Parameter]
-    public Guid? Id { get; set; } = null;
-    [Parameter]
-    public EventCallback<Type> ValueChanged { get; set; }
-    [Parameter]
-    public EventCallback<string> GetList { get; set; }
-    protected override void OnInitialized()
+    [Parameter] public List<KeyValue>? List { get; set; }
+
+    [Parameter] public string? Value { get; set; }
+
+    [Parameter] public bool ReGetOnClick { get; set; } = false;
+
+    [Parameter] public bool AutoComplete { get; set; } = false;
+
+    [Parameter] public bool Boolean { get; set; } = false;
+
+    [Parameter] public Guid? Id { get; set; } = null;
+
+    [Parameter] public EventCallback<KeyValue?> ValueChanged { get; set; }
+
+    [Parameter] public EventCallback<string> GetList { get; set; }
+
+    protected override async Task OnInitializedAsync()
     {
-        if (AutoComplete)
-        {
-            ReGetOnClick = false;
-            AutoCompleteValue = Value;
-        }
-        if (Boolean)
-        {
-            ReGetOnClick = false;
-            AutoComplete = false;
-        }
+        if (!AutoComplete) await GetList.InvokeAsync();        
     }
-    private async Task GetFilteredList()
-    {
-        await GetList.InvokeAsync(AutoCompleteValue);
-    }
+
+    private async Task GetFilteredList() => await GetList.InvokeAsync(Value);
+
     private async Task GetAll()
     {
-        if (AutoComplete) await SelectedValueChanged();
+        await SelectedValueChanged();
         await GetList.InvokeAsync();
     }
+
     private async Task SelectedValueChanged()
     {
-        if (AutoComplete) AutoCompleteValue = null;
-        if (Boolean) Value = null;
+        Value = null;
         await ValueChanged.InvokeAsync();
     }
-    private async Task SelectedValueChanged(Type? type)
+
+    private async Task SelectedValueChanged(KeyValue newValue)
     {
-        if (AutoComplete) AutoCompleteValue = type?.GetType()?.GetProperty("Value")?.GetValue(type)?.ToString();
-        if (Boolean) Value = type?.GetType()?.GetProperty("Value")?.GetValue(type)?.ToString();
-        if (Id.HasValue) type?.GetType()?.GetProperty("Id")?.SetValue(type,Id);
-        await ValueChanged.InvokeAsync(type);
+        Value = newValue.Value;
+        if (Id.HasValue) newValue.Id = Id;
+        await ValueChanged.InvokeAsync(newValue);
     }
 }

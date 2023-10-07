@@ -65,7 +65,7 @@
         {
             var response = await service.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo("EInvoiceTypes", "EInvoice Types");
+                GoTo("EInvoiceTypes");
             await ShowResultMessage(response);
         }
     }

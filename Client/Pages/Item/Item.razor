@@ -92,7 +92,7 @@
         {
             var response = await service.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo("Items", "Items");
+                GoTo("Items");
             await ShowResultMessage(response);
         }
     }

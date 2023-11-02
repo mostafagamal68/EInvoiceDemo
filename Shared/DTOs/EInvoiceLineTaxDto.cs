@@ -22,7 +22,5 @@ public class EInvoiceLineTaxDto : ICloneable
     public decimal? Amount { get; set; }
 
     public object Clone()
-    {
-        return (EInvoiceLineTaxDto)MemberwiseClone();
-    }
+        => (EInvoiceLineTaxDto)MemberwiseClone();
 }

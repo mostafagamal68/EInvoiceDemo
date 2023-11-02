@@ -35,17 +35,17 @@ public class EInvoiceLineDto : ICloneable
     [ValidateComplexType] public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = new();
     public object Clone()
     {
-        EInvoiceLineDto l = (EInvoiceLineDto)MemberwiseClone(); //This clones value types
+        EInvoiceLineDto l = (EInvoiceLineDto)MemberwiseClone();
 
-        //List<EInvoiceLineTaxDto> copyObjectList = new ();
+        List<EInvoiceLineTaxDto> copyObjectList = new();
 
-        //foreach (EInvoiceLineTaxDto o in EInvoiceLineTaxes)
-        //{
-        //    EInvoiceLineTaxDto co = (EInvoiceLineTaxDto)o.Clone(); //I want something like this
-        //    copyObjectList.Add(co);
-        //}
+        foreach (EInvoiceLineTaxDto o in l.EInvoiceLineTaxes)
+        {
+            EInvoiceLineTaxDto co = (EInvoiceLineTaxDto)o.Clone();
+            copyObjectList.Add(co);
+        }
 
-        //l.EInvoiceLineTaxes = copyObjectList;
+        l.EInvoiceLineTaxes = copyObjectList;
         return l;
     }
 }

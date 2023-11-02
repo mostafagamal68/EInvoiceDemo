@@ -215,7 +215,6 @@ namespace EInvoiceDemo.Server.Controllers
                             foreach (var item in deletedLineTaxes)
                             {
                                 _context.Entry(item).State = EntityState.Deleted;
-                                //eInvoiceLine.EInvoiceLineTaxes.Remove(item);
                                 _context.EInvoiceLineTaxes.Remove(item);
                             }
                         }
@@ -227,7 +226,6 @@ namespace EInvoiceDemo.Server.Controllers
                     foreach (var item in deletedLines)
                     {
                         _context.Entry(item).State = EntityState.Deleted;
-                        //eInvoice.EInvoiceLines.Remove(item);
                         _context.EInvoiceLines.Remove(item);
                     }
                 }

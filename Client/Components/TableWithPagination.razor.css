@@ -1,32 +1,32 @@
-﻿::deep th {
+﻿th {
     background-color: var(--secondary-color) !important;
     color: #FFFFFF !important;
 }
 
-    ::deep th:first-child, ::deep td:first-child {
+    th:first-child, td:first-child {
         text-align: center;
     }
 
-    ::deep th:first-child {
-        border-top-left-radius: 20px;
-    }
-
-    ::deep th:last-child {
-        border-top-right-radius: 20px;
-    }
-
-    ::deep th:not(:first-child,th:last-child) {
-        cursor: pointer;
-    }
-
-    ::deep td:last-child, ::deep th:last-child {
+    td:last-child, th:last-child {
         text-align: end;
     }
 
-::deep tr:last-child td:first-child {
+    th:first-child {
+        border-top-left-radius: 20px;
+    }
+
+    th:last-child {
+        border-top-right-radius: 20px;
+    }
+
+    th:not(:first-child,th:last-child) {
+        cursor: pointer;
+    }
+
+tr:last-child td:first-child {
     border-bottom-left-radius: 20px;
 }
 
-::deep tr:last-child td:last-child {
+tr:last-child td:last-child {
     border-bottom-right-radius: 20px;
 }

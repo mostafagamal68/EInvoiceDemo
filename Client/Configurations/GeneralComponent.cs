@@ -24,13 +24,7 @@ public class GeneralComponent : ComponentBase
     public HeaderService HeaderService { get; set; }
 
     [Inject]
-    public IJSRuntime JS { get; set; }
-
-    [Inject]
     public IToastService ToastService { get; set; }
-
-    [CascadingParameter]
-    public MainLayout Layout { get; set; }
 
     [CascadingParameter]
     public IModalService Modal { get; set; } = default!;

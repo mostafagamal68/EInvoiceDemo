@@ -1,0 +1,87 @@
+﻿@using System.Diagnostics.CodeAnalysis;
+@using System.ComponentModel;
+@typeparam TType
+@typeparam TItem where TItem : GlobalFilter<TType>
+<table class="table table-striped table-hover" @attributes="AdditionalAttributes">
+    <thead>
+        <tr class="align-middle text-left">
+            <th scope="col" class="border-end" style="">#</th>
+            @{
+                foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayNameAttribute))))
+                {
+                    <th scope="col" class="border-end" @onclick="@(async () => await SortBy(item.Name))">
+                        @item.GetCustomAttributesData()?.FirstOrDefault(c => c.AttributeType == typeof(DisplayNameAttribute))?.ConstructorArguments[0].Value
+                    </th>
+                }
+            }
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            var last = Model.Items.Count;
+            foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
+            {
+                var Id = (Guid)item.GetType().GetProperty(typeof(TType).Name.Replace("Dto", "Id")).GetValue(item);
+                <tr class="align-middle text-left">
+                    <td scope="row" class="border-end">@index</td>
+                    @foreach (var property in item.GetType().GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayNameAttribute))))
+                    {
+                        <td class="border-end">@property.GetValue(item)</td>
+                    }
+                    <td>
+
+                        @if (WithEdit)
+                        {
+                            <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
+                                <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
+                            </Btn>
+                        }
+
+                        @if (WithDelete)
+                        {
+                            <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
+                                <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
+                            </Btn>
+                        }
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@if (WithPagination)
+{
+    <Paginator Pagination="Model.Pagination" GetPage="Filter"></Paginator>
+}
+
+@code {
+    [Parameter]
+    public TItem Model { get; set; }
+
+    [Parameter]
+    public EventCallback Filter { get; set; }
+
+    [Parameter]
+    public EventCallback<(Guid Id, bool IsDelete)> Actions { get; set; }
+
+    [Parameter]
+    public bool WithEdit { get; set; } = true;
+
+    [Parameter]
+    public bool WithDelete { get; set; } = true;
+
+    [Parameter]
+    public bool WithPagination { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    private async Task SortBy(string Field)
+    {
+        Model.SortField = Field;
+        Model.SortApproach = !Model.SortApproach;
+        await Filter.InvokeAsync();
+    }
+}

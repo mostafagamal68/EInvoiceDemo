@@ -1,14 +1,15 @@
 ﻿<div class="dropdown">
     @if (AutoComplete)
     {
-        <input class="form-control" type="text" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:200px"
+        <input class="form-control" type="text" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false"
         @bind-value="Value" @bind-value:event="oninput" @bind-value:after="GetFilteredList" @onclick="GetAll" />
     }
     else
     {
-        <a class="form-select text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false" style="min-width:180px">
+        @* <a class="form-select text-decoration-none" role="button" data-bs-toggle="dropdown" aria-expanded="false">
             @(Value ?? "Not Selected")
-        </a>
+        </a> *@
+        <input class="form-select" data-bs-toggle="dropdown" aria-expanded="false" value="@(Value ?? "Not Selected")"/>
     }
 
     <ul class="dropdown-menu">
@@ -40,8 +41,6 @@
 
     [Parameter] public string? Value { get; set; }
 
-    [Parameter] public bool ReGetOnClick { get; set; } = false;
-
     [Parameter] public bool AutoComplete { get; set; } = false;
 
     [Parameter] public bool Boolean { get; set; } = false;
@@ -51,7 +50,7 @@
     [Parameter] public EventCallback<KeyValue?> ValueChanged { get; set; }
 
     [Parameter] public EventCallback<string> GetList { get; set; }
-
+    
     protected override async Task OnInitializedAsync()
     {
         if (!AutoComplete) await GetList.InvokeAsync();        
@@ -77,4 +76,5 @@
         if (Id.HasValue) newValue.Id = Id;
         await ValueChanged.InvokeAsync(newValue);
     }
+    
 }

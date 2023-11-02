@@ -18,6 +18,11 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--primary-color);
 }
 
+input {
+    padding: .375rem .75rem!important;
+    box-shadow: none!important;
+}
+
 .btn-violet {
     background-color: var(--secondary-color);
     color: white;

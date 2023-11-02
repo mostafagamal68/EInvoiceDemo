@@ -1,0 +1,77 @@
+﻿@using System.Linq.Expressions;
+@inherits InputText
+
+<div class="dropdown">
+    @if (AutoComplete)
+    {
+        <input class="form-select @CssClass" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" @attributes="AdditionalAttributes"
+        @bind="CurrentValue" @oninput="(args) => GetList.InvokeAsync(args?.Value?.ToString())" @onblur="AutoCompleteBlured" @onclick="GetAll" />
+    }
+    else
+    {
+        <input class="form-select @CssClass" style="cursor:pointer;" data-bs-toggle="dropdown" aria-expanded="false"
+               value="@(Value ?? "Not Selected")" @attributes="AdditionalAttributes" readonly />
+    }
+
+    <ul class="dropdown-menu">
+        @if (!List.Any())
+        {
+            <li><h6 class="dropdown-item my-0">No result</h6></li>
+        }
+        else
+        {
+            if (!AutoComplete)
+            {
+                <li><a class="dropdown-item my-0" role="button" @onclick="async () => await SelectedValueChanged()">Clear</a></li>
+                <li><hr class="dropdown-divider"></li>
+            }
+            foreach (var item in List)
+            {
+                <li>
+                    <a class="dropdown-item my-0" role="button" @onclick="async () => await SelectedValueChanged(item)">
+                        @item?.Value
+                    </a>
+                </li>
+            }
+        }
+    </ul>
+</div>
+
+@code {
+    [Parameter] public List<KeyValue>? List { get; set; } = new();
+
+    [Parameter] public bool AutoComplete { get; set; } = false;
+
+    [Parameter] public bool Boolean { get; set; } = false;
+
+    [Parameter] public Guid? Id { get; set; } = null;
+
+    [Parameter] public EventCallback<string> GetList { get; set; }
+
+    [Parameter] public Guid? Key { get; set; }
+
+    [Parameter] public EventCallback<Guid?> KeyChanged { get; set; }
+
+    [Parameter] public Expression<Func<Guid?>>? KeyExpression { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (!AutoComplete)
+            await GetList.InvokeAsync();
+    }
+
+    private async Task GetAll()
+    {
+        await GetList.InvokeAsync();
+        await SelectedValueChanged();
+    }
+
+    private Task AutoCompleteBlured()
+        => !Key.HasValue ? Task.FromResult(() => SelectedValueChanged()) : Task.CompletedTask;
+
+    private async Task SelectedValueChanged(KeyValue? newValue = null)
+    {
+        await KeyChanged.InvokeAsync(newValue?.Key);
+        await ValueChanged.InvokeAsync(newValue?.Value);
+    }
+}

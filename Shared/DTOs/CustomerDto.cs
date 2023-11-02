@@ -1,18 +1,19 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class CustomerDto
 {
+    [Key]
+    [Required]
     public Guid CustomerId { get; set; }
 
-    [DisplayName("Customer")]
+    [Display(Name = "Customer")]
     [Required]
     [StringLength(50)]
     public string? CustomerName { get; set; }
 
-    [DisplayName("Code")]
+    [Display(Name = "Code")]
     [Required]
     public int CustomerCode { get; set; }
 }

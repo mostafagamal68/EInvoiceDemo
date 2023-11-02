@@ -38,13 +38,11 @@
 </div>
 
 @code {
-    [Parameter] public List<KeyValue>? List { get; set; } = new();
+    [Parameter] public List<KeyValue>? List { get; set; }
 
     [Parameter] public bool AutoComplete { get; set; } = false;
 
     [Parameter] public bool Boolean { get; set; } = false;
-
-    [Parameter] public Guid? Id { get; set; } = null;
 
     [Parameter] public EventCallback<string> GetList { get; set; }
 

@@ -1,5 +1,4 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
@@ -9,28 +8,28 @@ public class EInvoiceDto
     [Required(ErrorMessage = "*")]
     public Guid EInvoiceId { get; set; }
 
-    [DisplayName("Code")]
+    [Display(Name = "Code")]
     [Required(ErrorMessage = "*")]
     public int EInvoiceCode { get; set; }
 
     [Required(ErrorMessage = "*")]
     public Guid? EInvoiceTypeId { get; set; }
 
-    [DisplayName("Type")]
+    [Display(Name = "Type")]
     [Required(ErrorMessage = "*")]
     public string? EInvoiceTypeName { get; set; }
 
     [Required(ErrorMessage = "*")]
     public Guid? CustomerId { get; set; }
 
-    [DisplayName("Customer")]
+    [Display(Name = "Customer")]
     [Required(ErrorMessage = "*")]
     public string? CustomerName { get; set; }
 
     [Required(ErrorMessage = "*")]
     public DateTime? DateTimeIssued { get; set; } = DateTime.Now;
 
-    [DisplayName("Net Amount")]
+    [Display(Name = "Net Amount")]
     public decimal NetAmount { get; set; }
 
     public List<EInvoiceLineDto> EInvoiceLines { get; set; } = new();

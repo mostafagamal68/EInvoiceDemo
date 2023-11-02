@@ -1,18 +1,19 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class TaxDto
 {
+    [Key]
+    [Required]
     public Guid TaxId { get; set; }
 
-    [DisplayName("Tax")]
+    [Display(Name = "Tax")]
     [Required]
     [StringLength(50)]
     public string? TaxName { get; set; }
 
-    [DisplayName("Description")]
+    [Display(Name = "Description")]
     [StringLength(150)]
     public string TaxDescription { get; set; } = string.Empty;
 

@@ -1,10 +1,10 @@
-﻿using System.ComponentModel;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class EInvoiceLineDto : ICloneable
 {
+    [Key]
     [Required(ErrorMessage = "*")]
     public Guid? EInvoiceLineId { get; set; }
 
@@ -14,25 +14,25 @@ public class EInvoiceLineDto : ICloneable
     [Required(ErrorMessage = "*")]
     public Guid? ItemId { get; set; }
 
-    [DisplayName("Item")]
+    [Display(Name = "Item")]
     [Required(ErrorMessage = "*")]
     public string? ItemName { get; set; }
 
-    [DisplayName("Quantity")]
+    [Display(Name = "Quantity")]
     [Required(ErrorMessage = "*")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? Quantity { get; set; }
 
-    [DisplayName("Amount Sold")]
+    [Display(Name = "Amount Sold")]
     [Required(ErrorMessage = "*")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? AmountSold { get; set; }
 
-    [DisplayName("Total")]
+    [Display(Name = "Total")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? Total { get; set; }
 
-    [DisplayName("Net Amount")]
+    [Display(Name = "Net Amount")]
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? ItemNetAmount { get; set; }
 

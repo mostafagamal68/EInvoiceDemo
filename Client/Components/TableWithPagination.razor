@@ -1,70 +1,98 @@
 ﻿@using System.Diagnostics.CodeAnalysis;
-@using System.ComponentModel;
+@using System.ComponentModel.DataAnnotations;
 @typeparam TType
-@typeparam TItem where TItem : GlobalFilter<TType>
-<table class="table table-striped table-hover" @attributes="AdditionalAttributes">
-    <thead>
-        <tr class="align-middle text-left">
-            <th scope="col" class="border-end" style="">#</th>
-            @{
-                foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayNameAttribute))))
-                {
-                    <th scope="col" class="border-end" @onclick="@(async () => await SortBy(item.Name))">
-                        @item.GetCustomAttributesData()?.FirstOrDefault(c => c.AttributeType == typeof(DisplayNameAttribute))?.ConstructorArguments[0].Value
-                    </th>
+@if (Model.Items.Any())
+{
+    <table class="table table-striped table-hover" @attributes="AdditionalAttributes">
+        <thead>
+            <tr class="align-middle text-left">
+                <th scope="col" class="border-end" style="">#</th>
+                @{
+                    foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                    {
+                        <th scope="col" class="border-end" @onclick="@(async () => await SortBy(item.Name))">
+                            @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                        </th>
+                    }
                 }
-            }
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        @{
-            var last = Model.Items.Count;
-            foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
             {
-                var Id = (Guid)item.GetType().GetProperty(typeof(TType).Name.Replace("Dto", "Id")).GetValue(item);
+                var properties = item.GetType().GetProperties();
                 <tr class="align-middle text-left">
                     <td scope="row" class="border-end">@index</td>
-                    @foreach (var property in item.GetType().GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayNameAttribute))))
+                    @if (RowTemplate is not null)
                     {
-                        <td class="border-end">@property.GetValue(item)</td>
+                        @RowTemplate(item)
+                    }
+                    else
+                    {
+                        foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                        {
+                            <td class="border-end">@property.GetValue(item)</td>
+                        }
                     }
                     <td>
-
-                        @if (WithEdit)
+                        @if (CustomActions is not null)
                         {
-                            <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
-                                <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
-                            </Btn>
+                            @CustomActions(item)
                         }
-
-                        @if (WithDelete)
+                        else
                         {
-                            <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
-                                <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                            </Btn>
+                            var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
+                            @if (WithEdit)
+                            {
+                                <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
+                                    <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
+                                </Btn>
+                            }
+
+                            @if (WithDelete)
+                            {
+                                <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
+                                    <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
+                                </Btn>
+                            }
                         }
                     </td>
                 </tr>
             }
-        }
-    </tbody>
-</table>
-
-@if (WithPagination)
+        </tbody>
+    </table>
+    @ExtraData
+    @if (WithPagination)
+    {
+        <Paginator Pagination="Model.Pagination" GetPage="Filter"></Paginator>
+    }
+}
+else
 {
-    <Paginator Pagination="Model.Pagination" GetPage="Filter"></Paginator>
+    <div class="d-flex alert alert-warning align-Customers-center">
+        <h5><i class="bi bi-exclamation-triangle mx-2"></i>No Data</h5>
+    </div>
 }
 
 @code {
     [Parameter]
-    public TItem Model { get; set; }
+    public GlobalFilter<TType> Model { get; set; }
 
     [Parameter]
     public EventCallback Filter { get; set; }
 
     [Parameter]
     public EventCallback<(Guid Id, bool IsDelete)> Actions { get; set; }
+
+    [Parameter]
+    public RenderFragment<TType>? RowTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<TType>? CustomActions { get; set; }
+
+    [Parameter]
+    public RenderFragment? ExtraData { get; set; }
 
     [Parameter]
     public bool WithEdit { get; set; } = true;

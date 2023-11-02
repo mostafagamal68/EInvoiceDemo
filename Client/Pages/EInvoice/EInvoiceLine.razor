@@ -10,7 +10,7 @@
                 <label>Item</label>
             </div>
             <div class="col-md-5">
-                <ComboBox AutoComplete="true" Value="@dto.ItemName" List="itemsList" GetList="GetItems" ValueChanged="ItemChanged"></ComboBox>
+                <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" List="itemsList" GetList="GetItems" />
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.ItemName)" />
@@ -45,45 +45,33 @@
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
                     </Btn>
                 </div>
-                @if (dto.EInvoiceLineTaxes.Any())
-                {
-                    <TableTemplate Items="dto.EInvoiceLineTaxes" Context="sub">
-                        <TableHeader>
-                            <th scope="col" class="border-end">#</th>
-                            <th scope="col" class="border-end">Tax</th>
-                            <th scope="col" class="border-end">Amount</th>
-                            <th>Actions</th>
-                        </TableHeader>
-                        <RowTemplate>
-                            <td scope="row" class="border-end">@sub.Item2</td>
-                            <td class="border-end">
-                                <ComboBox Id="@(sub.Item1.EInvoiceLineTaxId)" Value="@sub.Item1.TaxName" List="taxesList" GetList="GetTaxes" ValueChanged="TaxChanged"></ComboBox>
-                                <ValidationMessage For="@(() => sub.Item1.TaxName)" />
-                            </td>
-                            <td class="border-end">
-                                <InputNumber @bind-Value="sub.Item1.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
-                                <ValidationMessage For="@(() => sub.Item1.Amount)" />
-                            </td>
-                            <td>
-                                <Btn Classes="btn-sm btn-danger" ClickAction="() => DeleteRow(sub.Item1)">
-                                    <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                                </Btn>
-                            </td>
-                        </RowTemplate>
-                    </TableTemplate>
-                    <div class="row my-1">
-                        <div class="col-md-2 my-auto">
-                            <label>Total</label>
+                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="tax">
+                    <RowTemplate>
+                        <td class="border-end">
+                            <Select @bind-Value="tax.TaxName" @bind-Key="tax.TaxId" List="taxesList" GetList="GetTaxes" />
+                            <ValidationMessage For="@(() => tax.TaxName)" />
+                        </td>
+                        <td class="border-end">
+                            <InputNumber @bind-Value="tax.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
+                            <ValidationMessage For="@(() => tax.Amount)" />
+                        </td>
+                    </RowTemplate>
+                    <CustomActions>
+                        <Btn Classes="btn-sm btn-danger" ClickAction="() => DeleteRow(tax)">
+                            <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
+                        </Btn>
+                    </CustomActions>
+                    <ExtraData>
+                        <div class="row my-1">
+                            <div class="col-md-2 my-auto">
+                                <label>Total</label>
+                            </div>
+                            <div class="col-md-5 my-auto">
+                                <h5>@dto.Total</h5>
+                            </div>
                         </div>
-                        <div class="col-md-5 my-auto">
-                            <h5>@dto.Total</h5>
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    <h4>No Items</h4>
-                }
+                    </ExtraData>
+                </TableWithPagination>
             </div>
         </div>
         <div class="row my-1">
@@ -114,8 +102,9 @@
     public List<EInvoiceLineDto>? List { get; set; }
 
     Guid? Id;
-    List<KeyValue>? itemsList;
-    List<KeyValue>? taxesList;
+    EInvoiceLineTaxFilter taxFilter = new();
+    List<KeyValue>? itemsList = new();
+    List<KeyValue>? taxesList = new();
 
     [CascadingParameter]
     BlazoredModalInstance BlazoredModal { get; set; } = new();
@@ -124,6 +113,7 @@
     {
         if (dto.EInvoiceLineId.HasValue) Id = dto.EInvoiceLineId;
         else dto.EInvoiceLineId = Guid.NewGuid();
+        taxFilter.Items = dto.EInvoiceLineTaxes;
     }
 
     private void Add()
@@ -152,7 +142,7 @@
         var messages = new List<string>();
         foreach (var item in dto.EInvoiceLineTaxes.GroupBy(x => x.TaxId).Select(x => new { x.Key, Taxes = x }))
         {
-            if (item.Taxes.Count() > 1) 
+            if (item.Taxes.Count() > 1)
                 messages.Add($"{item.Taxes.Select(c => c.TaxName).First()} is duplicated.");
         }
         if (!messages.Any())
@@ -196,24 +186,15 @@
         }
         LoaderService.ToggleLoader();
     }
-    private async Task GetItems(string? filter)
-        => itemsList = await item.GetKeyValue(filter);
-    private void ItemChanged(KeyValue? keyValue)
-    {
-        dto.ItemId = keyValue?.Key;
-        dto.ItemName = keyValue?.Value;
-    }
-    private async Task GetTaxes(string? filter)
-        => taxesList = await tax.GetKeyValue(filter);
-    private void TaxChanged(KeyValue? keyValue)
-    {
-        var LineTax = dto.EInvoiceLineTaxes.First(c => c.EInvoiceLineTaxId == keyValue.Id);
-        LineTax.TaxId = keyValue?.Key;
-        LineTax.TaxName = keyValue?.Value;
-    }
+
     private void Calculate()
     {
         dto.Total = dto.EInvoiceLineTaxes.Sum(c => c.Amount);
         dto.ItemNetAmount = (dto.AmountSold * dto.Quantity) + dto.Total;
     }
+
+    private async Task GetItems(string? filter)
+        => itemsList = await item.GetKeyValue(filter);
+    private async Task GetTaxes(string? filter)
+        => taxesList = await tax.GetKeyValue(filter);
 }

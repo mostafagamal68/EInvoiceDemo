@@ -24,8 +24,12 @@
     public Dictionary<string, object>? AdditionalAttributes { get; set; }
     [Parameter]
     public bool ValidateEditContext { get; set; } = true;
+    [Parameter]
+    public bool CloseAfterSave { get; set; } = false;
     [CascadingParameter]
     public EditContext? EditContext { get; set; }
+    [CascadingParameter] 
+    BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
     private bool IsActionRun = false;
     private ElementReference Element;
@@ -46,11 +50,20 @@
             try
             {
                 await ClickAction.InvokeAsync();
+                if (BlazoredModal is not null && CloseAfterSave)
+                    await BlazoredModal.CloseAsync();
+                else if (CloseAfterSave)
+                    await JS.InvokeVoidAsync("history.back");
+            }
+            catch (Exception ex)
+            {
+                throw new Exception(ex.Message);
             }
             finally
             {
                 IsActionRun = false;
             }
+
         }
     }
 }

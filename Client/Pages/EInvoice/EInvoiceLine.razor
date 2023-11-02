@@ -103,7 +103,7 @@
         {
             <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="Save"></Btn>
+        <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="Save" CloseAfterSave="true"></Btn>
     </div>
 </EditForm>
 
@@ -125,11 +125,12 @@
         if (dto.EInvoiceLineId.HasValue) Id = dto.EInvoiceLineId;
         else dto.EInvoiceLineId = Guid.NewGuid();
     }
+
     private void Add()
-    {
-        dto.EInvoiceLineTaxes.Add(new EInvoiceLineTaxDto() { EInvoiceLineTaxId = Guid.NewGuid(), EInvoiceLineId = dto.EInvoiceLineId });
-    }
+        => dto.EInvoiceLineTaxes.Add(new EInvoiceLineTaxDto() { EInvoiceLineTaxId = Guid.NewGuid(), EInvoiceLineId = dto.EInvoiceLineId });
+
     private async Task Delete()
+
     {
         if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice ?"))
         {
@@ -138,17 +139,21 @@
             await BlazoredModal.CancelAsync();
         }
     }
+
     private void DeleteRow(EInvoiceLineTaxDto TaxDto)
     {
         dto.EInvoiceLineTaxes.Remove(TaxDto);
+        Calculate();
     }
+
     private void Save()
     {
         LoaderService.ToggleLoader();
         var messages = new List<string>();
         foreach (var item in dto.EInvoiceLineTaxes.GroupBy(x => x.TaxId).Select(x => new { x.Key, Taxes = x }))
         {
-            if (item.Taxes.Count() > 1) messages.Add($"{item.Taxes.Select(c => c.TaxName).First()} is duplicated.");
+            if (item.Taxes.Count() > 1) 
+                messages.Add($"{item.Taxes.Select(c => c.TaxName).First()} is duplicated.");
         }
         if (!messages.Any())
         {
@@ -161,7 +166,7 @@
                 eInvoiceLine.ItemName = dto.ItemName;
                 eInvoiceLine.ItemNetAmount = dto.ItemNetAmount;
                 eInvoiceLine.Total = dto.Total;
-                foreach (var lineTax in eInvoiceLine.EInvoiceLineTaxes)
+                foreach (var lineTax in dto.EInvoiceLineTaxes)
                 {
                     if (eInvoiceLine.EInvoiceLineTaxes.Any(c => c.EInvoiceLineTaxId == lineTax.EInvoiceLineTaxId))
                     {
@@ -175,10 +180,11 @@
                         eInvoiceLine.EInvoiceLineTaxes.Add(lineTax);
                     }
                 }
+                eInvoiceLine.EInvoiceLineTaxes.Where(c => !dto.EInvoiceLineTaxes.Any(x => c.EInvoiceLineTaxId == x.EInvoiceLineTaxId)).ToList().ForEach(c => eInvoiceLine.EInvoiceLineTaxes.Remove(c));
             }
             else
             {
-                List.Add((EInvoiceLineDto)dto.CloneJson());
+                List.Add(dto);
                 Id = dto.EInvoiceLineId;
             }
             ToastService.ShowSuccess("Line applied to this E-Invoice Successfully");

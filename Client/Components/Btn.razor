@@ -1,12 +1,14 @@
 ﻿@inject IJSRuntime JS
-<a @ref="Element" class="btn rounded-3 shadow-sm ms-2 @Classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
-    @SpanIcon
-    @Text
-    @if (IsActionRun)
-    {
-        <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
-    }
-</a>
+<span>
+    <a @ref="Element" class="btn rounded-3 shadow-sm @Classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
+        @SpanIcon
+        @Text
+        @if (IsActionRun)
+        {
+            <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+        }
+    </a>
+</span>
 @if (EditContext is not null && ValidateEditContext)
 {
     <NavigationLock OnBeforeInternalNavigation="CheckForModification" />
@@ -28,7 +30,7 @@
     public bool CloseAfterSave { get; set; } = false;
     [CascadingParameter]
     public EditContext? EditContext { get; set; }
-    [CascadingParameter] 
+    [CascadingParameter]
     BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
     private bool IsActionRun = false;

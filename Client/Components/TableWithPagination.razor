@@ -3,39 +3,55 @@
 @typeparam TType
 @if (Model.Items.Any())
 {
-    <table class="table table-striped table-hover" @attributes="AdditionalAttributes">
-        <thead>
-            <tr class="align-middle text-left">
-                <th scope="col" class="border-end" style="">#</th>
-                @{
-                    foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+    if (TableAsList)
+    {
+        <ul class="list-group">
+            <li class="list-group-item">
+                <label>#</label>
+                <div>
+                    @if (Filter.HasDelegate)
                     {
-                        <th scope="col" class="border-end" @onclick="@(async () => await SortBy(item.Name))">
-                            @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
-                        </th>
+                        <label>Sort by</label>
+                        <div>
+                            <select class="form-select py-0 px-2" @onchange="SortBy">
+                                <option value="">Default</option>
+                                @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                {
+                                    <option value="@item.Name">
+                                        @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                                    </option>
+                                }
+                            </select>
+                        </div>
                     }
-                }
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
+                    <label>Actions</label>
+                </div>
+            </li>
             @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
             {
                 var properties = item.GetType().GetProperties();
-                <tr class="align-middle text-left">
-                    <td scope="row" class="border-end">@index</td>
-                    @if (RowTemplate is not null)
-                    {
-                        @RowTemplate(item)
-                    }
-                    else
-                    {
-                        foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                <li class="list-group-item">
+                    <div>
+                        @foreach (var (property, index2) in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))).Select((value, i) => (value, i + 1)))
                         {
-                            <td class="border-end">@property.GetValue(item)</td>
+                            if (index2 == 1)
+                            {
+                                <span class="h5">
+                                    @index | @property.GetValue(item)
+                                </span>
+                            }
+                            else
+                            {
+                                <span>
+                                    <span class="badge rounded-pill shadow-sm">
+                                        @(property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name):
+                                    </span>
+                                    @property.GetValue(item)
+                                </span>
+                            }
                         }
-                    }
-                    <td>
+                    </div>
+                    <div>
                         @if (CustomActions is not null)
                         {
                             @CustomActions(item)
@@ -57,11 +73,85 @@
                                 </Btn>
                             }
                         }
-                    </td>
-                </tr>
+                    </div>
+                </li>
             }
-        </tbody>
-    </table>
+        </ul>
+    }
+    else
+    {
+        <table class="table table-striped table-hover" @attributes="AdditionalAttributes">
+            <thead>
+                <tr>
+                    <th scope="col" class="border-end">
+                        <input type="checkbox" class="form-check mx-1 d-inline align-middle" />
+                        #
+                    </th>
+                    @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                    {
+                        @if (Filter.HasDelegate)
+                        {
+                            <th scope="col" class="border-end" @onclick="async () => await SortBy(item.Name)">
+                                @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                            </th>
+                        }
+                        else
+                        {
+                            <th class="border-end">
+                                @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                            </th>
+                        }
+                    }
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
+                {
+                    var properties = item.GetType().GetProperties();
+                    <tr>
+                        <td class="border-end">
+                            <input type="checkbox" class="form-check mx-2 d-inline align-middle" />@index
+                        </td>
+                        @if (RowTemplate is not null)
+                        {
+                            @RowTemplate(item)
+                        }
+                        else
+                        {
+                            foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                            {
+                                <td class="border-end">@property.GetValue(item)</td>
+                            }
+                        }
+                        <td>
+                            @if (CustomActions is not null)
+                            {
+                                @CustomActions(item)
+                            }
+                            else
+                            {
+                                var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
+                                @if (WithEdit)
+                                {
+                                    <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
+                                        <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
+                                    </Btn>
+                                }
+
+                                @if (WithDelete)
+                                {
+                                    <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
+                                        <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
+                                    </Btn>
+                                }
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
     @ExtraData
     @if (WithPagination)
     {
@@ -98,6 +188,9 @@ else
     public bool WithEdit { get; set; } = true;
 
     [Parameter]
+    public bool TableAsList { get; set; } = false;
+
+    [Parameter]
     public bool WithDelete { get; set; } = true;
 
     [Parameter]
@@ -109,6 +202,12 @@ else
     private async Task SortBy(string Field)
     {
         Model.SortField = Field;
+        Model.SortApproach = !Model.SortApproach;
+        await Filter.InvokeAsync();
+    }
+    private async Task SortBy(ChangeEventArgs Field)
+    {
+        Model.SortField = Field.Value.ToString();
         Model.SortApproach = !Model.SortApproach;
         await Filter.InvokeAsync();
     }

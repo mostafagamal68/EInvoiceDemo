@@ -19,8 +19,17 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 input {
-    padding: .375rem .75rem!important;
-    box-shadow: none!important;
+    padding: .375rem .75rem !important;
+}
+
+select, input {
+    box-shadow: none !important;
+}
+
+span:not(:first-child) {
+    margin-left: 0.25rem;
+    margin-right: 0.5rem;
+    padding: 0;
 }
 
 .btn-violet {
@@ -36,8 +45,8 @@ input {
     }
 
     .btn-violet:active {
-        background-color: var(--secondary-color)!important;
-        color: white!important;
+        background-color: var(--secondary-color) !important;
+        color: white !important;
         border: 2px solid var(--secondary-color);
     }
 
@@ -55,16 +64,20 @@ a, .btn-link {
     color: var(--secondary-color);
 }
 
-.bg-primary {
-    background-color: var(--primary-color)
+.badge {
+    background-color: var(--secondary-color) !important;
 }
 
-.bg-secondary {
-    background-color: var(--secondary-color)
+.bg-dark-violet {
+    background-color: var(--primary-color) !important;
+}
+
+.bg-violet {
+    background-color: var(--secondary-color) !important;
 }
 
 .bg-tertiary {
-    background-color: var(--tertiary-color)
+    background-color: var(--tertiary-color) !important;
 }
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {

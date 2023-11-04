@@ -7,7 +7,7 @@
         text-align: center;
     }
 
-    td:last-child, th:last-child {
+    th:last-child, td:last-child {
         text-align: end;
     }
 
@@ -19,14 +19,60 @@
         border-top-right-radius: 20px;
     }
 
-    th:not(:first-child,th:last-child) {
+    th:not(:first-child,th:last-child)[scope] {
         cursor: pointer;
     }
 
-tr:last-child td:first-child {
-    border-bottom-left-radius: 20px;
+tr {
+    text-align: left;
+    vertical-align: middle;
 }
 
-tr:last-child td:last-child {
-    border-bottom-right-radius: 20px;
+    tr:last-child td:first-child {
+        border-bottom-left-radius: 20px;
+    }
+
+    tr:last-child td:last-child {
+        border-bottom-right-radius: 20px;
+    }
+
+    tr td:last-child > ::deep span:not(:last-child) {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+li {
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
 }
+
+    li:first-child {
+        background-color: var(--secondary-color);
+        color: white;
+    }
+
+        li:first-child > div {
+            display: flex;
+            justify-content: end;
+            gap: 0.5rem;
+        }
+
+    li:not(:first-child) > div {
+        flex-grow: 1;
+    }
+
+        li:not(:first-child) > div > span {
+            display: inline-block;
+        }
+
+    li:not(:first-child) div:last-child {
+        text-align: end;
+    }
+
+        li:not(:first-child) div:last-child ::deep span:not(:last-child) {
+            margin-left: 0.5rem;
+            margin-right: 0.5rem;
+        }

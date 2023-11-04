@@ -6,7 +6,7 @@
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
-    <div class="col-md-12 mb-3">
+    <div class="col-md-12 my-1">
         <div class="row my-1">
             <div class="col-md-2 my-auto">
                 <label>Code</label>
@@ -56,18 +56,18 @@
                 <div class="col-md-3 mb-1">
                     <Btn Classes="btn-violet" Text="Add Item" ValidateEditContext="false"
                          ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
-                        new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
+                            new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
                     </Btn>
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
-                    <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line">
+                    <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line" TableAsList="true">
                         <CustomActions>
-                        <Btn Classes="btn-sm btn-warning" ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
-                                new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()), async () => Calculate()))">
-                            <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
-                        </Btn>
+                            <Btn Classes="btn-sm btn-warning" ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
+                                    new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()), async () => Calculate()))">
+                                <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
+                            </Btn>
                         </CustomActions>
                     </TableWithPagination>
                 }
@@ -85,13 +85,13 @@
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-end">
+    <div class="text-end">
         @if (Id.HasValue)
         {
             <Btn ValidateEditContext="false" Classes="btn-info" Text="New" ClickAction="New"></Btn>
             <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="HandlValidSubmit" CloseAfterSave="true"></Btn>
+        <Btn Classes="btn-success" Text="Save" ClickAction="HandlValidSubmit" CloseAfterSave="true"></Btn>
     </div>
 </EditForm>
 @code {

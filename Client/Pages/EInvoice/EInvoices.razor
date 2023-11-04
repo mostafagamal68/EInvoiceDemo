@@ -4,7 +4,7 @@
 @inject ICustomersService customer
 @inject IEInvoiceTypesService type
 
-<div class="d-flex justify-content-end align-items-center mb-3">
+<div class="text-end my-1">
     <Btn Classes="btn-violet" Text="Add" ClickAction="@(()=>GoTo("EInvoice", true))">
         <SpanIcon><i class="bi bi-plus-circle me-1"></i></SpanIcon>
     </Btn>
@@ -12,11 +12,11 @@
 <div class="d-flex justify-content-start flex-wrap gap-2 my-1">
     <div class="flex-grow-1">
         <label>Type</label>
-        <ComboBox Value="@EInvoicesFilter.EInvoiceTypeName" List="typesList" GetList="GetTypes" ValueChanged="TypeChanged"></ComboBox>
+        <Select @bind-Value="EInvoicesFilter.EInvoiceTypeName" @bind-Key="EInvoicesFilter.EInvoiceTypeId" List="typesList" GetList="GetTypes" />
     </div>
     <div class="flex-grow-1">
         <label>Customer</label>
-        <ComboBox AutoComplete="true" List="customersList" GetList="GetCustomers" ValueChanged="CustomerChanged"></ComboBox>
+        <Select AutoComplete="true" @bind-Value="EInvoicesFilter.CustomerName" @bind-Key="EInvoicesFilter.CustomerId" List="customersList" GetList="GetCustomers" />
     </div>
     <div class="flex-grow-1">
         <label>Date From</label>
@@ -27,7 +27,7 @@
         <input type="datetime-local" class="form-control" @bind="EInvoicesFilter.DateTimeIssuedTo" />
     </div>
 </div>
-<div class="d-flex justify-content-end my-2">
+<div class="text-end my-1">
     <Btn Classes="btn-primary" Text="Clear" ClickAction="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}">
         <SpanIcon><i class="bi bi-x me-1"></i></SpanIcon>
     </Btn>
@@ -43,8 +43,9 @@
 }
 @code {
     EInvoicesFilter EInvoicesFilter = new();
-    List<KeyValue>? customersList;
-    List<KeyValue>? typesList;
+    List<KeyValue>? customersList = new();
+    List<KeyValue>? typesList = new();
+
     protected override async Task OnInitializedAsync()
     {
         HeaderService.ChangeHeaderAndTitle("E-Invoices");
@@ -52,7 +53,10 @@
         await GetEInvoicesFiltered();
         LoaderService.ToggleLoader();
     }
-    private async Task GetEInvoicesFiltered() => EInvoicesFilter = await service.GetList(EInvoicesFilter);
+
+    private async Task GetEInvoicesFiltered()
+        => EInvoicesFilter = await service.GetList(EInvoicesFilter);
+
     private async Task TableActions(Guid Id, bool IsDelete)
     {
         if (IsDelete)
@@ -72,22 +76,7 @@
     }
     private async Task GetCustomers(string? filter)
         => customersList = await customer.GetKeyValue(filter);
-    private void CustomerChanged(KeyValue? keyValue)
-    {
-        EInvoicesFilter.CustomerId = keyValue?.Key;
-        EInvoicesFilter.CustomerName = keyValue?.Value;
-    }
+
     private async Task GetTypes(string? filter)
         => typesList = await type.GetKeyValue(filter);
-    private void TypeChanged(KeyValue? keyValue)
-    {
-        EInvoicesFilter.EInvoiceTypeId = keyValue?.Key;
-        EInvoicesFilter.EInvoiceTypeName = keyValue?.Value;
-    }
-    private async Task SortBy(string Field)
-    {
-        EInvoicesFilter.SortField = Field;
-        EInvoicesFilter.SortApproach = !EInvoicesFilter.SortApproach;
-        await GetEInvoicesFiltered();
-    }
 }

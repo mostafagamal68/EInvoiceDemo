@@ -4,7 +4,7 @@
 
 <EditForm Model="dto">
     <ObjectGraphDataAnnotationsValidator />
-    <div class="col-md-12 mb-3">
+    <div class="col-md-12 my-1">
         <div class="row my-1">
             <div class="col-md-2 my-auto">
                 <label>Item</label>
@@ -86,12 +86,12 @@
             </div>
         </div>
     </div>
-    <div class="d-flex justify-content-end gap-2">
+    <div class="text-end">
         @if (Id.HasValue)
         {
             <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn Type="submit" Classes="btn-success" Text="Save" ClickAction="Save" CloseAfterSave="true"></Btn>
+        <Btn Classes="btn-success" Text="Save" ClickAction="Save" CloseAfterSave="true"></Btn>
     </div>
 </EditForm>
 

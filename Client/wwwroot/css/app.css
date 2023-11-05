@@ -26,10 +26,14 @@ select, input {
     box-shadow: none !important;
 }
 
-span:not(:first-child) {
-    margin-left: 0.25rem;
+span:not(:last-child):has(a.btn) {
+    margin-left: -0.25rem;
     margin-right: 0.5rem;
-    padding: 0;
+}
+
+span:not(:first-child):not(:has(a)) {
+    margin-left: 0.5rem;
+    margin-right: 0.25rem;
 }
 
 .btn-violet {
@@ -82,10 +86,6 @@ a, .btn-link {
 
 .btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
     box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-.content {
-    padding-top: 1.1rem;
 }
 
 .valid.modified:not([type=checkbox]) {

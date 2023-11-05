@@ -45,16 +45,24 @@
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
                     </Btn>
                 </div>
-                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="tax">
+                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="tax" TableAsList="true">
                     <RowTemplate>
-                        <td class="border-end">
+                        <span>
+                            <span class="badge rounded-pill shadow-sm">
+                                Tax:
+                            </span>
                             <Select @bind-Value="tax.TaxName" @bind-Key="tax.TaxId" List="taxesList" GetList="GetTaxes" />
                             <ValidationMessage For="@(() => tax.TaxName)" />
-                        </td>
-                        <td class="border-end">
-                            <InputNumber @bind-Value="tax.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
+                        </span>
+                        <span>
+                            <span class="badge rounded-pill shadow-sm">
+                                Amount:
+                            </span>
+                            <div>
+                                <InputNumber @bind-Value="tax.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
+                            </div>
                             <ValidationMessage For="@(() => tax.Amount)" />
-                        </td>
+                        </span>
                     </RowTemplate>
                     <CustomActions>
                         <Btn Classes="btn-sm btn-danger" ClickAction="() => DeleteRow(tax)">

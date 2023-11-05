@@ -1,4 +1,11 @@
-﻿th {
+﻿.table-div {
+    /*margin: 0 15px 0 15px;*/
+    /*max-width: 100%;*/
+    /*vertical-align: middle;*/
+    overflow-x: auto;
+}
+
+th {
     background-color: var(--secondary-color) !important;
     color: #FFFFFF !important;
 }
@@ -25,7 +32,7 @@
 
 tr {
     text-align: left;
-    vertical-align: middle;
+    /*vertical-align: middle;*/
 }
 
     tr:last-child td:first-child {
@@ -64,7 +71,7 @@ li {
         flex-grow: 1;
     }
 
-        li:not(:first-child) > div > span {
+        li:not(:first-child) > div > span, li:not(:first-child) > div > ::deep span, li:not(:first-child) > div > ::deep span > div {
             display: inline-block;
         }
 

@@ -27,27 +27,37 @@
                     <label>Actions</label>
                 </div>
             </li>
-            @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
+            @foreach (var (item, rowIndex) in Model.Items.Select((value, i) => (value, i + 1)))
             {
                 var properties = item.GetType().GetProperties();
                 <li class="list-group-item">
                     <div>
-                        @foreach (var (property, index2) in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))).Select((value, i) => (value, i + 1)))
+                        <span class="h5">
+                            @rowIndex | 
+                        </span>
+                        @if (RowTemplate is not null)
                         {
-                            if (index2 == 1)
+                            @RowTemplate(item)
+                        }
+                        else
+                        {
+                            @foreach (var (property, itemIndex) in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))).Select((value, i) => (value, i + 1)))
                             {
-                                <span class="h5">
-                                    @index | @property.GetValue(item)
-                                </span>
-                            }
-                            else
-                            {
-                                <span>
-                                    <span class="badge rounded-pill shadow-sm">
-                                        @(property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name):
+                                if (itemIndex == 1)
+                                {
+                                    <span class="h5">
+                                        @property.GetValue(item)
                                     </span>
-                                    @property.GetValue(item)
-                                </span>
+                                }
+                                else
+                                {
+                                    <span>
+                                        <span class="badge rounded-pill shadow-sm">
+                                            @(property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name):
+                                        </span>
+                                        @property.GetValue(item)
+                                    </span>
+                                }
                             }
                         }
                     </div>
@@ -80,77 +90,79 @@
     }
     else
     {
-        <table class="table table-striped table-hover" @attributes="AdditionalAttributes">
-            <thead>
-                <tr>
-                    <th scope="col" class="border-end">
-                        <input type="checkbox" class="form-check mx-1 d-inline align-middle" />
-                        #
-                    </th>
-                    @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
-                    {
-                        @if (Filter.HasDelegate)
-                        {
-                            <th scope="col" class="border-end" @onclick="async () => await SortBy(item.Name)">
-                                @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
-                            </th>
-                        }
-                        else
-                        {
-                            <th class="border-end">
-                                @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
-                            </th>
-                        }
-                    }
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
-                {
-                    var properties = item.GetType().GetProperties();
+        <div class="table-div">
+            <table class="table table-striped table-hover table-responsive align-middle" @attributes="AdditionalAttributes">
+                <thead>
                     <tr>
-                        <td class="border-end">
-                            <input type="checkbox" class="form-check mx-2 d-inline align-middle" />@index
-                        </td>
-                        @if (RowTemplate is not null)
+                        <th scope="col" class="border-end">
+                            <input type="checkbox" class="form-check mx-1 d-inline align-middle" />
+                            #
+                        </th>
+                        @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                         {
-                            @RowTemplate(item)
-                        }
-                        else
-                        {
-                            foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                            @if (Filter.HasDelegate)
                             {
-                                <td class="border-end">@property.GetValue(item)</td>
-                            }
-                        }
-                        <td>
-                            @if (CustomActions is not null)
-                            {
-                                @CustomActions(item)
+                                <th scope="col" class="border-end" @onclick="async () => await SortBy(item.Name)">
+                                    @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                                </th>
                             }
                             else
                             {
-                                var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
-                                @if (WithEdit)
+                                <th class="border-end">
+                                    @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                                </th>
+                            }
+                        }
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
+                    {
+                        var properties = item.GetType().GetProperties();
+                        <tr>
+                            <td class="border-end">
+                                <input type="checkbox" class="form-check mx-2 d-inline align-middle" />@index
+                            </td>
+                            @if (RowTemplate is not null)
+                            {
+                                @RowTemplate(item)
+                            }
+                            else
+                            {
+                                foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                                 {
-                                    <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
-                                        <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
-                                    </Btn>
-                                }
-
-                                @if (WithDelete)
-                                {
-                                    <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
-                                        <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                                    </Btn>
+                                    <td class="border-end">@property.GetValue(item)</td>
                                 }
                             }
-                        </td>
-                    </tr>
-                }
-            </tbody>
-        </table>
+                            <td>
+                                @if (CustomActions is not null)
+                                {
+                                    @CustomActions(item)
+                                }
+                                else
+                                {
+                                    var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
+                                    @if (WithEdit)
+                                    {
+                                        <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
+                                            <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
+                                        </Btn>
+                                    }
+
+                                    @if (WithDelete)
+                                    {
+                                        <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
+                                            <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
+                                        </Btn>
+                                    }
+                                }
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
     }
     @ExtraData
     @if (WithPagination)

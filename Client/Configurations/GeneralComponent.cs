@@ -2,12 +2,7 @@
 using Blazored.Modal.Services;
 using Blazored.Toast.Services;
 using EInvoiceDemo.Client.Components;
-using EInvoiceDemo.Client.Pages.EInvoiceType;
-using EInvoiceDemo.Client.Services;
-using EInvoiceDemo.Client.Shared;
-using EInvoiceDemo.Shared.Helpers;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
 using System.Net;
 
 namespace EInvoiceDemo.Client.Configurations;

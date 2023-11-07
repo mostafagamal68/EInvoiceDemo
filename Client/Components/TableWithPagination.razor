@@ -197,10 +197,10 @@ else
     public RenderFragment? ExtraData { get; set; }
 
     [Parameter]
-    public bool WithEdit { get; set; } = true;
+    public bool TableAsList { get; set; } = false;
 
     [Parameter]
-    public bool TableAsList { get; set; } = false;
+    public bool WithEdit { get; set; } = true;
 
     [Parameter]
     public bool WithDelete { get; set; } = true;
@@ -218,9 +218,6 @@ else
         await Filter.InvokeAsync();
     }
     private async Task SortBy(ChangeEventArgs Field)
-    {
-        Model.SortField = Field.Value.ToString();
-        Model.SortApproach = !Model.SortApproach;
-        await Filter.InvokeAsync();
-    }
+        => await SortBy(Field!.Value!.ToString()!);
+
 }

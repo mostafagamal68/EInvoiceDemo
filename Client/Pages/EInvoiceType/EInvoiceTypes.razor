@@ -22,6 +22,7 @@
 }
 @code {
     EInvoiceTypesFilter EInvoiceTypesFilter = new();
+
     protected override async Task OnInitializedAsync()
     {
         HeaderService.ChangeHeaderAndTitle("E-Invocie Types");
@@ -29,7 +30,10 @@
         await GetEInvoiceTypesFiltered();
         LoaderService.ToggleLoader();
     }
-    private async Task GetEInvoiceTypesFiltered() => EInvoiceTypesFilter = await service.GetList(EInvoiceTypesFilter);
+
+    private async Task GetEInvoiceTypesFiltered()
+        => EInvoiceTypesFilter = await service.GetList(EInvoiceTypesFilter);
+
     private async Task TableActions(Guid Id, bool IsDelete)
     {
         if (IsDelete)
@@ -47,11 +51,4 @@
             await ShowModal(typeof(EInvoiceType), "Edit - E-Invoice Type", new ModalParameters().Add(nameof(EInvoiceType.IsModal), true).Add(nameof(EInvoiceType.Id), Id), GetEInvoiceTypesFiltered);
         }
     }
-    private async Task SortBy(string Field)
-    {
-        EInvoiceTypesFilter.SortField = Field;
-        EInvoiceTypesFilter.SortApproach = !EInvoiceTypesFilter.SortApproach;
-        await GetEInvoiceTypesFiltered();
-    }
-
 }

@@ -22,6 +22,7 @@
 }
 @code {
     CustomersFilter CustomersFilter = new();
+
     protected override async Task OnInitializedAsync()
     {
         HeaderService.ChangeHeaderAndTitle("Customers");
@@ -29,7 +30,10 @@
         await GetCustomersFiltered();
         LoaderService.ToggleLoader();
     }
-    private async Task GetCustomersFiltered() => CustomersFilter = await service.GetList(CustomersFilter);
+
+    private async Task GetCustomersFiltered()
+        => CustomersFilter = await service.GetList(CustomersFilter);
+
     private async Task TableActions(Guid Id, bool IsDelete)
     {
         if (IsDelete)
@@ -47,11 +51,4 @@
             await ShowModal(typeof(Customer), "Edit - Customer", new ModalParameters().Add(nameof(Customer.IsModal), true).Add(nameof(Customer.Id), Id), GetCustomersFiltered);
         }
     }
-    private async Task SortBy(string Field)
-    {
-        CustomersFilter.SortField = Field;
-        CustomersFilter.SortApproach = !CustomersFilter.SortApproach;
-        await GetCustomersFiltered();
-    }
-
 }

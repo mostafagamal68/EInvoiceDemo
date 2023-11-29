@@ -78,7 +78,7 @@
                 <label>Net Amount</label>
             </div>
             <div class="col-md-5 my-auto">
-                <h5>@dto.NetAmount</h5>
+                <h5>@dto.NetAmount.ToString(2)</h5>
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.NetAmount)" />
@@ -100,8 +100,8 @@
 
     EInvoiceDto dto = new();
     EInvoiceLineFilter lineFilter = new();
-    List<KeyValue> customersList = new();
-    List<KeyValue> typesList = new();
+    List<KeyValue>? customersList = new();
+    List<KeyValue>? typesList = new();
 
     protected override async Task OnInitializedAsync()
         => await GetEInvoice();
@@ -151,10 +151,13 @@
             await ShowResultMessage(response);
         }
     }
+
     private async Task GetCustomers(string? filter)
         => customersList = await customer.GetKeyValue(filter);
+
     private async Task GetTypes(string? filter)
         => typesList = await type.GetKeyValue(filter);
+
     private void Calculate()
         => dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
 }

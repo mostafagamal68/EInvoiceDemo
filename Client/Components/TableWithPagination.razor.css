@@ -43,24 +43,19 @@ tr {
         margin: 0;
     }
 
-@media (min-width: 800px) {
-    tr td:last-child > ::deep span:not(:last-child) {
-        margin-left: 0.5rem;
-        margin-right: 0.5rem;
-    }
-}
-
 li {
     display: flex;
     justify-content: space-between;
     flex-wrap: wrap;
     align-items: center;
     gap: 0.5rem;
+    padding: 0.5rem;
 }
 
     li:first-child {
         background-color: var(--secondary-color);
         color: white;
+        padding: 0.5rem 1rem;
     }
 
         li:first-child > div {
@@ -73,15 +68,32 @@ li {
         flex-grow: 1;
     }
 
-        li:not(:first-child) > div > span, li:not(:first-child) > div > ::deep span, li:not(:first-child) > div > ::deep span > div {
-            display: inline-block;
+        li:not(:first-child) > div:not(:last-child) > span, li:not(:first-child) > div:not(:last-child) > ::deep span, li:not(:first-child) > div:not(:last-child) > ::deep span > div {
+            display: flex;
+            align-items: center;
+            margin: 0.15rem 0;
+            justify-content: space-between;
         }
 
     li:not(:first-child) div:last-child {
         text-align: end;
+        align-self: end;
     }
 
         li:not(:first-child) div:last-child ::deep span:not(:last-child) {
             margin-left: 0.5rem;
             margin-right: 0.5rem;
         }
+
+
+@media (min-width: 800px) {
+    tr td:last-child > ::deep span:not(:last-child) {
+        margin-left: 0.5rem;
+        margin-right: 0.5rem;
+    }
+
+    li:not(:first-child) > div:not(:last-child) > span, li:not(:first-child) > div:not(:last-child) > ::deep span, li:not(:first-child) > div:not(:last-child) > ::deep span > div {
+        display: inline-block;
+        margin: 0.15rem 0.25rem;
+    }
+}

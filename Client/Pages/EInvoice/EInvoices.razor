@@ -74,6 +74,7 @@
             GoTo("EInvoice", true, Id);
         }
     }
+
     private async Task GetCustomers(string? filter)
         => customersList = await customer.GetKeyValue(filter);
 

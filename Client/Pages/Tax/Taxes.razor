@@ -22,6 +22,7 @@
 }
 @code {
     TaxesFilter TaxesFilter = new();
+
     protected override async Task OnInitializedAsync()
     {
         HeaderService.ChangeHeaderAndTitle("Taxes");
@@ -29,7 +30,10 @@
         await GetTaxesFiltered();
         LoaderService.ToggleLoader();
     }
-    private async Task GetTaxesFiltered() => TaxesFilter = await service.GetList(TaxesFilter);
+
+    private async Task GetTaxesFiltered()
+        => TaxesFilter = await service.GetList(TaxesFilter);
+
     private async Task TableActions(Guid Id, bool IsDelete)
     {
         if (IsDelete)
@@ -46,11 +50,5 @@
         {
             await ShowModal(typeof(Tax), "Edit - Tax", new ModalParameters().Add(nameof(Tax.IsModal), true).Add(nameof(Tax.Id), Id), GetTaxesFiltered);
         }
-    }
-    private async Task SortBy(string Field)
-    {
-        TaxesFilter.SortField = Field;
-        TaxesFilter.SortApproach = !TaxesFilter.SortApproach;
-        await GetTaxesFiltered();
     }
 }

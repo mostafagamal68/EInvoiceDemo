@@ -60,10 +60,13 @@
             try
             {
                 await ClickAction.InvokeAsync();
-                if (BlazoredModal is not null && CloseAfterSave)
-                    await BlazoredModal.CloseAsync();
-                else if (CloseAfterSave)
-                    await JS.InvokeVoidAsync("history.back");
+                if (CloseAfterSave)
+                {
+                    if (BlazoredModal is not null)
+                        await BlazoredModal.CloseAsync();
+                    else
+                        await JS.InvokeVoidAsync("history.back");
+                }
             }
             catch (Exception ex)
             {

@@ -55,7 +55,7 @@
                                         <span class="badge rounded-pill shadow-sm">
                                             @(property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name):
                                         </span>
-                                        @property.GetValue(item)
+                                        @property.GetValue(item)?.ToString(2)
                                     </span>
                                 }
                             }
@@ -132,7 +132,7 @@
                             {
                                 foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                                 {
-                                    <td class="border-end">@property.GetValue(item)</td>
+                                    <td class="border-end">@property.GetValue(item)?.ToString(2)</td>
                                 }
                             }
                             <td>

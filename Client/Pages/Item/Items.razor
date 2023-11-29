@@ -22,6 +22,7 @@
 }
 @code {
     ItemsFilter ItemsFilter = new();
+
     protected override async Task OnInitializedAsync()
     {
         HeaderService.ChangeHeaderAndTitle("Items");
@@ -29,7 +30,10 @@
         await GetItemsFiltered();
         LoaderService.ToggleLoader();
     }
-    private async Task GetItemsFiltered() => ItemsFilter = await service.GetList(ItemsFilter);
+
+    private async Task GetItemsFiltered()
+        => ItemsFilter = await service.GetList(ItemsFilter);
+
     private async Task TableActions(Guid Id, bool IsDelete)
     {
         if (IsDelete)
@@ -47,11 +51,4 @@
             await ShowModal(typeof(Item), "Edit - Item", new ModalParameters().Add(nameof(Item.IsModal), true).Add(nameof(Item.Id), Id), GetItemsFiltered);
         }
     }
-    private async Task SortBy(string Field)
-    {
-        ItemsFilter.SortField = Field;
-        ItemsFilter.SortApproach = !ItemsFilter.SortApproach;
-        await GetItemsFiltered();
-    }
-
 }

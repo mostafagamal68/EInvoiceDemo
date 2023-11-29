@@ -75,7 +75,7 @@
                                 <label>Total</label>
                             </div>
                             <div class="col-md-5 my-auto">
-                                <h5>@dto.Total</h5>
+                                <h5>@dto.Total?.ToString(2)</h5>
                             </div>
                         </div>
                     </ExtraData>
@@ -87,7 +87,7 @@
                 <label>Item Net Amount</label>
             </div>
             <div class="col-md-5 my-auto">
-                <h5>@dto.ItemNetAmount</h5>
+                <h5>@dto.ItemNetAmount?.ToString(2)</h5>
             </div>
             <div class="col-md my-auto">
                 <ValidationMessage For="@(() => dto.ItemNetAmount)" />
@@ -107,7 +107,7 @@
     [Parameter]
     public EInvoiceLineDto dto { get; set; } = new();
     [Parameter]
-    public List<EInvoiceLineDto>? List { get; set; }
+    public List<EInvoiceLineDto> List { get; set; } = new();
 
     Guid? Id;
     EInvoiceLineTaxFilter taxFilter = new();
@@ -203,6 +203,7 @@
 
     private async Task GetItems(string? filter)
         => itemsList = await item.GetKeyValue(filter);
+
     private async Task GetTaxes(string? filter)
         => taxesList = await tax.GetKeyValue(filter);
 }

@@ -1,6 +1,6 @@
 ﻿@inject IJSRuntime JS
 <span>
-    <a @ref="Element" class="btn rounded-3 shadow-sm @Classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
+    <a @ref="Element" class="btn rounded-3 shadow-sm @classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
         @SpanIcon
         @Text
         @if (IsActionRun)
@@ -9,7 +9,7 @@
         }
     </a>
 </span>
-@if (EditContext is not null && ValidateEditContext)
+@if (EditContext is not null && ValidateModel)
 {
     <NavigationLock OnBeforeInternalNavigation="CheckForModification" />
 }
@@ -18,22 +18,19 @@
     public string Text { get; set; } = "";
 
     [Parameter]
-    public string Classes { get; set; } = "";
-
-    [Parameter]
     public EventCallback ClickAction { get; set; }
 
     [Parameter]
     public RenderFragment? SpanIcon { get; set; }
 
     [Parameter]
-    public bool ValidateEditContext { get; set; } = true;
+    public bool ValidateModel { get; set; } = false;
 
     [Parameter]
     public bool CloseAfterSave { get; set; } = false;
 
     [Parameter(CaptureUnmatchedValues = true)]
-    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+    public Dictionary<string, object>? OtherAttributes { get; set; }
 
     [CascadingParameter]
     public EditContext? EditContext { get; set; }
@@ -41,8 +38,18 @@
     [CascadingParameter]
     BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
+    private Dictionary<string, object>? AdditionalAttributes { get; set; }
+    private string? classes { get; set; }
     private bool IsActionRun = false;
     private ElementReference Element;
+
+    protected override void OnParametersSet()
+    {
+        classes = OtherAttributes?.GetValueOrDefault("class")?.ToString();
+        OtherAttributes?.Remove("class");
+        AdditionalAttributes = OtherAttributes;
+        base.OnParametersSet();
+    }
 
     private async Task CheckForModification(LocationChangingContext context)
     {
@@ -54,7 +61,7 @@
     }
     private async Task RunAction()
     {
-        if (EditContext == null || !ValidateEditContext || EditContext.Validate())
+        if (EditContext == null || !ValidateModel || EditContext.Validate())
         {
             IsActionRun = true;
             try

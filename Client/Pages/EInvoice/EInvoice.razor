@@ -54,7 +54,7 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <Btn Classes="btn-violet" Text="Add Item" ValidateEditContext="false"
+                    <Btn class="btn-violet" Text="Add Item" ValidateModel="false"
                          ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                             new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
@@ -64,7 +64,7 @@
                 {
                     <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line" TableAsList="true">
                         <CustomActions>
-                            <Btn Classes="btn-sm btn-warning" ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
+                            <Btn class="btn-sm btn-warning" ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                                     new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()), async () => Calculate()))">
                                 <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
                             </Btn>
@@ -88,10 +88,10 @@
     <div class="text-end">
         @if (Id.HasValue)
         {
-            <Btn ValidateEditContext="false" Classes="btn-info" Text="New" ClickAction="New"></Btn>
-            <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn Classes="btn-success" Text="Save" ClickAction="HandlValidSubmit" CloseAfterSave="true"></Btn>
+        <Btn class="btn-success" Text="Save"  ValidateModel="true" ClickAction="HandlValidSubmit" CloseAfterSave="true"></Btn>
     </div>
 </EditForm>
 @code {

@@ -41,7 +41,7 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <Btn Classes="btn-violet" Text="Add Tax" ValidateEditContext="false" ClickAction="Add">
+                    <Btn class="btn-violet" Text="Add Tax" ClickAction="Add">
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
                     </Btn>
                 </div>
@@ -65,7 +65,7 @@
                         </span>
                     </RowTemplate>
                     <CustomActions>
-                        <Btn Classes="btn-sm btn-danger" ClickAction="() => DeleteRow(tax)">
+                        <Btn class="btn-sm btn-danger" ClickAction="() => DeleteRow(tax)">
                             <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
                         </Btn>
                     </CustomActions>
@@ -97,9 +97,9 @@
     <div class="text-end">
         @if (Id.HasValue)
         {
-            <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn Classes="btn-success" Text="Save" ClickAction="Save" CloseAfterSave="true"></Btn>
+        <Btn class="btn-success" Text="Save"  ValidateModel="true" ClickAction="Save" CloseAfterSave="true"></Btn>
     </div>
 </EditForm>
 

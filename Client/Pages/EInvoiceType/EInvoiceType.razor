@@ -20,10 +20,10 @@
     <div class="text-end">
         @if (Id.HasValue)
         {
-            <Btn ValidateEditContext="false" Classes="btn-info" Text="New" ClickAction="New"></Btn>
-            <Btn ValidateEditContext="false" Classes="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn Classes="btn-success" Text="Save" ClickAction="HandlValidSubmit"></Btn>
+        <Btn class="btn-success" Text="Save"  ValidateModel="true" ClickAction="HandlValidSubmit"></Btn>
     </div>
 </EditForm>
 @code {

@@ -5,7 +5,7 @@
 @inject IEInvoiceTypesService type
 
 <div class="text-end my-1">
-    <Btn Classes="btn-violet" Text="Add" ClickAction="@(()=>GoTo("EInvoice", true))">
+    <Btn class="btn-violet" Text="Add" ClickAction="@(()=>GoTo("EInvoice", true))">
         <SpanIcon><i class="bi bi-plus-circle me-1"></i></SpanIcon>
     </Btn>
 </div>
@@ -28,10 +28,10 @@
     </div>
 </div>
 <div class="text-end my-1">
-    <Btn Classes="btn-primary" Text="Clear" ClickAction="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}">
+    <Btn class="btn-primary" Text="Clear" ClickAction="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}">
         <SpanIcon><i class="bi bi-x me-1"></i></SpanIcon>
     </Btn>
-    <Btn Classes="btn-success" Text="Search" ClickAction="GetEInvoicesFiltered">
+    <Btn class="btn-success" Text="Search" ClickAction="GetEInvoicesFiltered">
         <SpanIcon><i class="bi bi-search me-1"></i></SpanIcon>
     </Btn>
 </div>

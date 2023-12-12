@@ -71,14 +71,14 @@
                             var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
                             @if (WithEdit)
                             {
-                                <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
+                                <Btn class="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
                                     <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
                                 </Btn>
                             }
 
                             @if (WithDelete)
                             {
-                                <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
+                                <Btn class="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
                                     <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
                                 </Btn>
                             }
@@ -145,14 +145,14 @@
                                     var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
                                     @if (WithEdit)
                                     {
-                                        <Btn Classes="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
+                                        <Btn class="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
                                             <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
                                         </Btn>
                                     }
 
                                     @if (WithDelete)
                                     {
-                                        <Btn Classes="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
+                                        <Btn class="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
                                             <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
                                         </Btn>
                                     }

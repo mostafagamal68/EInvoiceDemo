@@ -1,9 +1,9 @@
 ﻿@using System.Diagnostics.CodeAnalysis;
 @using System.ComponentModel.DataAnnotations;
-@typeparam TType
+@typeparam TType where TType : DtoBase
 @if (Model.Items.Any())
 {
-    if (TableAsList)
+    if (TableDesignType == TableDesign.List)
     {
         <ul class="list-group">
             <li class="list-group-item">
@@ -33,7 +33,7 @@
                 <li class="list-group-item">
                     <div>
                         <span class="h5">
-                            @rowIndex | 
+                            @rowIndex |
                         </span>
                         @if (RowTemplate is not null)
                         {
@@ -90,12 +90,15 @@
     }
     else
     {
-        <div class="table-div">
-            <table class="table table-striped table-hover table-responsive align-middle" @attributes="AdditionalAttributes">
-                <thead>
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover align-middle" @attributes="AdditionalAttributes">
+                <thead class="align-middle">
                     <tr>
                         <th scope="col" class="border-end">
-                            <input type="checkbox" class="form-check mx-1 d-inline align-middle" />
+                            @if (MultiSelect)
+                            {
+                                <input type="checkbox" class="form-check mx-1 d-inline align-middle" @bind="SelectAll" @bind:after="CheckedAll" />
+                            }
                             #
                         </th>
                         @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
@@ -108,21 +111,48 @@
                             }
                             else
                             {
-                                <th class="border-end">
+                                <th scope="col" class="border-end">
                                     @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
                                 </th>
                             }
                         }
-                        <th>Actions</th>
+                        <th scope="col" class="px-2">
+                            @if (MultiSelect)
+                            {
+                                <div class="btn-group dropstart">
+                                    <a role="button" class="btn btn-sm btn-secondary rounded-3 shadow-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@(!Model.Items.Any(c => c.IsSelected))">
+                                        Actions
+                                    </a>
+                                    <div class="dropdown-menu px-2">
+                                        <Btn class="btn-sm btn-danger" ClickAction="async () => await BulkActions.InvokeAsync(BulkOperation.Delete)">
+                                            <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
+                                        </Btn>
+                                        @if (MultiSelectActions != null)
+                                        {
+
+                                        }
+                                    </div>
+                                </div>
+                            }
+                            else
+                            {
+                                @("Actions");
+                            }
+                        </th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach (var (item, index) in Model.Items.Select((value, i) => (value, i + 1)))
                     {
-                        var properties = item.GetType().GetProperties();
-                        <tr>
+                        var properties = item?.GetType().GetProperties();
+                        Guid Id = (Guid)properties?.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item)!;
+                        <tr class="@(item.IsSelected ? "table-active" : "")">
                             <td class="border-end">
-                                <input type="checkbox" class="form-check mx-2 d-inline align-middle" />@index
+                                @if (MultiSelect)
+                                {
+                                    <input type="checkbox" class="form-check mx-2 d-inline align-middle" @bind="item.IsSelected" @bind:after="CheckedChanged" />
+                                }
+                                @index
                             </td>
                             @if (RowTemplate is not null)
                             {
@@ -142,7 +172,6 @@
                                 }
                                 else
                                 {
-                                    var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
                                     @if (WithEdit)
                                     {
                                         <Btn class="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
@@ -178,6 +207,13 @@ else
 }
 
 @code {
+    bool SelectAll;
+    public enum TableDesign
+    {
+        Table,
+        List,
+        Cards
+    }
     [Parameter]
     public GlobalFilter<TType> Model { get; set; }
 
@@ -186,6 +222,9 @@ else
 
     [Parameter]
     public EventCallback<(Guid Id, bool IsDelete)> Actions { get; set; }
+
+    [Parameter]
+    public EventCallback<BulkOperation> BulkActions { get; set; }
 
     [Parameter]
     public RenderFragment<TType>? RowTemplate { get; set; }
@@ -197,7 +236,13 @@ else
     public RenderFragment? ExtraData { get; set; }
 
     [Parameter]
-    public bool TableAsList { get; set; } = false;
+    public RenderFragment? MultiSelectActions { get; set; }
+
+    [Parameter]
+    public TableDesign TableDesignType { get; set; }
+
+    [Parameter]
+    public bool MultiSelect { get; set; }
 
     [Parameter]
     public bool WithEdit { get; set; } = true;
@@ -214,10 +259,16 @@ else
     private async Task SortBy(string Field)
     {
         Model.SortField = Field;
-        Model.SortApproach = !Model.SortApproach;
+        Model.SortApproach = Model.SortApproach;
         await Filter.InvokeAsync();
     }
-    private async Task SortBy(ChangeEventArgs Field)
-        => await SortBy(Field!.Value!.ToString()!);
 
+    private async Task SortBy(ChangeEventArgs Field)
+        => await SortBy((string)Field.Value!);
+
+    private void CheckedChanged()
+        => SelectAll = Model.Items.All(c => c.IsSelected);
+
+    private void CheckedAll()
+        => Model.Items.ForEach(c => c.IsSelected = SelectAll);
 }

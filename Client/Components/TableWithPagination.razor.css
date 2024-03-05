@@ -1,8 +1,4 @@
-﻿.table-div {
-    overflow-x: auto;
-}
-
-th {
+﻿th {
     background-color: var(--secondary-color) !important;
     color: #FFFFFF !important;
 }

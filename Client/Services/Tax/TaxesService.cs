@@ -1,32 +1,25 @@
 ﻿using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Models;
 using System.Net.Http.Json;
-using System.Text.Json;
 
 namespace EInvoiceDemo.Client.Services;
 
-public class TaxesService : ITaxesService
+internal class TaxesService : HttpClientService, ITaxesService
 {
-    readonly HttpClient _httpClient;
-    readonly JsonSerializerOptions _options;
-    const string api = "api/Taxes";
-    public TaxesService(HttpClient httpClient)
-    {
-        _httpClient = httpClient;
-        _options = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
-    }
+    public TaxesService(HttpClient httpClient) : base(httpClient, "Taxes") { }
+
     public async Task<TaxesFilter?> GetList(TaxesFilter? filter)
-        => await (await _httpClient.PostAsJsonAsync($"{api}/Filter", filter)).Content.ReadFromJsonAsync<TaxesFilter>(_options);
+        => await (await _httpClient.PostAsJsonAsync($"{_api}/Filter", filter)).Content.ReadFromJsonAsync<TaxesFilter>(_options);
     public async Task<List<KeyValue>?> GetKeyValue(string? filter)
-        => await _httpClient.GetFromJsonAsync<List<KeyValue>>($"{api}/KeyValue?filter={filter}"); 
+        => await _httpClient.GetFromJsonAsync<List<KeyValue>>($"{_api}/KeyValue?filter={filter}"); 
     public async Task<TaxDto> GetSingle(Guid? Id)
-        => await _httpClient.GetFromJsonAsync<TaxDto>($"{api}/{Id}");
+        => await _httpClient.GetFromJsonAsync<TaxDto>($"{_api}/{Id}");
     public async Task<int> GetCode()
-        => await _httpClient.GetFromJsonAsync<int>($"{api}/Code");
+        => await _httpClient.GetFromJsonAsync<int>($"{_api}/Code");
     public async Task<HttpResponseMessage> Create(TaxDto dto)
-        => await _httpClient.PostAsJsonAsync(api, dto);
+        => await _httpClient.PostAsJsonAsync(_api, dto);
     public async Task<HttpResponseMessage> Edit(TaxDto dto)
-        => await _httpClient.PutAsJsonAsync(api, dto);
+        => await _httpClient.PutAsJsonAsync(_api, dto);
     public async Task<HttpResponseMessage> Delete(Guid? Id)
-        => await _httpClient.DeleteAsync($"{api}/{Id}");
+        => await _httpClient.DeleteAsync($"{_api}/{Id}");
 }

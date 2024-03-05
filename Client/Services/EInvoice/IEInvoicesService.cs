@@ -2,12 +2,7 @@
 
 namespace EInvoiceDemo.Client.Services;
 
-public interface IEInvoicesService
+internal interface IEInvoicesService : IBaseService<EInvoicesFilter, EInvoiceDto>
 {
-    Task<EInvoicesFilter?> GetList(EInvoicesFilter? filter);
-    Task<EInvoiceDto> GetSingle(Guid? Id);
-    Task<int> GetCode();
-    Task<HttpResponseMessage> Create(EInvoiceDto dto);
-    Task<HttpResponseMessage> Edit(EInvoiceDto dto);
-    Task<HttpResponseMessage> Delete(Guid? Id);
+    Task<HttpResponseMessage> BulkDelete(List<Guid> Ids);
 }

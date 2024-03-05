@@ -1,131 +1,39 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using EInvoiceDemo.Server.Data;
+﻿using Microsoft.AspNetCore.Mvc;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
-using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
+using EInvoiceDemo.Server.Repositories;
 
 namespace EInvoiceDemo.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ItemsController : ControllerBase
+    public class ItemsController : GenericController<IItemRepository>
     {
-        private readonly EInvoiceContext _context;
-
-        public ItemsController(EInvoiceContext context)
-        {
-            _context = context;
-        }
+        public ItemsController(IItemRepository itemRepository) : base(itemRepository) { }
 
         // GET: api/Items/KeyValue
         [HttpGet("KeyValue")]
-        public async Task<ActionResult<List<KeyValue>>> GetKeyValue([FromQuery] string? filter)
-        {
-            var data = _context.Items.AsQueryable();
-            if (filter.HasValue())
-                data = data.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter));
-            return await data
-            .Select(c => new KeyValue
-            {
-                Key = c.ItemId,
-                Value = c.ItemCode + " - " + c.ItemName
-            }).Take(30).ToListAsync();
-
-        }
+        public async Task<ActionResult<List<KeyValue>>> GetKeyValue([FromQuery] string? filter) => await _repository.GetKeyValue(filter);
 
         // GET: api/Items/Code
         [HttpGet("Code")]
-        public async Task<ActionResult<int>> GetItemCode()
-            => (await _context.Items?.MaxAsync(c => (int?)c.ItemCode) ?? 0) + 1;
+        public async Task<ActionResult<int>> GetItemCode() => await _repository.GetCode();
 
         // GET: api/Items
         [HttpPost("{filter}")]
-        public async Task<ActionResult<ItemsFilter>> GetItems(ItemsFilter? filter)
-        {
-            var query = _context.Items.AsQueryable();
-            if (filter is null) filter = new ItemsFilter();
-            else
-            {
-                if (filter.ItemName.HasValue())
-                    query = query.Where(c => (c.ItemCode + " " + c.ItemName).Contains(filter.ItemName));
-            }
-
-            filter.Pagination = Pagination.GetPagination<Item, ItemsFilter, ItemDto>(query, filter);
-
-            filter.Items = await query
-                .Select(c => new ItemDto
-                {
-                    ItemId = c.ItemId,
-                    ItemName = c.ItemName,
-                    ItemCode = c.ItemCode,
-                    ItemDescription = c.ItemDescription,
-                })
-                .OrderWith(filter.SortField, filter.SortApproach)
-                .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
-                .Take(filter.Pagination.RowsCount)
-                .ToListAsync();
-
-            return filter;
-        }
+        public async Task<ActionResult<ItemsFilter>> GetItems(ItemsFilter? filter) => await _repository.GetList(filter);
 
         // GET: api/Items/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<ItemDto>> GetItem(Guid id)
-        {
-            var item = await _context.Items.FindAsync(id);
-
-            if (item == null)
-            {
-                return NotFound();
-            }
-
-            return new ItemDto
-            {
-                ItemId = item.ItemId,
-                ItemName = item.ItemName,
-                ItemCode = item.ItemCode,
-                ItemDescription = item.ItemDescription,
-            };
-        }
+        public async Task<ActionResult<ItemDto>> GetItem(Guid id) => await _repository.GetSingle(id);
 
         // PUT: api/Items/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut]
         public async Task<IActionResult> PutItem(ItemDto dto)
         {
-            var Item = await _context.Items.FindAsync(dto.ItemId);
-
-            if (Item is null) return BadRequest();
-
-            Item.ItemName = dto.ItemName;
-            Item.ItemCode = dto.ItemCode;
-            Item.ItemDescription = dto.ItemDescription;
-
-            _context.Entry(Item).State = EntityState.Modified;
-
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                if (!ItemExists(dto.ItemId))
-                {
-                    return NotFound();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _repository.Update(dto);
             return Ok("Saved Successfully");
         }
 
@@ -134,27 +42,7 @@ namespace EInvoiceDemo.Server.Controllers
         [HttpPost]
         public async Task<IActionResult> PostItem(Item item)
         {
-            if (_context.Items == null)
-            {
-                return Problem("Entity set 'EInvoiceContext.Items'  is null.");
-            }
-            _context.Items.Add(item);
-            try
-            {
-                await _context.SaveChangesAsync();
-            }
-            catch (DbUpdateException)
-            {
-                if (ItemExists(item.ItemId))
-                {
-                    return Conflict();
-                }
-                else
-                {
-                    throw;
-                }
-            }
-
+            await _repository.Add(item);
             return CreatedAtAction("GetItem", new { id = item.ItemId }, item);
         }
 
@@ -162,22 +50,8 @@ namespace EInvoiceDemo.Server.Controllers
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteItem(Guid id)
         {
-            var item = await _context.Items.FindAsync(id);
-
-            if (item == null)
-                return NotFound();
-            if (_context.EInvoiceLines.Any(c => c.ItemId == id))
-                return BadRequest("This Item used with E-Invoice line and cannot be deleted.");
-
-            _context.Items.Remove(item);
-            await _context.SaveChangesAsync();
-
+            await _repository.Delete(id);
             return Ok("Deleted Successfully");
-        }
-
-        private bool ItemExists(Guid id)
-        {
-            return (_context.Items?.Any(e => e.ItemId == id)).GetValueOrDefault();
         }
     }
 }

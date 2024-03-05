@@ -45,7 +45,7 @@
                         <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
                     </Btn>
                 </div>
-                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="tax" TableAsList="true">
+                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="tax" TableDesignType="TableWithPagination<EInvoiceLineTaxDto>.TableDesign.List">
                     <RowTemplate>
                         <span>
                             <span class="badge rounded-pill shadow-sm">
@@ -94,7 +94,7 @@
             </div>
         </div>
     </div>
-    <div class="text-end">
+    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
             <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>

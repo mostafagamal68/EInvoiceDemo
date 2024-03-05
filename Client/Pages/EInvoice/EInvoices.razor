@@ -4,12 +4,12 @@
 @inject ICustomersService customer
 @inject IEInvoiceTypesService type
 
-<div class="text-end my-1">
+<div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
     <Btn class="btn-violet" Text="Add" ClickAction="@(()=>GoTo("EInvoice", true))">
         <SpanIcon><i class="bi bi-plus-circle me-1"></i></SpanIcon>
     </Btn>
 </div>
-<div class="d-flex justify-content-start flex-wrap gap-2 my-1">
+<div class="d-flex justify-content-start align-items-center flex-wrap gap-2 my-2">
     <div class="flex-grow-1">
         <label>Type</label>
         <Select @bind-Value="EInvoicesFilter.EInvoiceTypeName" @bind-Key="EInvoicesFilter.EInvoiceTypeId" List="typesList" GetList="GetTypes" />
@@ -27,7 +27,7 @@
         <input type="datetime-local" class="form-control" @bind="EInvoicesFilter.DateTimeIssuedTo" />
     </div>
 </div>
-<div class="text-end my-1">
+<div class="d-flex justify-content-end align-items-center gap-2 flex-wrap my-2">
     <Btn class="btn-primary" Text="Clear" ClickAction="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}">
         <SpanIcon><i class="bi bi-x me-1"></i></SpanIcon>
     </Btn>
@@ -37,25 +37,27 @@
 </div>
 @if (!LoaderService.IsLoading)
 {
-    <TableWithPagination TType="EInvoiceDto" Model="EInvoicesFilter" Filter="GetEInvoicesFiltered"
-                         Actions="@((args) => TableActions(args.Id, args.IsDelete))">
+    <TableWithPagination TType="EInvoiceDto" Model="EInvoicesFilter" Filter="GetEInvoicesFiltered" MultiSelect="true"
+                         Actions="@((args) => TableActions(args.Id, args.IsDelete))" BulkActions="BulkActions">
     </TableWithPagination>
 }
 @code {
-    EInvoicesFilter EInvoicesFilter = new();
+    EInvoicesFilter? EInvoicesFilter = new();
     List<KeyValue>? customersList = new();
     List<KeyValue>? typesList = new();
 
     protected override async Task OnInitializedAsync()
     {
         HeaderService.ChangeHeaderAndTitle("E-Invoices");
-        LoaderService.ToggleLoader();
         await GetEInvoicesFiltered();
-        LoaderService.ToggleLoader();
     }
 
     private async Task GetEInvoicesFiltered()
-        => EInvoicesFilter = await service.GetList(EInvoicesFilter);
+    {
+        LoaderService.ToggleLoader();
+        EInvoicesFilter = await service.GetList(EInvoicesFilter);
+        LoaderService.ToggleLoader();        
+    }
 
     private async Task TableActions(Guid Id, bool IsDelete)
     {
@@ -65,13 +67,29 @@
             {
                 var response = await service.Delete(Id);
                 if (response.IsSuccessStatusCode)
-                    EInvoicesFilter.Items.Remove(EInvoicesFilter.Items.First(c => c.EInvoiceId == Id));
+                    EInvoicesFilter?.Items.Remove(EInvoicesFilter.Items.First(c => c.EInvoiceId == Id));
                 await ShowResultMessage(response);
             }
         }
         else
         {
             GoTo("EInvoice", true, Id);
+        }
+    }
+
+    private async Task BulkActions(BulkOperation operation)
+    {
+        var SelectedItems = EInvoicesFilter.Items.Where(c => c.IsSelected);
+        if (operation is BulkOperation.Delete)
+        {
+            if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this EInvoice?"))
+            {
+                var Ids = SelectedItems.Select(c => c.EInvoiceId).ToList();
+                var response = await service.BulkDelete(Ids);
+                if (response.IsSuccessStatusCode)
+                    EInvoicesFilter.Items.Where(c => Ids.Contains(c.EInvoiceId)).ToList().ForEach(c => EInvoicesFilter.Items.Remove(c));
+                await ShowResultMessage(response);
+            }
         }
     }
 

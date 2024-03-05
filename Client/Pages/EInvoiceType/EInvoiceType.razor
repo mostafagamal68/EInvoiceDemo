@@ -17,28 +17,34 @@
             </div>
         </div>
     </div>
-    <div class="text-end">
+    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
             <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
+            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy"></Btn>
             <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn class="btn-success" Text="Save"  ValidateModel="true" ClickAction="HandlValidSubmit"></Btn>
+        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit"></Btn>
     </div>
 </EditForm>
 @code {
     [Parameter]
     public Guid? Id { get; set; }
+
     EInvoiceTypeDto dto = new();
+
     protected override async Task OnInitializedAsync()
+        => await GetEInvoiceType();
+
+    private async Task GetEInvoiceType()
     {
         if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " E-Invoice Type");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
             dto = await service.GetSingle(Id);
-        LoaderService.ToggleLoader();
+        LoaderService.ToggleLoader();        
     }
-    private async Task HandlValidSubmit()
+    private async Task HandleValidSubmit()
     {
         HttpResponseMessage httpResponseMessage;
         if (!Id.HasValue)
@@ -47,17 +53,22 @@
             httpResponseMessage = await service.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
                 Id = dto.EInvoiceTypeId;
-            // GoTo("EInvoiceType", "EInvoice Type", true, dto.EInvoiceTypeId);            
+            // GoTo("EInvoiceType", "EInvoice Type", true, dto.EInvoiceTypeId);
         }
         else
             httpResponseMessage = await service.Edit(dto);
         await ShowResultMessage(httpResponseMessage);
-
     }
-    private void New()
+    private async Task New()
     {
         Id = null;
         dto = new EInvoiceTypeDto();
+        await GetEInvoiceType();
+    }
+    private async Task Copy()
+    {
+        Id = null;
+        await GetEInvoiceType();
     }
     private async Task Delete()
     {

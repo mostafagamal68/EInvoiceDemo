@@ -62,7 +62,7 @@
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
-                    <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line" TableAsList="true">
+                    <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line" TableDesignType="TableWithPagination<EInvoiceLineDto>.TableDesign.List">
                         <CustomActions>
                             <Btn class="btn-sm btn-warning" ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
                                     new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()), async () => Calculate()))">
@@ -85,13 +85,14 @@
             </div>
         </div>
     </div>
-    <div class="text-end">
+    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
             <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
+            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy"></Btn>
             <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
         }
-        <Btn class="btn-success" Text="Save"  ValidateModel="true" ClickAction="HandlValidSubmit" CloseAfterSave="true"></Btn>
+        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" CloseAfterSave="true"></Btn>
     </div>
 </EditForm>
 @code {
@@ -120,7 +121,7 @@
         lineFilter.Items = dto.EInvoiceLines;
         LoaderService.ToggleLoader();
     }
-    private async Task HandlValidSubmit()
+    private async Task HandleValidSubmit()
     {
         HttpResponseMessage httpResponseMessage;
         if (!Id.HasValue)
@@ -133,13 +134,27 @@
         else
             httpResponseMessage = await service.Edit(dto);
         await ShowResultMessage(httpResponseMessage);
-
     }
     private async Task New()
     {
         Id = null;
         dto = new EInvoiceDto();
         await GetEInvoice();
+    }
+    private async Task Copy()
+    {
+        Id = null;
+        await GetEInvoice();
+        dto.EInvoiceLines.ForEach(c => 
+            { 
+                c.EInvoiceId = dto.EInvoiceId; 
+                c.EInvoiceLineId = Guid.NewGuid(); 
+                c.EInvoiceLineTaxes.ForEach(x => 
+                    { 
+                        x.EInvoiceLineId = c.EInvoiceLineId; 
+                        x.EInvoiceLineTaxId = Guid.NewGuid(); 
+                    });
+            });
     }
     private async Task Delete()
     {

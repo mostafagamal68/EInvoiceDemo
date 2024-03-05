@@ -26,11 +26,6 @@ select, input {
     box-shadow: none !important;
 }
 
-span:not(:last-child):has(a.btn) {
-    margin-left: -0.25rem;
-    margin-right: 0.5rem;
-}
-
 span:not(:first-child):not(:has(a)) {
     margin-left: 0.5rem;
     margin-right: 0.25rem;

@@ -1,5 +1,6 @@
+using EInvoiceDemo.Server;
 using EInvoiceDemo.Server.Data;
-using Microsoft.AspNetCore.ResponseCompression;
+using EInvoiceDemo.Server.Services;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -7,8 +8,8 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
-//builder.Services.AddRazorPages();
 builder.Services.AddDbContext<EInvoiceContext>(op => op.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddApplicationServices();
 
 var app = builder.Build();
 
@@ -30,9 +31,7 @@ app.UseBlazorFrameworkFiles();
 app.UseStaticFiles();
 
 app.UseRouting();
-
-
-//app.MapRazorPages();
+app.UseMiddleware<ExceptionHandler>();
 app.MapControllers();
 app.MapFallbackToFile("index.html");
 

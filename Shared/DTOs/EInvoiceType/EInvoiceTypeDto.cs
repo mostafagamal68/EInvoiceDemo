@@ -2,7 +2,7 @@
 
 namespace EInvoiceDemo.Shared.DTOs;
 
-public class EInvoiceTypeDto
+public class EInvoiceTypeDto : DtoBase
 {
     [Key]
     [Required]

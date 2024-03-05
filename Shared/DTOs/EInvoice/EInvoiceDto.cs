@@ -2,7 +2,7 @@
 
 namespace EInvoiceDemo.Shared.DTOs;
 
-public class EInvoiceDto
+public class EInvoiceDto : DtoBase
 {
     [Key]
     [Required(ErrorMessage = "*")]

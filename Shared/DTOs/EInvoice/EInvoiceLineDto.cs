@@ -2,7 +2,7 @@
 
 namespace EInvoiceDemo.Shared.DTOs;
 
-public class EInvoiceLineDto : ICloneable
+public class EInvoiceLineDto : DtoBase, ICloneable
 {
     [Key]
     [Required(ErrorMessage = "*")]

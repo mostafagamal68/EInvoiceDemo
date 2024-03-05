@@ -2,11 +2,11 @@
 
 namespace EInvoiceDemo.Shared.DTOs;
 
-public class EInvoiceLineTaxDto : ICloneable
+public class EInvoiceLineTaxDto : DtoBase, ICloneable
 {
     [Key]
     [Required(ErrorMessage = "*")]
-    public Guid EInvoiceLineTaxId { get; set; }
+    public Guid? EInvoiceLineTaxId { get; set; }
 
     [Required(ErrorMessage = "*")]
     public Guid? EInvoiceLineId { get; set; }

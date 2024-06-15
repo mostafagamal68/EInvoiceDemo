@@ -1,11 +1,17 @@
 ﻿@inject IJSRuntime JS
 <span>
     <a @ref="Element" class="btn rounded-3 shadow-sm @classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
-        @SpanIcon
-        @Text
         @if (IsActionRun)
         {
             <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+        }
+        @if (Text.HasValue())
+        {
+            <label class="mx-1">@Text</label>
+        }
+        @if (Icon.HasValue())
+        {
+            <i class="@Icon mx-1"></i>
         }
     </a>
 </span>
@@ -15,13 +21,13 @@
 }
 @code {
     [Parameter]
-    public string Text { get; set; } = "";
+    public string? Text { get; set; }
 
     [Parameter]
     public EventCallback ClickAction { get; set; }
 
     [Parameter]
-    public RenderFragment? SpanIcon { get; set; }
+    public string? Icon { get; set; }
 
     [Parameter]
     public bool ValidateModel { get; set; } = false;
@@ -53,7 +59,7 @@
 
     private async Task CheckForModification(LocationChangingContext context)
     {
-        if (EditContext.IsModified())
+        if (EditContext?.IsModified() == true)
         {
             var confirm = await JS.InvokeAsync<bool>("window.confirm", "There are unsaved changes!, Do you want to leave?");
             if (!confirm) context.PreventNavigation();

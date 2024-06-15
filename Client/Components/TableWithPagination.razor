@@ -71,16 +71,14 @@
                             var Id = (Guid)properties.Where(c => Attribute.IsDefined(c, typeof(KeyAttribute))).Single().GetValue(item);
                             @if (WithEdit)
                             {
-                                <Btn class="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
-                                    <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
-                                </Btn>
+                                <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
+                                     ClickAction="async () => await Actions.InvokeAsync((Id, false))" />
                             }
 
                             @if (WithDelete)
                             {
-                                <Btn class="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
-                                    <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                                </Btn>
+                                <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
+                                     ClickAction="async () => await Actions.InvokeAsync((Id, true))" />
                             }
                         }
                     </div>
@@ -124,9 +122,8 @@
                                         Actions
                                     </a>
                                     <div class="dropdown-menu px-2">
-                                        <Btn class="btn-sm btn-danger" ClickAction="async () => await BulkActions.InvokeAsync(BulkOperation.Delete)">
-                                            <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                                        </Btn>
+                                        <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
+                                             ClickAction="async () => await BulkActions.InvokeAsync(BulkOperation.Delete)" />
                                         @if (MultiSelectActions != null)
                                         {
 
@@ -136,7 +133,8 @@
                             }
                             else
                             {
-                                @("Actions");
+                                @("Actions")
+                                ;
                             }
                         </th>
                     </tr>
@@ -174,16 +172,14 @@
                                 {
                                     @if (WithEdit)
                                     {
-                                        <Btn class="btn-sm btn-warning" ClickAction="async () => await Actions.InvokeAsync((Id, false))">
-                                            <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
-                                        </Btn>
+                                        <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
+                                             ClickAction="async () => await Actions.InvokeAsync((Id, false))" />
                                     }
 
                                     @if (WithDelete)
                                     {
-                                        <Btn class="btn-sm btn-danger" ClickAction="async () => await Actions.InvokeAsync((Id, true))">
-                                            <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                                        </Btn>
+                                        <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
+                                             ClickAction="async () => await Actions.InvokeAsync((Id, true))" />
                                     }
                                 }
                             </td>

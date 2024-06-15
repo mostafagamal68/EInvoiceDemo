@@ -18,12 +18,13 @@ h1, h2, h3, h4, h5, h6 {
     color: var(--primary-color);
 }
 
-input {
+input:not([type=checkbox]):not([type=radio]) {
     padding: .375rem .75rem !important;
 }
 
 select, input {
-    box-shadow: none !important;
+    box-shadow: 0 .125rem .25rem rgba(0,0,0,.075);
+    /*box-shadow: none !important;*/
 }
 
 span:not(:first-child):not(:has(a)) {

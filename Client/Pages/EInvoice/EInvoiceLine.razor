@@ -1,6 +1,8 @@
-﻿@inherits GeneralComponent
-@inject IItemsService item
-@inject ITaxesService tax
+﻿@using EInvoiceDemo.Client.Pages.Item
+@using EInvoiceDemo.Client.Pages.Tax
+@inherits GeneralComponent
+@inject IGenericService<ItemsFilter, ItemDto> items
+@inject IGenericService<TaxesFilter, TaxDto> taxes
 
 <EditForm Model="dto">
     <ObjectGraphDataAnnotationsValidator />
@@ -41,33 +43,29 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <Btn class="btn-violet" Text="Add Tax" ClickAction="Add">
-                        <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
-                    </Btn>
+                    <Btn class="btn-violet" Text="Add Tax" ClickAction="Add" Icon="bi bi-check-circle" />
                 </div>
-                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="tax" TableDesignType="TableWithPagination<EInvoiceLineTaxDto>.TableDesign.List">
+                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="taxes" TableDesignType="TableWithPagination<EInvoiceLineTaxDto>.TableDesign.List">
                     <RowTemplate>
                         <span>
                             <span class="badge rounded-pill shadow-sm">
                                 Tax:
                             </span>
-                            <Select @bind-Value="tax.TaxName" @bind-Key="tax.TaxId" List="taxesList" GetList="GetTaxes" />
-                            <ValidationMessage For="@(() => tax.TaxName)" />
+                            <Select @bind-Value="taxes.TaxName" @bind-Key="taxes.TaxId" List="taxesList" GetList="GetTaxes" />
+                            <ValidationMessage For="@(() => taxes.TaxName)" />
                         </span>
                         <span>
                             <span class="badge rounded-pill shadow-sm">
                                 Amount:
                             </span>
                             <div>
-                                <InputNumber @bind-Value="tax.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
+                                <InputNumber @bind-Value="taxes.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
                             </div>
-                            <ValidationMessage For="@(() => tax.Amount)" />
+                            <ValidationMessage For="@(() => taxes.Amount)" />
                         </span>
                     </RowTemplate>
                     <CustomActions>
-                        <Btn class="btn-sm btn-danger" ClickAction="() => DeleteRow(tax)">
-                            <SpanIcon><i class="bi bi-trash"></i></SpanIcon>
-                        </Btn>
+                        <Btn class="btn-sm btn-danger" ClickAction="() => DeleteRow(taxes)" Icon="bi bi-trash" />
                     </CustomActions>
                     <ExtraData>
                         <div class="row my-1">
@@ -97,9 +95,9 @@
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
-            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
         }
-        <Btn class="btn-success" Text="Save"  ValidateModel="true" ClickAction="Save" CloseAfterSave="true"></Btn>
+        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="Save" CloseAfterSave="true" />
     </div>
 </EditForm>
 
@@ -119,6 +117,8 @@
 
     protected override void OnInitialized()
     {
+        items.Api = nameof(Items);
+        taxes.Api = nameof(Taxes);
         if (dto.EInvoiceLineId.HasValue) Id = dto.EInvoiceLineId;
         else dto.EInvoiceLineId = Guid.NewGuid();
         taxFilter.Items = dto.EInvoiceLineTaxes;
@@ -130,7 +130,7 @@
     private async Task Delete()
 
     {
-        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice ?"))
+        if (await ShowDeleteConfirmation("EInvoice Line"))
         {
             List?.Remove(List.First(c => c.EInvoiceLineId == Id));
             ToastService.ShowSuccess("Deleted Successfully");
@@ -148,10 +148,10 @@
     {
         LoaderService.ToggleLoader();
         var messages = new List<string>();
-        foreach (var item in dto.EInvoiceLineTaxes.GroupBy(x => x.TaxId).Select(x => new { x.Key, Taxes = x }))
+        foreach (var items in dto.EInvoiceLineTaxes.GroupBy(x => x.TaxId).Select(x => new { x.Key, Taxes = x }))
         {
-            if (item.Taxes.Count() > 1)
-                messages.Add($"{item.Taxes.Select(c => c.TaxName).First()} is duplicated.");
+            if (items.Taxes.Count() > 1)
+                messages.Add($"{items.Taxes.Select(c => c.TaxName).First()} is duplicated.");
         }
         if (!messages.Any())
         {
@@ -202,8 +202,8 @@
     }
 
     private async Task GetItems(string? filter)
-        => itemsList = await item.GetKeyValue(filter);
+        => itemsList = await items.GetKeyValue(filter);
 
     private async Task GetTaxes(string? filter)
-        => taxesList = await tax.GetKeyValue(filter);
+        => taxesList = await taxes.GetKeyValue(filter);
 }

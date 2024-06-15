@@ -1,6 +1,6 @@
 ﻿@page "/Tax/{Id:decimal}"
 @inherits GeneralComponent
-@inject ITaxesService service
+@inject IGenericService<TaxesFilter, TaxDto> tax
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
@@ -42,11 +42,11 @@
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
-            <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
-            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy"></Btn>
-            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-info" Text="New" ClickAction="New" />
+            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
         }
-        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit"></Btn>
+        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
     </div>
 </EditForm>
 @code {
@@ -56,15 +56,18 @@
     TaxDto dto = new();
 
     protected override async Task OnInitializedAsync()
-        => await GetTax();
+    {
+        tax.Api = nameof(Taxes);
+        await GetTax();
+    }
 
     private async Task GetTax()
     {
-        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " Tax");
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Tax)}");
         LoaderService.ToggleLoader();
-        if (Id.HasValue) dto = await service.GetSingle(Id);
-        else dto.TaxCode = await service.GetCode();
-        LoaderService.ToggleLoader();        
+        if (Id.HasValue) dto = await tax.GetSingle(Id);
+        else dto.TaxCode = await tax.GetCode();
+        LoaderService.ToggleLoader();
     }
     private async Task HandleValidSubmit()
     {
@@ -72,13 +75,13 @@
         if (!Id.HasValue)
         {
             dto.TaxId = Guid.NewGuid();
-            httpResponseMessage = await service.Create(dto);
+            httpResponseMessage = await tax.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
                 Id = dto.TaxId;
             // GoTo("Tax", "Taxes", true, dto.TaxId);
         }
         else
-            httpResponseMessage = await service.Edit(dto);
+            httpResponseMessage = await tax.Edit(dto);
         await ShowResultMessage(httpResponseMessage);
     }
     private async Task New()
@@ -94,11 +97,11 @@
     }
     private async Task Delete()
     {
-        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this Tax?"))
+        if (await ShowDeleteConfirmation("Tax"))
         {
-            var response = await service.Delete(Id);
+            var response = await tax.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo("Taxs");
+                GoTo("Taxes");
             await ShowResultMessage(response);
         }
     }

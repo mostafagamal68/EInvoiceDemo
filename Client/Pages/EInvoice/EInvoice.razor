@@ -1,8 +1,8 @@
 ﻿@page "/EInvoice/{Id:guid?}"
+@using EInvoiceDemo.Client.Pages.Customer
 @inherits GeneralComponent
-@inject IEInvoicesService service
-@inject ICustomersService customer
-@inject IEInvoiceTypesService type
+@inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoice
+@inject IGenericService<CustomersFilter, CustomerDto> customers
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
@@ -23,10 +23,10 @@
                 <label>Type</label>
             </div>
             <div class="col-md-5">
-                <Select @bind-Value="dto.EInvoiceTypeName" @bind-Key="dto.EInvoiceTypeId" List="typesList" GetList="GetTypes" />
+                <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadioButtons=true/>
             </div>
             <div class="col-md-3 my-auto">
-                <ValidationMessage For="@(() => dto.EInvoiceTypeName)" />
+                <ValidationMessage For="@(() => dto.EInvoiceType)" />
             </div>
         </div>
         <div class="row my-1">
@@ -54,20 +54,29 @@
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
-                    <Btn class="btn-violet" Text="Add Item" ValidateModel="false"
-                         ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
-                            new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }), async () => Calculate()))">
-                        <SpanIcon><i class="bi bi-check-circle me-1"></i></SpanIcon>
-                    </Btn>
+                    <Btn class="btn-violet" Text="Add Item" Icon="bi bi-check-circle"
+                         ClickAction="@(() => ShowModal(
+                            typeof(EInvoiceLine),
+                            "EInvoice Line",
+                            new ModalParameters()
+                                .Add(nameof(EInvoiceLine.List), dto.EInvoiceLines)
+                                .Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }),
+                            async () => Calculate())
+                            )" />
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
                     <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line" TableDesignType="TableWithPagination<EInvoiceLineDto>.TableDesign.List">
                         <CustomActions>
-                            <Btn class="btn-sm btn-warning" ClickAction="@(()=>ShowModal(typeof(EInvoiceLine), "EInvoice Line",
-                                    new ModalParameters().Add(nameof(EInvoiceLine.List), dto.EInvoiceLines).Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()), async () => Calculate()))">
-                                <SpanIcon><i class="bi bi-pencil-square"></i></SpanIcon>
-                            </Btn>
+                            <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
+                                 ClickAction="@(() => ShowModal(
+                                    typeof(EInvoiceLine),
+                                    "EInvoice Line",
+                                    new ModalParameters()
+                                    .Add(nameof(EInvoiceLine.List), dto.EInvoiceLines)
+                                    .Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()),
+                                    async () => Calculate())
+                                    )" />
                         </CustomActions>
                     </TableWithPagination>
                 }
@@ -88,9 +97,9 @@
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
-            <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
-            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy"></Btn>
-            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-info" Text="New" ClickAction="New" />
+            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
         }
         <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" CloseAfterSave="true"></Btn>
     </div>
@@ -105,18 +114,22 @@
     List<KeyValue>? typesList = new();
 
     protected override async Task OnInitializedAsync()
-        => await GetEInvoice();
+    {        
+        einvoice.Api = nameof(EInvoices);
+        customers.Api = nameof(Customers);
+        await GetEInvoice();
+    }
 
     private async Task GetEInvoice()
     {
-        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " E-Invoice");
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
-            dto = await service.GetSingle(Id);
+            dto = await einvoice.GetSingle(Id);
         else
         {
             dto.EInvoiceId = Guid.NewGuid();
-            dto.EInvoiceCode = await service.GetCode();
+            dto.EInvoiceCode = await einvoice.GetCode();
         }
         lineFilter.Items = dto.EInvoiceLines;
         LoaderService.ToggleLoader();
@@ -126,13 +139,13 @@
         HttpResponseMessage httpResponseMessage;
         if (!Id.HasValue)
         {
-            httpResponseMessage = await service.Create(dto);
+            httpResponseMessage = await einvoice.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
                 Id = dto.EInvoiceId;
             // GoTo("EInvoice", "EInvoice ", true, dto.EInvoiceId);
         }
         else
-            httpResponseMessage = await service.Edit(dto);
+            httpResponseMessage = await einvoice.Edit(dto);
         await ShowResultMessage(httpResponseMessage);
     }
     private async Task New()
@@ -145,22 +158,22 @@
     {
         Id = null;
         await GetEInvoice();
-        dto.EInvoiceLines.ForEach(c => 
-            { 
-                c.EInvoiceId = dto.EInvoiceId; 
-                c.EInvoiceLineId = Guid.NewGuid(); 
-                c.EInvoiceLineTaxes.ForEach(x => 
-                    { 
-                        x.EInvoiceLineId = c.EInvoiceLineId; 
-                        x.EInvoiceLineTaxId = Guid.NewGuid(); 
+        dto.EInvoiceLines.ForEach(c =>
+            {
+                c.EInvoiceId = dto.EInvoiceId;
+                c.EInvoiceLineId = Guid.NewGuid();
+                c.EInvoiceLineTaxes.ForEach(x =>
+                    {
+                        x.EInvoiceLineId = c.EInvoiceLineId;
+                        x.EInvoiceLineTaxId = Guid.NewGuid();
                     });
             });
     }
     private async Task Delete()
     {
-        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this E-Invoice ?"))
+        if (await ShowDeleteConfirmation("EInvoice"))
         {
-            var response = await service.Delete(Id);
+            var response = await einvoice.Delete(Id);
             if (response.IsSuccessStatusCode)
                 GoTo("EInvoices");
             await ShowResultMessage(response);
@@ -168,10 +181,7 @@
     }
 
     private async Task GetCustomers(string? filter)
-        => customersList = await customer.GetKeyValue(filter);
-
-    private async Task GetTypes(string? filter)
-        => typesList = await type.GetKeyValue(filter);
+        => customersList = await customers.GetKeyValue(filter);
 
     private void Calculate()
         => dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;

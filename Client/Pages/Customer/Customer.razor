@@ -1,6 +1,6 @@
 ﻿@page "/Customer/{Id:guid?}"
 @inherits GeneralComponent
-@inject ICustomersService service
+@inject IGenericService<CustomersFilter, CustomerDto> customer
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
@@ -31,11 +31,11 @@
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
         {
-            <Btn class="btn-info" Text="New" ClickAction="New"></Btn>
-            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy"></Btn>
-            <Btn class="btn-danger" Text="Delete" ClickAction="Delete"></Btn>
+            <Btn class="btn-info" Text="New" ClickAction="New" />
+            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
         }
-        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit"></Btn>
+        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
     </div>
 </EditForm>
 @code {
@@ -45,15 +45,18 @@
     CustomerDto dto = new();
 
     protected override async Task OnInitializedAsync()
-        => await GetCustomer();
+    {
+        customer.Api = nameof(Customers);
+        await GetCustomer();
+    }
 
     private async Task GetCustomer()
-    {        
-        if (!IsModal) HeaderService.ChangeHeaderAndTitle((Id.HasValue ? "Edit" : "Add") + " Customer");
+    {
+        if (!IsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Customer)}");
         LoaderService.ToggleLoader();
-        if (Id.HasValue) dto = await service.GetSingle(Id);
-        else dto.CustomerCode = await service.GetCode();
-        LoaderService.ToggleLoader();        
+        if (Id.HasValue) dto = await customer.GetSingle(Id);
+        else dto.CustomerCode = await customer.GetCode();
+        LoaderService.ToggleLoader();
     }
     private async Task HandleValidSubmit()
     {
@@ -61,13 +64,13 @@
         if (!Id.HasValue)
         {
             dto.CustomerId = Guid.NewGuid();
-            httpResponseMessage = await service.Create(dto);
+            httpResponseMessage = await customer.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
                 Id = dto.CustomerId;
             // GoTo("Customer", "Customers", true, dto.CustomerId);
         }
         else
-            httpResponseMessage = await service.Edit(dto);
+            httpResponseMessage = await customer.Edit(dto);
         await ShowResultMessage(httpResponseMessage);
     }
     private async Task New()
@@ -83,9 +86,9 @@
     }
     private async Task Delete()
     {
-        if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this Customer?"))
+        if (await ShowDeleteConfirmation("Customer"))
         {
-            var response = await service.Delete(Id);
+            var response = await customer.Delete(Id);
             if (response.IsSuccessStatusCode)
                 GoTo("Customers");
             await ShowResultMessage(response);

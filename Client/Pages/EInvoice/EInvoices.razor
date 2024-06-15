@@ -1,101 +1,96 @@
 ﻿@page "/EInvoices"
+@using EInvoiceDemo.Client.Pages.Customer
 @inherits GeneralComponent
-@inject IEInvoicesService service
-@inject ICustomersService customer
-@inject IEInvoiceTypesService type
+@inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoices
+@inject IGenericService<CustomersFilter, CustomerDto> customers
 
 <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
-    <Btn class="btn-violet" Text="Add" ClickAction="@(()=>GoTo("EInvoice", true))">
-        <SpanIcon><i class="bi bi-plus-circle me-1"></i></SpanIcon>
-    </Btn>
+    <Btn class="btn-violet" Text="Add" ClickAction="() => GoTo(nameof(EInvoice))" Icon="bi bi-plus-circle" />
 </div>
 <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 my-2">
     <div class="flex-grow-1">
         <label>Type</label>
-        <Select @bind-Value="EInvoicesFilter.EInvoiceTypeName" @bind-Key="EInvoicesFilter.EInvoiceTypeId" List="typesList" GetList="GetTypes" />
+        <Options T=EInvoiceTypeEnum @bind-Value=filter.EInvoiceType DisplayName=@nameof(filter.EInvoiceType) ShowChoose=true />
     </div>
     <div class="flex-grow-1">
         <label>Customer</label>
-        <Select AutoComplete="true" @bind-Value="EInvoicesFilter.CustomerName" @bind-Key="EInvoicesFilter.CustomerId" List="customersList" GetList="GetCustomers" />
+        <Select AutoComplete="true" @bind-Value="filter.CustomerName" @bind-Key="filter.CustomerId" List="customersList" GetList="GetCustomers" />
     </div>
     <div class="flex-grow-1">
         <label>Date From</label>
-        <input type="datetime-local" class="form-control" @bind="EInvoicesFilter.DateTimeIssuedFrom" />
+        <input type="datetime-local" class="form-control" @bind="filter.DateTimeIssuedFrom" />
     </div>
     <div class="flex-grow-1">
         <label>Date To</label>
-        <input type="datetime-local" class="form-control" @bind="EInvoicesFilter.DateTimeIssuedTo" />
+        <input type="datetime-local" class="form-control" @bind="filter.DateTimeIssuedTo" />
     </div>
 </div>
 <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap my-2">
-    <Btn class="btn-primary" Text="Clear" ClickAction="async () => { EInvoicesFilter = new(); await GetEInvoicesFiltered();}">
-        <SpanIcon><i class="bi bi-x me-1"></i></SpanIcon>
-    </Btn>
-    <Btn class="btn-success" Text="Search" ClickAction="GetEInvoicesFiltered">
-        <SpanIcon><i class="bi bi-search me-1"></i></SpanIcon>
-    </Btn>
+    <Btn class="btn-primary" Text="Clear" ClickAction="Clear" Icon="bi bi-x" />
+    <Btn class="btn-success" Text="Search" ClickAction="GetEInvoicesFiltered" Icon="bi bi-search" />
 </div>
 @if (!LoaderService.IsLoading)
 {
-    <TableWithPagination TType="EInvoiceDto" Model="EInvoicesFilter" Filter="GetEInvoicesFiltered" MultiSelect="true"
+    <TableWithPagination TType="EInvoiceDto" Model="filter" Filter="GetEInvoicesFiltered" MultiSelect="true"
                          Actions="@((args) => TableActions(args.Id, args.IsDelete))" BulkActions="BulkActions">
     </TableWithPagination>
 }
 @code {
-    EInvoicesFilter? EInvoicesFilter = new();
+    EInvoicesFilter filter = new();
     List<KeyValue>? customersList = new();
     List<KeyValue>? typesList = new();
 
     protected override async Task OnInitializedAsync()
     {
-        HeaderService.ChangeHeaderAndTitle("E-Invoices");
+        einvoices.Api = nameof(EInvoices);
+        customers.Api = nameof(Customers);
+        HeaderService.ChangeHeaderAndTitle(nameof(EInvoices));
         await GetEInvoicesFiltered();
     }
 
     private async Task GetEInvoicesFiltered()
     {
         LoaderService.ToggleLoader();
-        EInvoicesFilter = await service.GetList(EInvoicesFilter);
-        LoaderService.ToggleLoader();        
+        filter = await einvoices.GetList(filter);
+        LoaderService.ToggleLoader();
     }
 
+    private async Task Clear()
+    {
+        filter = new();
+        await GetEInvoicesFiltered();
+    }
     private async Task TableActions(Guid Id, bool IsDelete)
     {
         if (IsDelete)
         {
-            if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this EInvoice?"))
+            if (await ShowDeleteConfirmation(nameof(EInvoice)))
             {
-                var response = await service.Delete(Id);
+                var response = await einvoices.Delete(Id);
                 if (response.IsSuccessStatusCode)
-                    EInvoicesFilter?.Items.Remove(EInvoicesFilter.Items.First(c => c.EInvoiceId == Id));
+                    filter?.Items.Remove(filter.Items.First(c => c.EInvoiceId == Id));
                 await ShowResultMessage(response);
             }
         }
-        else
-        {
-            GoTo("EInvoice", true, Id);
-        }
+        else GoTo(nameof(EInvoice), Id);
     }
 
     private async Task BulkActions(BulkOperation operation)
     {
-        var SelectedItems = EInvoicesFilter.Items.Where(c => c.IsSelected);
+        var SelectedItems = filter.Items.Where(c => c.IsSelected);
         if (operation is BulkOperation.Delete)
         {
-            if (await ShowConfirm("Delete Confirmation", "Are you sure to delete this EInvoice?"))
+            if (await ShowDeleteConfirmation(nameof(EInvoices)))
             {
                 var Ids = SelectedItems.Select(c => c.EInvoiceId).ToList();
-                var response = await service.BulkDelete(Ids);
+                var response = await einvoices.Bulk(Ids, BulkOperation.Delete);
                 if (response.IsSuccessStatusCode)
-                    EInvoicesFilter.Items.Where(c => Ids.Contains(c.EInvoiceId)).ToList().ForEach(c => EInvoicesFilter.Items.Remove(c));
+                    filter.Items.Where(c => Ids.Contains(c.EInvoiceId)).ToList().ForEach(c => filter.Items.Remove(c));
                 await ShowResultMessage(response);
             }
         }
     }
 
     private async Task GetCustomers(string? filter)
-        => customersList = await customer.GetKeyValue(filter);
-
-    private async Task GetTypes(string? filter)
-        => typesList = await type.GetKeyValue(filter);
+        => customersList = await customers.GetKeyValue(filter);
 }

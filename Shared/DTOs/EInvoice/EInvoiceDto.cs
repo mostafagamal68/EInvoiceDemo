@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EInvoiceDemo.Shared.Enums;
+using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
@@ -12,12 +13,9 @@ public class EInvoiceDto : DtoBase
     [Required(ErrorMessage = "*")]
     public int EInvoiceCode { get; set; }
 
-    [Required(ErrorMessage = "*")]
-    public Guid? EInvoiceTypeId { get; set; }
-
     [Display(Name = "Type")]
     [Required(ErrorMessage = "*")]
-    public string? EInvoiceTypeName { get; set; }
+    public EInvoiceTypeEnum? EInvoiceType { get; set; }
 
     [Required(ErrorMessage = "*")]
     public Guid? CustomerId { get; set; }

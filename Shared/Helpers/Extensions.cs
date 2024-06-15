@@ -24,7 +24,8 @@ public static class Extensions
 
     public static bool HasValue(this string? Value)
         => !string.IsNullOrEmpty(Value) && !string.IsNullOrWhiteSpace(Value);
-
+    public static T? CastTo<T>(this object? value) => (T?)value;
+    public static T? CastAs<T>(this object value) where T : class => value as T;
     public static string ToDateString(this DateTime Value)
         => Value.ToString("dd/MM/yyyy hh:mm:ss tt");
 

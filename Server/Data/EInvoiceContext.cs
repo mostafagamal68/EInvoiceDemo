@@ -10,7 +10,6 @@ public class EInvoiceContext : DbContext
         
     }
     public DbSet<Customer> Customers { get; set; }
-    public DbSet<EInvoiceType> EInvoiceTypes { get; set; }
     public DbSet<EInvoice> EInvoices { get; set; }
     public DbSet<Item> Items { get; set; }
     public DbSet<EInvoiceLine> EInvoiceLines { get; set; }

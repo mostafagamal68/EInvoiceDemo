@@ -20,7 +20,7 @@ internal class EInvoiceRepository : ContextService, IEInvoiceRepository
             CustomerId = dto.CustomerId.GetValueOrDefault(),
             EInvoiceCode = dto.EInvoiceCode,
             DateTimeIssued = dto.DateTimeIssued.GetValueOrDefault(),
-            EInvoiceTypeId = dto.EInvoiceTypeId.GetValueOrDefault(),
+            EInvoiceType = dto.EInvoiceType,
             NetAmount = dto.NetAmount,
         };
         foreach (var line in dto.EInvoiceLines)
@@ -91,7 +91,7 @@ internal class EInvoiceRepository : ContextService, IEInvoiceRepository
 
         var query = Query()
                     .WhereIf(filter.CustomerId.HasValue, c => c.CustomerId == filter.CustomerId)
-                    .WhereIf(filter.EInvoiceTypeId.HasValue, c => c.EInvoiceTypeId == filter.EInvoiceTypeId)
+                    .WhereIf(filter.EInvoiceType.HasValue, c => c.EInvoiceType == filter.EInvoiceType)
                     .WhereIf(filter.DateTimeIssuedFrom.HasValue, c => c.DateTimeIssued >= filter.DateTimeIssuedFrom)
                     .WhereIf(filter.DateTimeIssuedTo.HasValue, c => c.DateTimeIssued <= filter.DateTimeIssuedTo);
 
@@ -103,8 +103,7 @@ internal class EInvoiceRepository : ContextService, IEInvoiceRepository
                 EInvoiceId = c.EInvoiceId,
                 CustomerId = c.CustomerId,
                 CustomerName = c.Customer.CustomerName,
-                EInvoiceTypeId = c.EInvoiceTypeId,
-                EInvoiceTypeName = c.EInvoiceType.EInvoiceTypeName,
+                EInvoiceType = c.EInvoiceType,
                 DateTimeIssued = c.DateTimeIssued,
                 EInvoiceCode = c.EInvoiceCode,
                 NetAmount = c.NetAmount,
@@ -126,8 +125,7 @@ internal class EInvoiceRepository : ContextService, IEInvoiceRepository
             EInvoiceId = eInvoice.EInvoiceId,
             CustomerId = eInvoice.CustomerId,
             CustomerName = eInvoice.Customer?.CustomerName,
-            EInvoiceTypeId = eInvoice.EInvoiceTypeId,
-            EInvoiceTypeName = eInvoice.EInvoiceType?.EInvoiceTypeName,
+            EInvoiceType = eInvoice.EInvoiceType,
             DateTimeIssued = eInvoice.DateTimeIssued,
             EInvoiceCode = eInvoice.EInvoiceCode,
             NetAmount = eInvoice.NetAmount,
@@ -157,7 +155,7 @@ internal class EInvoiceRepository : ContextService, IEInvoiceRepository
 
     public IQueryable<EInvoice> Query()
     => _context.EInvoices
-            .Include(c => c.Customer).Include(c => c.EInvoiceType)
+            .Include(c => c.Customer)
             .Include(c => c.EInvoiceLines).ThenInclude(c => c.EInvoiceLineTaxes).ThenInclude(c => c.Tax)
             .Include(c => c.EInvoiceLines).ThenInclude(c => c.Item)
             .AsQueryable();
@@ -172,7 +170,7 @@ internal class EInvoiceRepository : ContextService, IEInvoiceRepository
         eInvoice.CustomerId = dto.CustomerId.GetValueOrDefault();
         eInvoice.EInvoiceCode = dto.EInvoiceCode;
         eInvoice.DateTimeIssued = dto.DateTimeIssued.GetValueOrDefault();
-        eInvoice.EInvoiceTypeId = dto.EInvoiceTypeId.GetValueOrDefault();
+        eInvoice.EInvoiceType = dto.EInvoiceType;
         eInvoice.NetAmount = dto.NetAmount;
 
         foreach (var line in dto.EInvoiceLines)

@@ -11,7 +11,6 @@ public static class ApplicationServices
         services.AddScoped<IItemRepository, ItemRepository>();
         services.AddScoped<ICustomerRepository, CustomerRepository>();
         services.AddScoped<IEInvoiceRepository, EInvoiceRepository>();
-        services.AddScoped<IEInvoiceTypeRepository, EInvoiceTypeRepository>();
         return services;
     }
 }

@@ -1,0 +1,93 @@
+﻿@using System.Linq.Expressions
+@using System.Diagnostics.CodeAnalysis
+@using System.Globalization
+@typeparam T where T : struct, Enum
+@inherits InputBase<T?>
+@if (AsRadioButtons)
+{
+    <div class="rounded p-1 @CssClass">
+        @if (ShowChoose)
+        {
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="@DisplayName"
+                       value="" checked="@(!Value.HasValue)" @onchange="ValueHasChanged" />
+                <label class="form-check-label">None</label>
+            </div>
+        }
+        @foreach (var item in Enum.GetValues<T>())
+        {
+            <div class="form-check form-check-inline">
+                <input class="form-check-input" type="radio" name="@DisplayName"
+                       value="@item" checked="@(Value.Equals(item))" @onchange="ValueHasChanged" />
+                <label class="form-check-label">@Enum.GetName(typeof(T), item)</label>
+            </div>
+        }
+    </div>
+}
+else
+{
+    <select class="form-select @CssClass" value="@Value" name="@DisplayName" @onchange="ValueHasChanged" @onblur="OnInputBlurred">
+        @if (ShowChoose)
+        {
+            <option value="">Select</option>
+        }
+        @foreach (var item in Enum.GetValues<T>())
+        {
+            <option value="@item">@Enum.GetName(typeof(T), item)</option>
+        }
+    </select>
+}
+@code {
+    [Parameter]
+    public bool AsRadioButtons { get; set; }
+    [Parameter]
+    public bool ShowChoose { get; set; }
+    // [Parameter]
+    // public T? Value { get; set; }
+    // [Parameter]
+    // public EventCallback<T?> ValueChanged { get; set; }
+    // [Parameter]
+    // public Expression<Func<T?>>? ValueExpression { get; set; }
+    // [CascadingParameter]
+    // public EditContext? EditContext { get; set; }
+
+    // private FieldIdentifier fieldIdentifier;
+    // private string? cssClass;
+    // protected override void OnInitialized()
+    // {
+    //     fieldIdentifier = FieldIdentifier.Create(ValueExpression);
+    //     base.OnInitialized();
+    // }
+    void OnInputBlurred()
+    {
+        if (EditContext is not null)
+            EditContext.NotifyFieldChanged(FieldIdentifier);
+    }
+    async Task ValueHasChanged(ChangeEventArgs args)
+    {
+        Value = args.Value.CastAs<string?>().HasValue() ? Enum.Parse<T>(args.Value.ToString()) : null;
+        await ValueChanged.InvokeAsync(Value);
+    }
+    protected override bool TryParseValueFromString(string? value, out T? result, [NotNullWhen(false)] out string? validationErrorMessage)
+    {
+        if (value is not null)
+        {
+            if (Enum.TryParse<T>(value, true, out T parsedValue))
+            {
+                result = parsedValue;
+            }
+            else
+            {
+                result = null;
+                validationErrorMessage = string.Format(CultureInfo.InvariantCulture, "Cannot asign value", DisplayName ?? FieldIdentifier.FieldName);
+                return false;
+            }
+        }
+        else
+        {
+            result = null;
+        }
+        validationErrorMessage = null;
+        return true;
+    }
+}

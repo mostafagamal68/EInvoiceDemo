@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class TaxDto : DtoBase
 {
-    [Key]
-    [Required]
-    public Guid TaxId { get; set; }
-
     [Display(Name = "Tax")]
     [Required]
     [StringLength(50)]

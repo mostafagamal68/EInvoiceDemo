@@ -1,6 +1,4 @@
-﻿using EInvoiceDemo.Shared.DTOs;
-
-namespace EInvoiceDemo.Shared.Models;
+﻿namespace EInvoiceDemo.Shared.Models;
 
 public class GlobalFilter<T> where T : DtoBase
 {

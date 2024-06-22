@@ -38,7 +38,7 @@ namespace EInvoiceDemo.Server.Controllers
         public async Task<IActionResult> PostEInvoice(EInvoiceDto dto)
         {
             await _repository.Add(_repository.AddLogic(dto));
-            return CreatedAtAction("GetEInvoice", new { id = dto.EInvoiceId }, dto);
+            return CreatedAtAction("GetEInvoice", new { id = dto.Id }, dto);
         }
 
         // DELETE: api/EInvoices/5

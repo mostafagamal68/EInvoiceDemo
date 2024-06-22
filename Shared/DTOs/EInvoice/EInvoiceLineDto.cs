@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class EInvoiceLineDto : DtoBase, ICloneable
 {
-    [Key]
-    [Required(ErrorMessage = "*")]
-    public Guid? EInvoiceLineId { get; set; }
-
     [Required(ErrorMessage = "*")]
     public Guid? EInvoiceId { get; set; }
 
@@ -37,12 +34,12 @@ public class EInvoiceLineDto : DtoBase, ICloneable
     public decimal? ItemNetAmount { get; set; }
 
     [ValidateComplexType] 
-    public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = new();
+    public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = [];
     public object Clone()
     {
         EInvoiceLineDto l = (EInvoiceLineDto)MemberwiseClone();
 
-        List<EInvoiceLineTaxDto> copyObjectList = new();
+        List<EInvoiceLineTaxDto> copyObjectList = [];
 
         foreach (EInvoiceLineTaxDto o in l.EInvoiceLineTaxes)
         {

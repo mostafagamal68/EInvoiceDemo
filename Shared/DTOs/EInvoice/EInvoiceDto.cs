@@ -1,14 +1,11 @@
 ﻿using EInvoiceDemo.Shared.Enums;
+using EInvoiceDemo.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class EInvoiceDto : DtoBase
 {
-    [Key]
-    [Required(ErrorMessage = "*")]
-    public Guid EInvoiceId { get; set; }
-
     [Display(Name = "Code")]
     [Required(ErrorMessage = "*")]
     public int EInvoiceCode { get; set; }
@@ -30,5 +27,5 @@ public class EInvoiceDto : DtoBase
     [Display(Name = "Net Amount")]
     public decimal NetAmount { get; set; }
 
-    public List<EInvoiceLineDto> EInvoiceLines { get; set; } = new();
+    public List<EInvoiceLineDto> EInvoiceLines { get; set; } = [];
 }

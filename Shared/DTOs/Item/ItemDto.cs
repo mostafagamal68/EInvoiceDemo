@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class ItemDto : DtoBase
 {
-    [Key]
-    [Required]
-    public Guid ItemId { get; set; }
-
     [Display(Name = "Item")]
     [Required]
     [StringLength(50)]

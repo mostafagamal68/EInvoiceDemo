@@ -8,9 +8,9 @@ namespace EInvoiceDemo.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class CustomersController : GenericController<ICustomerRepository>
+    public class CustomersController(ICustomerRepository customerRepository)
+        : GenericController<ICustomerRepository>(customerRepository)
     {
-        public CustomersController(ICustomerRepository customerRepository) : base(customerRepository) { }
 
         // GET: api/Customers/KeyValue
         [HttpGet("KeyValue")]

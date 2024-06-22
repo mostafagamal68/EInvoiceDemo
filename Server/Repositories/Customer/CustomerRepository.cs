@@ -8,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EInvoiceDemo.Server.Repositories;
 
-internal class CustomerRepository : ContextService, ICustomerRepository
+internal class CustomerRepository(EInvoiceContext context)
+    : ContextService(context), ICustomerRepository
 {
-    public CustomerRepository(EInvoiceContext context) : base(context) { }
-
     public async Task Add(Customer model)
     {
         DbModel().Add(model);
@@ -62,7 +61,7 @@ internal class CustomerRepository : ContextService, ICustomerRepository
         filter.Items = await query
             .Select(c => new CustomerDto
             {
-                CustomerId = c.CustomerId,
+                Id = c.CustomerId,
                 CustomerName = c.CustomerName,
                 CustomerCode = c.CustomerCode,
             })
@@ -80,7 +79,7 @@ internal class CustomerRepository : ContextService, ICustomerRepository
 
         return new CustomerDto
         {
-            CustomerId = customer.CustomerId,
+            Id = customer.CustomerId,
             CustomerCode = customer.CustomerCode,
             CustomerName = customer.CustomerName,
         };
@@ -93,7 +92,7 @@ internal class CustomerRepository : ContextService, ICustomerRepository
 
     public async Task Update(CustomerDto dto)
     {
-        var Customer = await DbModel().FindAsync(dto.CustomerId);
+        var Customer = await DbModel().FindAsync(dto.Id);
 
         Customer.CustomerCode = dto.CustomerCode;
         Customer.CustomerName = dto.CustomerName;

@@ -8,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EInvoiceDemo.Server.Repositories;
 
-internal class TaxRepository : ContextService, ITaxRepository
+internal class TaxRepository(EInvoiceContext context)
+    : ContextService(context), ITaxRepository
 {
-    public TaxRepository(EInvoiceContext context) : base(context) { }
-
     public async Task Add(Tax model)
     {
         DbModel().Add(model);
@@ -61,7 +60,7 @@ internal class TaxRepository : ContextService, ITaxRepository
         filter.Items = await query
             .Select(c => new TaxDto
             {
-                TaxId = c.TaxId,
+                Id = c.TaxId,
                 TaxName = c.TaxName,
                 TaxCode = c.TaxCode,
                 TaxDescription = c.TaxDescription,
@@ -80,7 +79,7 @@ internal class TaxRepository : ContextService, ITaxRepository
 
         return new TaxDto
         {
-            TaxId = tax.TaxId,
+            Id = tax.TaxId,
             TaxName = tax.TaxName,
             TaxCode = tax.TaxCode,
             TaxDescription = tax.TaxDescription,
@@ -91,7 +90,7 @@ internal class TaxRepository : ContextService, ITaxRepository
     
     public async Task Update(TaxDto dto)
     {
-        var Tax = await DbModel().FindOrErrorAsync(dto.TaxId);
+        var Tax = await DbModel().FindOrErrorAsync(dto.Id);
 
         Tax.TaxName = dto.TaxName;
         Tax.TaxCode = dto.TaxCode;

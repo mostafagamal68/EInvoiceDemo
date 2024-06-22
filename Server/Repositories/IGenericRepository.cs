@@ -1,5 +1,4 @@
-﻿using EInvoiceDemo.Shared.DTOs;
-using EInvoiceDemo.Shared.Models;
+﻿using EInvoiceDemo.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 
 namespace EInvoiceDemo.Server.Repositories;

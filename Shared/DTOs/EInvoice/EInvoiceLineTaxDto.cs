@@ -1,13 +1,10 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using EInvoiceDemo.Shared.Models;
 
 namespace EInvoiceDemo.Shared.DTOs;
 
 public class EInvoiceLineTaxDto : DtoBase, ICloneable
 {
-    [Key]
-    [Required(ErrorMessage = "*")]
-    public Guid? EInvoiceLineTaxId { get; set; }
-
     [Required(ErrorMessage = "*")]
     public Guid? EInvoiceLineId { get; set; }
 

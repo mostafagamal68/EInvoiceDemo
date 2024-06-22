@@ -8,10 +8,9 @@ using Microsoft.EntityFrameworkCore;
 
 namespace EInvoiceDemo.Server.Repositories;
 
-internal class ItemRepository : ContextService, IItemRepository
+internal class ItemRepository(EInvoiceContext context)
+    : ContextService(context), IItemRepository
 {
-    public ItemRepository(EInvoiceContext context) : base(context) { }
-
     public async Task Add(Item model)
     {
         DbModel().Add(model);
@@ -62,7 +61,7 @@ internal class ItemRepository : ContextService, IItemRepository
         filter.Items = await query
             .Select(c => new ItemDto
             {
-                ItemId = c.ItemId,
+                Id = c.ItemId,
                 ItemName = c.ItemName,
                 ItemCode = c.ItemCode,
                 ItemDescription = c.ItemDescription,
@@ -81,7 +80,7 @@ internal class ItemRepository : ContextService, IItemRepository
 
         return new ItemDto
         {
-            ItemId = item.ItemId,
+            Id = item.ItemId,
             ItemName = item.ItemName,
             ItemCode = item.ItemCode,
             ItemDescription = item.ItemDescription,
@@ -92,7 +91,7 @@ internal class ItemRepository : ContextService, IItemRepository
     
     public async Task Update(ItemDto dto)
     {
-        var Item = await DbModel().FindOrErrorAsync(dto.ItemId);
+        var Item = await DbModel().FindOrErrorAsync(dto.Id);
 
         Item.ItemName = dto.ItemName;
         Item.ItemCode = dto.ItemCode;

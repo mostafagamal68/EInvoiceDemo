@@ -5,28 +5,15 @@
 <EditForm Model="dto">
     <DataAnnotationsValidator />
     <div class="col-md-12 my-1">
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Code</label>
-            </div>
-            <div class="col-md-5">
-                <InputNumber class="form-control" @bind-Value="dto.CustomerCode" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.CustomerCode)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Name</label>
-            </div>
-            <div class="col-md-5">
-                <InputText class="form-control" @bind-Value="dto.CustomerName" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.CustomerName)" />
-            </div>
-        </div>
+
+        <Field Name="Code" For="@(() => dto.CustomerCode)">
+            <InputNumber class="form-control" @bind-Value="dto.CustomerCode" />
+        </Field>
+
+        <Field Name="Name" For="@(() => dto.CustomerName)">
+            <InputText class="form-control" @bind-Value="dto.CustomerName" />
+        </Field>
+
     </div>
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
@@ -39,20 +26,13 @@
     </div>
 </EditForm>
 @code {
-    [Parameter]
-    public Guid? Id { get; set; }
-
     CustomerDto dto = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        customer.Api = nameof(Customers);
-        await GetCustomer();
-    }
+    protected override async Task OnInitializedAsync() => await GetCustomer();
 
     private async Task GetCustomer()
     {
-        if (!IsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Customer)}");
+        if (!AsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Customer)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue) dto = await customer.GetSingle(Id);
         else dto.CustomerCode = await customer.GetCode();
@@ -63,10 +43,10 @@
         HttpResponseMessage httpResponseMessage;
         if (!Id.HasValue)
         {
-            dto.CustomerId = Guid.NewGuid();
+            dto.Id = Guid.NewGuid();
             httpResponseMessage = await customer.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
-                Id = dto.CustomerId;
+                Id = dto.Id;
             // GoTo("Customer", "Customers", true, dto.CustomerId);
         }
         else

@@ -25,7 +25,10 @@ public class GeneralComponent : ComponentBase
     public IModalService Modal { get; set; } = default!;
 
     [Parameter]
-    public bool IsModal { get; set; } = false;
+    public Guid? Id { get; set; }
+
+    [Parameter]
+    public bool AsModal { get; set; } = false;
 
     public ModalOptions ModalOptions { get; set; } = new()
     {
@@ -63,7 +66,7 @@ public class GeneralComponent : ComponentBase
 
     public async Task ShowModal(Type component, string title, ModalParameters? parameters = null, Func<Task>? afterClose = null)
     {
-        var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(IsModal), true), ModalOptions);
+        var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true), ModalOptions);
         await modal.Result;
         if (afterClose is not null)
         {

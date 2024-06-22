@@ -7,45 +7,27 @@
 <EditForm Model="dto">
     <ObjectGraphDataAnnotationsValidator />
     <div class="col-md-12 my-1">
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Item</label>
-            </div>
-            <div class="col-md-5">
-                <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" List="itemsList" GetList="GetItems" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.ItemName)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Quantity</label>
-            </div>
-            <div class="col-md-5">
-                <InputNumber class="form-control" @bind-Value="dto.Quantity" @bind-Value:after="Calculate" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.Quantity)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Amount Sold</label>
-            </div>
-            <div class="col-md-5">
-                <InputNumber class="form-control" @bind-Value="dto.AmountSold" @bind-Value:after="Calculate" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.AmountSold)" />
-            </div>
-        </div>
+        
+        <Field Name="Item" For="@(() => dto.ItemName)">
+            <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" List="itemsList" GetList="GetItems" />
+        </Field>
+        
+        <Field Name="Quantity" For="@(() => dto.Quantity)">
+            <InputNumber class="form-control" @bind-Value="dto.Quantity" @bind-Value:after="Calculate" />
+        </Field>
+        
+        <Field Name="Amount Sold" For="@(() => dto.AmountSold)">
+            <InputNumber class="form-control" @bind-Value="dto.AmountSold" @bind-Value:after="Calculate" />
+        </Field>
+
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
                     <Btn class="btn-violet" Text="Add Tax" ClickAction="Add" Icon="bi bi-check-circle" />
                 </div>
-                <TableWithPagination TType="EInvoiceLineTaxDto" Model="taxFilter" WithPagination="false" Context="taxes" TableDesignType="TableWithPagination<EInvoiceLineTaxDto>.TableDesign.List">
+                <Grid TType=EInvoiceLineTaxDto TFilter=EInvoiceLineTaxFilter Model=taxFilter
+                                     WithEdit=false WithDelete=false WithPagination=false ShowActions=false ShowSort=false
+                                     Context=taxes TableDesignType=TableDesign.List>
                     <RowTemplate>
                         <span>
                             <span class="badge rounded-pill shadow-sm">
@@ -67,30 +49,19 @@
                     <CustomActions>
                         <Btn class="btn-sm btn-danger" ClickAction="() => DeleteRow(taxes)" Icon="bi bi-trash" />
                     </CustomActions>
-                    <ExtraData>
-                        <div class="row my-1">
-                            <div class="col-md-2 my-auto">
-                                <label>Total</label>
-                            </div>
-                            <div class="col-md-5 my-auto">
-                                <h5>@dto.Total?.ToString(2)</h5>
-                            </div>
-                        </div>
+                    <ExtraData>                        
+                        <Field Name="Total" For="@(() => dto.Total)">
+                            <h5>@dto.Total?.ToString(2)</h5>
+                        </Field>
                     </ExtraData>
-                </TableWithPagination>
+                </Grid>
             </div>
         </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Item Net Amount</label>
-            </div>
-            <div class="col-md-5 my-auto">
-                <h5>@dto.ItemNetAmount?.ToString(2)</h5>
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.ItemNetAmount)" />
-            </div>
-        </div>
+        
+        <Field Name="Item Net Amount" For="@(() => dto.ItemNetAmount)">
+            <h5>@dto.ItemNetAmount?.ToString(2)</h5>
+        </Field>
+
     </div>
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
@@ -107,7 +78,6 @@
     [Parameter]
     public List<EInvoiceLineDto> List { get; set; } = new();
 
-    Guid? Id;
     EInvoiceLineTaxFilter taxFilter = new();
     List<KeyValue>? itemsList = new();
     List<KeyValue>? taxesList = new();
@@ -117,22 +87,19 @@
 
     protected override void OnInitialized()
     {
-        items.Api = nameof(Items);
-        taxes.Api = nameof(Taxes);
-        if (dto.EInvoiceLineId.HasValue) Id = dto.EInvoiceLineId;
-        else dto.EInvoiceLineId = Guid.NewGuid();
+        if (dto.Id != Guid.Empty) Id = dto.Id;
+        else dto.Id = Guid.NewGuid();
         taxFilter.Items = dto.EInvoiceLineTaxes;
     }
 
     private void Add()
-        => dto.EInvoiceLineTaxes.Add(new EInvoiceLineTaxDto() { EInvoiceLineTaxId = Guid.NewGuid(), EInvoiceLineId = dto.EInvoiceLineId });
+        => dto.EInvoiceLineTaxes.Add(new EInvoiceLineTaxDto() { Id = Guid.NewGuid(), EInvoiceLineId = dto.Id });
 
     private async Task Delete()
-
     {
         if (await ShowDeleteConfirmation("EInvoice Line"))
         {
-            List?.Remove(List.First(c => c.EInvoiceLineId == Id));
+            List?.Remove(List.First(c => c.Id == Id));
             ToastService.ShowSuccess("Deleted Successfully");
             await BlazoredModal.CancelAsync();
         }
@@ -155,9 +122,9 @@
         }
         if (!messages.Any())
         {
-            if (List.Any(c => c.EInvoiceLineId == Id))
+            if (List.Any(c => c.Id == Id))
             {
-                var eInvoiceLine = List.First(c => c.EInvoiceLineId == dto.EInvoiceLineId);
+                var eInvoiceLine = List.First(c => c.Id == dto.Id);
                 eInvoiceLine.AmountSold = dto.AmountSold;
                 eInvoiceLine.Quantity = dto.Quantity;
                 eInvoiceLine.ItemId = dto.ItemId;
@@ -166,9 +133,9 @@
                 eInvoiceLine.Total = dto.Total;
                 foreach (var lineTax in dto.EInvoiceLineTaxes)
                 {
-                    if (eInvoiceLine.EInvoiceLineTaxes.Any(c => c.EInvoiceLineTaxId == lineTax.EInvoiceLineTaxId))
+                    if (eInvoiceLine.EInvoiceLineTaxes.Any(c => c.Id == lineTax.Id))
                     {
-                        var eInvoiceLineTax = eInvoiceLine.EInvoiceLineTaxes.First(c => c.EInvoiceLineTaxId == lineTax.EInvoiceLineTaxId);
+                        var eInvoiceLineTax = eInvoiceLine.EInvoiceLineTaxes.First(c => c.Id == lineTax.Id);
                         eInvoiceLineTax.TaxId = lineTax.TaxId;
                         eInvoiceLineTax.TaxName = lineTax.TaxName;
                         eInvoiceLineTax.Amount = lineTax.Amount;
@@ -178,12 +145,12 @@
                         eInvoiceLine.EInvoiceLineTaxes.Add(lineTax);
                     }
                 }
-                eInvoiceLine.EInvoiceLineTaxes.Where(c => !dto.EInvoiceLineTaxes.Any(x => c.EInvoiceLineTaxId == x.EInvoiceLineTaxId)).ToList().ForEach(c => eInvoiceLine.EInvoiceLineTaxes.Remove(c));
+                eInvoiceLine.EInvoiceLineTaxes.Where(c => !dto.EInvoiceLineTaxes.Any(x => c.Id == x.Id)).ToList().ForEach(c => eInvoiceLine.EInvoiceLineTaxes.Remove(c));
             }
             else
             {
                 List.Add(dto);
-                Id = dto.EInvoiceLineId;
+                Id = dto.Id;
             }
             ToastService.ShowSuccess("Line applied to this E-Invoice Successfully");
         }

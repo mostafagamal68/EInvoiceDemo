@@ -1,55 +1,11 @@
 ﻿@page "/Customers"
-@inherits GeneralComponent
-@inject IGenericService<CustomersFilter, CustomerDto> customers
 
-<div class="text-end my-1">
-    <Btn class="btn-violet" Text="Add" Icon="bi bi-plus-circle"
-         ClickAction="@(() => ShowModal(typeof(Customer), $"Add - {nameof(Customer)}", afterClose: GetCustomersFiltered))" />
-</div>
-<div class="d-flex justify-content-start flex-wrap gap-2 my-1">
-    <div>
-        <label>Name</label>
-        <input class="form-control" @bind="filter.CustomerName" @bind:event="oninput" @bind:after="GetCustomersFiltered" />
-    </div>
-</div>
-@if (!LoaderService.IsLoading)
-{
-    <TableWithPagination TType="CustomerDto" Model="filter" Filter="GetCustomersFiltered"
-                         Actions="@((args) => TableActions(args.Id, args.IsDelete))">
-    </TableWithPagination>
-}
+<Grid FormType=@typeof(Customer) TType=CustomerDto TFilter=CustomersFilter TableDesignType=TableDesign.Table>
+    <SearchTemplate>
+        <input class="form-control shadow-none" @bind="context.filter.CustomerName" @bind:event="oninput" @bind:after="context.action.InvokeAsync" />
+    </SearchTemplate>
+</Grid>
+
 @code {
-    CustomersFilter filter = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        customers.Api = nameof(Customers);
-        HeaderService.ChangeHeaderAndTitle(nameof(Customers));
-        LoaderService.ToggleLoader();
-        await GetCustomersFiltered();
-        LoaderService.ToggleLoader();
-    }
-
-    private async Task GetCustomersFiltered()
-        => filter = await customers.GetList(filter);
-
-    private async Task TableActions(Guid Id, bool IsDelete)
-    {
-        if (IsDelete)
-        {
-            if (await ShowDeleteConfirmation(nameof(Customer)))
-            {
-                var response = await customers.Delete(Id);
-                if (response.IsSuccessStatusCode)
-                    filter.Items.Remove(filter.Items.First(c => c.CustomerId == Id));
-                await ShowResultMessage(response);
-            }
-        }
-        else
-            await ShowModal(
-                typeof(Customer),
-                $"Edit - {nameof(Customer)}",
-                new ModalParameters().Add(nameof(Customer.IsModal), true).Add(nameof(Customer.Id), Id),
-                GetCustomersFiltered);
-    }
 }

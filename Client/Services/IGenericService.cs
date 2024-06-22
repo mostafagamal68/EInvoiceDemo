@@ -1,14 +1,13 @@
-﻿using EInvoiceDemo.Shared.DTOs;
-using EInvoiceDemo.Shared.Models;
+﻿using EInvoiceDemo.Shared.Models;
 using System.Net.Http;
 
 namespace EInvoiceDemo.Client.Services;
 
-internal interface IGenericService<TFilter, TDto>
+public interface IGenericService<TFilter, TDto>
     where TDto : DtoBase
     where TFilter : GlobalFilter<TDto>
 {
-    string Api { set; }
+    string api { get; }
     Task<TFilter> GetList(TFilter filter);
     Task<List<KeyValue>?> GetKeyValue(string? filter);
     Task<TDto> GetSingle(Guid? Id);

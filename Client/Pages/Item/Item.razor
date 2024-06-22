@@ -5,39 +5,19 @@
 <EditForm Model="dto">
     <DataAnnotationsValidator />
     <div class="col-md-12 my-1">
-        <div class="row my-1">
-            <div class="col-md-3 my-auto">
-                <label>Code</label>
-            </div>
-            <div class="col-md-6">
-                <InputNumber class="form-control" @bind-Value="dto.ItemCode" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.ItemCode)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-3 my-auto">
-                <label>Name</label>
-            </div>
-            <div class="col-md-6">
-                <InputText class="form-control" @bind-Value="dto.ItemName" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.ItemName)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-3 my-auto">
-                <label>Description</label>
-            </div>
-            <div class="col-md-6">
-                <InputTextArea class="form-control" @bind-Value="dto.ItemDescription" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.ItemDescription)" />
-            </div>
-        </div>
+
+        <Field Name="Code" For="@(() => dto.ItemCode)">
+            <InputNumber class="form-control" @bind-Value="dto.ItemCode" />
+        </Field>
+
+        <Field Name="Name" For="@(() => dto.ItemName)">
+            <InputText class="form-control" @bind-Value="dto.ItemName" />
+        </Field>
+
+        <Field Name="Description" For="@(() => dto.ItemDescription)">
+            <InputTextArea class="form-control" @bind-Value="dto.ItemDescription" />
+        </Field>
+
     </div>
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
@@ -50,20 +30,13 @@
     </div>
 </EditForm>
 @code {
-    [Parameter]
-    public Guid? Id { get; set; }
-
     ItemDto dto = new();
 
-    protected override async Task OnInitializedAsync()
-    {
-        item.Api = nameof(Items);
-        await GetItem();
-    }
+    protected override async Task OnInitializedAsync() => await GetItem();
 
     private async Task GetItem()
     {
-        if (!IsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Item)}");
+        if (!AsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Item)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue) dto = await item.GetSingle(Id);
         else dto.ItemCode = await item.GetCode();
@@ -74,10 +47,10 @@
         HttpResponseMessage httpResponseMessage;
         if (!Id.HasValue)
         {
-            dto.ItemId = Guid.NewGuid();
+            dto.Id = Guid.NewGuid();
             httpResponseMessage = await item.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
-                Id = dto.ItemId;
+                Id = dto.Id;
             // GoTo("Item", "EInvoice Type", true, dto.ItemId);
         }
         else

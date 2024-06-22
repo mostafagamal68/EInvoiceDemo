@@ -1,0 +1,371 @@
+﻿@using System.Diagnostics.CodeAnalysis;
+@using System.ComponentModel.DataAnnotations;
+@typeparam TType where TType : DtoBase
+@typeparam TFilter where TFilter : GlobalFilter<TType>, new()
+@inject IGenericService<TFilter, TType> Service
+@inherits GeneralComponent
+@if (ShowActions)
+{
+    <div class="d-flex justify-content-between rounded shadow p-2 my-1 flex-wrap">
+        @if (SearchTemplate is not null)
+        {
+            <div class="d-flex">
+                <span class="btn btn-light disabled"><i class="bi bi-search"></i></span>
+                @SearchTemplate.Invoke((Model, new EventCallback(null, Filter)))
+            </div>
+        }
+        <div class="d-flex justify-content-end align-items-center gap-2">
+            <Btn class="btn-primary" ClickAction="Clear" Icon="bi bi-x" />
+            <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" />
+            @if (ActionsAsModal)
+            {
+                <Btn class="btn-violet" Icon="bi bi-plus-circle"
+                     ClickAction="@(() => ShowModal(FormType, $"Add - {FormType.Name}", afterClose: Filter))" />
+            }
+            else
+            {
+                <Btn class="btn-violet" ClickAction="() => GoTo(FormType.Name)" Icon="bi bi-plus-circle" />
+            }
+        </div>
+    </div>
+}
+@if (FilterTemplate is not null)
+{
+    <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 my-2">
+        @FilterTemplate.Invoke(Model)
+    </div>
+}
+@if (!LoaderService.IsLoading)
+{
+    if (Model.Items.Any())
+    {
+        if (TableDesignType == TableDesign.List)
+        {
+            <ul class="list-group">
+                <li class="list-group-item">
+                    <label>#</label>
+                    <div>
+                        @if (ShowSort)
+                        {
+                            <label>Sort by</label>
+                            <div>
+                                <select class="form-select py-0 px-2" @onchange="SortBy">
+                                    <option value="">Default</option>
+                                    @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                    {
+                                        <option value="@item.Name">
+                                            @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                                        </option>
+                                    }
+                                </select>
+                            </div>
+                        }
+                        <label>Actions</label>
+                    </div>
+                </li>
+                @foreach ((TType item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
+                {
+                    var properties = item.GetType().GetProperties();
+                    <li class="list-group-item">
+                        <div>
+                            <span class="h5">
+                                @index |
+                            </span>
+                            @if (RowTemplate is not null)
+                            {
+                                @RowTemplate(item)
+                            }
+                            else
+                            {
+                                foreach (var (property, itemIndex) in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))).Select((value, i) => (value, i + 1)))
+                                {
+                                    if (itemIndex == 1)
+                                    {
+                                        <span class="h5">
+                                            @property.GetValue(item)
+                                        </span>
+                                    }
+                                    else
+                                    {
+                                        <span>
+                                            <span class="badge rounded-pill shadow-sm">
+                                                @(property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name):
+                                            </span>
+                                            @property.GetValue(item)?.ToString(2)
+                                        </span>
+                                    }
+                                }
+                            }
+                        </div>
+                        <div>
+                            @CustomActions?.Invoke(item)
+                            @if (WithEdit)
+                            {
+                                <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
+                                     ClickAction="() => Edit(item.Id)" />
+                            }
+
+                            @if (WithDelete)
+                            {
+                                <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
+                                     ClickAction="async () => await Delete(item.Id)" />
+                            }
+                        </div>
+                    </li>
+                }
+            </ul>
+        }
+        else if (TableDesignType == TableDesign.Cards)
+        {
+
+        }
+        else if (TableDesignType == TableDesign.Table)
+        {
+            <div class="table-responsive">
+                <table class="table table-sm table-striped table-hover align-middle" @attributes="AdditionalAttributes">
+                    <thead class="align-middle">
+                        <tr>
+                            <th scope="col" class="border-end">
+                                @if (MultiSelect)
+                                {
+                                    <input type="checkbox" class="form-check mx-1 d-inline align-middle" @bind="SelectAll" @bind:after="CheckedAll" />
+                                }
+                                #
+                            </th>
+                            @if (ShowSort)
+                            {
+                                foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                {
+                                    <th scope="col" class="border-end" @onclick="async () => await SortBy(item.Name)">
+                                        @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                                    </th>
+                                }
+                            }
+                            else
+                            {
+                                foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                {
+                                    <th scope="col" class="border-end">
+                                        @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
+                                    </th>
+                                }
+                            }
+                            <th scope="col" class="px-2">
+                                @if (MultiSelect)
+                                {
+                                    <div class="btn-group dropstart">
+                                        <a role="button" class="btn btn-sm btn-secondary rounded-3 shadow-sm dropdown-toggle" data-bs-toggle="dropdown" aria-expanded="false" disabled="@(!Model.Items.Any(c => c.IsSelected))">
+                                            Actions
+                                        </a>
+                                        <div class="dropdown-menu px-2">
+                                            <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
+                                                 ClickAction="async () => await Bulk(BulkOperation.Delete)" />
+                                            @if (MultiSelectActions != null)
+                                            {
+
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                                else
+                                {
+                                    @("Actions")
+                                    ;
+                                }
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach ((TType item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
+                        {
+                            var properties = item.GetType().GetProperties();
+                            <tr class="@(item.IsSelected ? "table-active" : "")">
+                                <td class="border-end">
+                                    @if (MultiSelect)
+                                    {
+                                        <input type="checkbox" class="form-check mx-2 d-inline align-middle" @bind="item.IsSelected" @bind:after="CheckedChanged" />
+                                    }
+                                    @index
+                                </td>
+                                @foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                {
+                                    <td class="border-end">@property.GetValue(item)?.ToString(2)</td>
+                                }
+                                <td>
+                                    @CustomActions?.Invoke(item)
+                                    @if (WithEdit)
+                                    {
+                                        <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
+                                             ClickAction="() => Edit(item.Id)" />
+                                    }
+
+                                    @if (WithDelete)
+                                    {
+                                        <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
+                                             ClickAction="async () => await Delete(item.Id)" />
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        }
+        else
+        {
+            if (RowTemplate is not null)
+                foreach ((TType item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
+                    RowTemplate(item);
+        }
+        @ExtraData
+        @if (WithPagination)
+        {
+            <Paginator Pagination="Model.Pagination" GetPage="Filter"></Paginator>
+        }
+    }
+    else
+    {
+        <div class="d-flex alert alert-warning align-Customers-center my-2">
+            <h5><i class="bi bi-exclamation-triangle mx-2"></i>No Data</h5>
+        </div>
+    }
+}
+
+@code {
+    bool SelectAll;
+
+    [Parameter]
+    public Type FormType { get; set; }
+
+    [Parameter]
+    public TFilter Model { get; set; } = new();
+
+    [Parameter]
+    public RenderFragment<(TFilter filter, EventCallback action)>? SearchTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<TFilter>? FilterTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<TType>? RowTemplate { get; set; }
+
+    [Parameter]
+    public RenderFragment<TType>? CustomActions { get; set; }
+
+    [Parameter]
+    public RenderFragment? ExtraData { get; set; }
+
+    [Parameter]
+    public RenderFragment? MultiSelectActions { get; set; }
+
+    [Parameter]
+    public TableDesign? TableDesignType { get; set; }
+
+    [Parameter]
+    public bool MultiSelect { get; set; }
+
+    [Parameter]
+    public bool WithEdit { get; set; } = true;
+
+    [Parameter]
+    public bool WithDelete { get; set; } = true;
+
+    [Parameter]
+    public bool WithPagination { get; set; } = true;
+
+    [Parameter]
+    public bool ActionsAsModal { get; set; } = true;
+
+    [Parameter]
+    public bool ShowActions { get; set; } = true;
+
+    [Parameter]
+    public bool ShowSort { get; set; } = true;
+
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object>? AdditionalAttributes { get; set; }
+
+    [CascadingParameter]
+    public EditContext? EditContext { get; set; }
+    // protected override async Task OnParametersSetAsync() => await Filter();
+    protected override async Task OnInitializedAsync() => await Filter();
+
+    private async Task Filter()
+    {
+        if (EditContext is null)
+        {
+            LoaderService.ToggleLoader();
+            HeaderService.ChangeHeaderAndTitle(Service.api);
+            Model = await Service.GetList(Model);
+            LoaderService.ToggleLoader();
+        }
+    }
+    private async Task Edit(Guid id)
+    {
+        if (ActionsAsModal)
+            await ShowModal(
+                    FormType,
+                    $"Edit - {FormType.Name}",
+                    new ModalParameters().Add(nameof(AsModal), true).Add(nameof(Id), id),
+                    Filter);
+        else
+            GoTo(FormType.Name, id);
+    }
+
+    private async Task Delete(Guid id)
+    {
+        if (await ShowDeleteConfirmation(FormType.Name))
+        {
+            var response = await Service.Delete(id);
+            if (response.IsSuccessStatusCode)
+                Model?.Items.Remove(Model.Items.First(c => c.Id == id));
+            // await Filter();
+            await ShowResultMessage(response);
+        }
+    }
+    private async Task Bulk(BulkOperation operation)
+    {
+        var SelectedItems = Model.Items.Where(c => c.IsSelected);
+        HttpResponseMessage? response = null;
+        switch (operation)
+        {
+            case BulkOperation.Delete:
+                {
+                    if (await ShowDeleteConfirmation(FormType.Name))
+                    {
+                        var Ids = SelectedItems.Select(c => c.Id).ToList();
+                        response = await Service.Bulk(Ids, BulkOperation.Delete);
+                        if (response.IsSuccessStatusCode)
+                            Model.Items.Where(c => Ids.Contains(c.Id)).ToList().ForEach(c => Model.Items.Remove(c));
+                    }
+                    break;
+                };
+            case BulkOperation.Update:
+                {
+                    break;
+                }
+        }
+        // await Filter();
+        await ShowResultMessage(response);
+    }
+    private async Task Clear()
+    {
+        Model = new();
+        await Filter();
+    }
+    private async Task SortBy(string Field)
+    {
+        Model.SortField = Field;
+        Model.SortApproach = Model.SortApproach;
+        await Filter();
+    }
+
+    private async Task SortBy(ChangeEventArgs Field)
+        => await SortBy((string)Field.Value!);
+
+    private void CheckedChanged()
+        => SelectAll = Model.Items.All(c => c.IsSelected);
+
+    private void CheckedAll()
+        => Model.Items.ForEach(c => c.IsSelected = SelectAll);
+}

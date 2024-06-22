@@ -1,95 +1,31 @@
 ﻿@page "/EInvoices"
-@using EInvoiceDemo.Client.Pages.Customer
-@inherits GeneralComponent
-@inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoices
 @inject IGenericService<CustomersFilter, CustomerDto> customers
 
-<div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
-    <Btn class="btn-violet" Text="Add" ClickAction="() => GoTo(nameof(EInvoice))" Icon="bi bi-plus-circle" />
-</div>
-<div class="d-flex justify-content-start align-items-center flex-wrap gap-2 my-2">
-    <div class="flex-grow-1">
-        <label>Type</label>
-        <Options T=EInvoiceTypeEnum @bind-Value=filter.EInvoiceType DisplayName=@nameof(filter.EInvoiceType) ShowChoose=true />
-    </div>
-    <div class="flex-grow-1">
-        <label>Customer</label>
-        <Select AutoComplete="true" @bind-Value="filter.CustomerName" @bind-Key="filter.CustomerId" List="customersList" GetList="GetCustomers" />
-    </div>
-    <div class="flex-grow-1">
-        <label>Date From</label>
-        <input type="datetime-local" class="form-control" @bind="filter.DateTimeIssuedFrom" />
-    </div>
-    <div class="flex-grow-1">
-        <label>Date To</label>
-        <input type="datetime-local" class="form-control" @bind="filter.DateTimeIssuedTo" />
-    </div>
-</div>
-<div class="d-flex justify-content-end align-items-center gap-2 flex-wrap my-2">
-    <Btn class="btn-primary" Text="Clear" ClickAction="Clear" Icon="bi bi-x" />
-    <Btn class="btn-success" Text="Search" ClickAction="GetEInvoicesFiltered" Icon="bi bi-search" />
-</div>
-@if (!LoaderService.IsLoading)
-{
-    <TableWithPagination TType="EInvoiceDto" Model="filter" Filter="GetEInvoicesFiltered" MultiSelect="true"
-                         Actions="@((args) => TableActions(args.Id, args.IsDelete))" BulkActions="BulkActions">
-    </TableWithPagination>
-}
+<Grid FormType=@typeof(EInvoice) TType=EInvoiceDto TFilter=EInvoicesFilter
+                     MultiSelect=true TableDesignType=TableDesign.Table ActionsAsModal=false>
+    <FilterTemplate Context="filter">
+        <div class="flex-grow-1">
+            <label>Type</label>
+            <Options T=EInvoiceTypeEnum @bind-Value=filter.EInvoiceType DisplayName=@nameof(filter.EInvoiceType) ShowChoose=true />
+        </div>
+        <div class="flex-grow-1">
+            <label>Customer</label>
+            <Select AutoComplete="true" @bind-Value="filter.CustomerName" @bind-Key="filter.CustomerId"
+                    List="customersList" GetList="GetCustomers" />
+        </div>
+        <div class="flex-grow-1">
+            <label>Date From</label>
+            <input type="datetime-local" class="form-control" @bind="filter.DateTimeIssuedFrom" />
+        </div>
+        <div class="flex-grow-1">
+            <label>Date To</label>
+            <input type="datetime-local" class="form-control" @bind="filter.DateTimeIssuedTo" />
+        </div>
+    </FilterTemplate>
+</Grid>
+
 @code {
-    EInvoicesFilter filter = new();
     List<KeyValue>? customersList = new();
-    List<KeyValue>? typesList = new();
-
-    protected override async Task OnInitializedAsync()
-    {
-        einvoices.Api = nameof(EInvoices);
-        customers.Api = nameof(Customers);
-        HeaderService.ChangeHeaderAndTitle(nameof(EInvoices));
-        await GetEInvoicesFiltered();
-    }
-
-    private async Task GetEInvoicesFiltered()
-    {
-        LoaderService.ToggleLoader();
-        filter = await einvoices.GetList(filter);
-        LoaderService.ToggleLoader();
-    }
-
-    private async Task Clear()
-    {
-        filter = new();
-        await GetEInvoicesFiltered();
-    }
-    private async Task TableActions(Guid Id, bool IsDelete)
-    {
-        if (IsDelete)
-        {
-            if (await ShowDeleteConfirmation(nameof(EInvoice)))
-            {
-                var response = await einvoices.Delete(Id);
-                if (response.IsSuccessStatusCode)
-                    filter?.Items.Remove(filter.Items.First(c => c.EInvoiceId == Id));
-                await ShowResultMessage(response);
-            }
-        }
-        else GoTo(nameof(EInvoice), Id);
-    }
-
-    private async Task BulkActions(BulkOperation operation)
-    {
-        var SelectedItems = filter.Items.Where(c => c.IsSelected);
-        if (operation is BulkOperation.Delete)
-        {
-            if (await ShowDeleteConfirmation(nameof(EInvoices)))
-            {
-                var Ids = SelectedItems.Select(c => c.EInvoiceId).ToList();
-                var response = await einvoices.Bulk(Ids, BulkOperation.Delete);
-                if (response.IsSuccessStatusCode)
-                    filter.Items.Where(c => Ids.Contains(c.EInvoiceId)).ToList().ForEach(c => filter.Items.Remove(c));
-                await ShowResultMessage(response);
-            }
-        }
-    }
 
     private async Task GetCustomers(string? filter)
         => customersList = await customers.GetKeyValue(filter);

@@ -7,50 +7,23 @@
 <EditForm Model="dto">
     <DataAnnotationsValidator />
     <div class="col-md-12 my-1">
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Code</label>
-            </div>
-            <div class="col-md-5">
-                <InputNumber class="form-control" @bind-Value="dto.EInvoiceCode" />
-                <ValidationMessage For="@(() => dto.EInvoiceCode)" />
-            </div>
-            <div class="col-md my-auto">
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Type</label>
-            </div>
-            <div class="col-md-5">
-                <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadioButtons=true/>
-            </div>
-            <div class="col-md-3 my-auto">
-                <ValidationMessage For="@(() => dto.EInvoiceType)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Customer</label>
-            </div>
-            <div class="col-md-5">
-                <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId" List="customersList" GetList="GetCustomers" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.CustomerName)" />
-            </div>
-        </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Date</label>
-            </div>
-            <div class="col-md-5">
-                <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="dto.DateTimeIssued" class="form-control" />
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.DateTimeIssued)" />
-            </div>
-        </div>
+
+        <Field Name="Code" For="@(() => dto.EInvoiceCode)">
+            <InputNumber class="form-control" @bind-Value="dto.EInvoiceCode" />
+        </Field>
+
+        <Field Name="Type" For="@(() => dto.EInvoiceType)">
+            <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadioButtons=true />
+        </Field>
+
+        <Field Name="Customer" For="@(() => dto.CustomerName)">
+            <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId" List="customersList" GetList="GetCustomers" />
+        </Field>
+
+        <Field Name="Date" For="@(() => dto.DateTimeIssued)">
+            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="dto.DateTimeIssued" class="form-control" />
+        </Field>
+
         <div class="card rounded-3 my-1">
             <div class="card-body">
                 <div class="col-md-3 mb-1">
@@ -60,13 +33,15 @@
                             "EInvoice Line",
                             new ModalParameters()
                                 .Add(nameof(EInvoiceLine.List), dto.EInvoiceLines)
-                                .Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.EInvoiceId }),
+                                .Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.Id }),
                             async () => Calculate())
                             )" />
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
-                    <TableWithPagination TType="EInvoiceLineDto" Model="lineFilter" WithPagination="false" Context="line" TableDesignType="TableWithPagination<EInvoiceLineDto>.TableDesign.List">
+                    <Grid TType=EInvoiceLineDto TFilter=EInvoiceLineFilter Model=lineFilter
+                        WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false                        
+                        Context=line TableDesignType=TableDesign.List>
                         <CustomActions>
                             <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
                                  ClickAction="@(() => ShowModal(
@@ -78,21 +53,15 @@
                                     async () => Calculate())
                                     )" />
                         </CustomActions>
-                    </TableWithPagination>
+                    </Grid>
                 }
             </div>
         </div>
-        <div class="row my-1">
-            <div class="col-md-2 my-auto">
-                <label>Net Amount</label>
-            </div>
-            <div class="col-md-5 my-auto">
-                <h5>@dto.NetAmount.ToString(2)</h5>
-            </div>
-            <div class="col-md my-auto">
-                <ValidationMessage For="@(() => dto.NetAmount)" />
-            </div>
-        </div>
+
+        <Field Name="Net Amount" For="@(() => dto.NetAmount)">
+            <h5>@dto.NetAmount.ToString(2)</h5>
+        </Field>
+
     </div>
     <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
         @if (Id.HasValue)
@@ -105,30 +74,22 @@
     </div>
 </EditForm>
 @code {
-    [Parameter]
-    public Guid? Id { get; set; }
-
     EInvoiceDto dto = new();
     EInvoiceLineFilter lineFilter = new();
     List<KeyValue>? customersList = new();
     List<KeyValue>? typesList = new();
 
-    protected override async Task OnInitializedAsync()
-    {        
-        einvoice.Api = nameof(EInvoices);
-        customers.Api = nameof(Customers);
-        await GetEInvoice();
-    }
+    protected override async Task OnInitializedAsync() => await GetEInvoice();
 
     private async Task GetEInvoice()
     {
-        if (!IsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
+        if (!AsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
             dto = await einvoice.GetSingle(Id);
         else
         {
-            dto.EInvoiceId = Guid.NewGuid();
+            dto.Id = Guid.NewGuid();
             dto.EInvoiceCode = await einvoice.GetCode();
         }
         lineFilter.Items = dto.EInvoiceLines;
@@ -141,7 +102,7 @@
         {
             httpResponseMessage = await einvoice.Create(dto);
             if (httpResponseMessage.IsSuccessStatusCode)
-                Id = dto.EInvoiceId;
+                Id = dto.Id;
             // GoTo("EInvoice", "EInvoice ", true, dto.EInvoiceId);
         }
         else
@@ -160,12 +121,12 @@
         await GetEInvoice();
         dto.EInvoiceLines.ForEach(c =>
             {
-                c.EInvoiceId = dto.EInvoiceId;
-                c.EInvoiceLineId = Guid.NewGuid();
+                c.EInvoiceId = dto.Id;
+                c.Id = Guid.NewGuid();
                 c.EInvoiceLineTaxes.ForEach(x =>
                     {
-                        x.EInvoiceLineId = c.EInvoiceLineId;
-                        x.EInvoiceLineTaxId = Guid.NewGuid();
+                        x.EInvoiceLineId = c.Id;
+                        x.Id = Guid.NewGuid();
                     });
             });
     }

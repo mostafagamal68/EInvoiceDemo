@@ -1,6 +1,6 @@
 ﻿@page "/Taxes"
 
-<Grid FormType=@typeof(Tax) TType=TaxDto TFilter=TaxesFilter TableDesignType=TableDesign.Table>
+<Grid FormType=@typeof(Tax) TDto=TaxDto TFilter=TaxesFilter TableDesignType=TableDesign.Table>
     <SearchTemplate>
         <input class="form-control shadow-none" @bind="context.filter.TaxName" @bind:event="oninput" @bind:after="context.action.InvokeAsync" />
     </SearchTemplate>

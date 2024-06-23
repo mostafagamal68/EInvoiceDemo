@@ -1,6 +1,6 @@
 ﻿@page "/Items"
 
-<Grid FormType=@typeof(Item) TType=ItemDto TFilter=ItemsFilter TableDesignType=TableDesign.Table>
+<Grid FormType=@typeof(Item) TDto=ItemDto TFilter=ItemsFilter TableDesignType=TableDesign.Table>
     <SearchTemplate>
         <input class="form-control shadow-none" @bind="context.filter.ItemName" @bind:event="oninput" @bind:after="context.action.InvokeAsync" />
     </SearchTemplate>

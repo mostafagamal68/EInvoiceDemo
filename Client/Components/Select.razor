@@ -1,11 +1,13 @@
 ﻿@using System.Linq.Expressions;
+@typeparam TDto where TDto : DtoBase
+@typeparam TFilter where TFilter : GlobalFilter<TDto>
 @inherits InputText
-
+@inject IGenericService<TFilter, TDto> Service
 <div class="dropdown">
     @if (AutoComplete)
     {
-        <input class="form-select @CssClass" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" value="@CurrentValue" 
-               @attributes="AdditionalAttributes" @oninput="(args) => GetList.InvokeAsync(args?.Value?.ToString())" 
+        <input class="form-select @CssClass" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" value="@CurrentValue"
+               @attributes="AdditionalAttributes" @oninput="(args) => Service.GetKeyValue(args?.Value?.ToString())"
                @onblur="AutoCompleteBlured" @onclick="GetAll" />
     }
     else
@@ -17,19 +19,26 @@
     <ul class="dropdown-menu w-100">
         @if (!List.Any())
         {
-            <li><h6 class="dropdown-item my-0">No result</h6></li>
+            <li><h6 class="dropdown-item py-0">No result</h6></li>
         }
         else
         {
             if (!AutoComplete)
             {
-                <li><a class="dropdown-item my-0" role="button" @onclick="SelectedValueChanged">Clear</a></li>
+                <li>
+                    <a class="dropdown-item py-0" role="button" @onclick="SelectedValueChanged">
+                        <div class="d-flex justify-content-between">
+                            <span class="text-start">Clear</span>
+                            <span class="text-end"><i class="bi bi-x-circle"></i></span>
+                        </div>
+                    </a>
+                </li>
                 <li><hr class="dropdown-divider"></li>
             }
             foreach (var item in List)
             {
                 <li>
-                    <a class="dropdown-item my-0" role="button" @onclick="async () => await SelectedValueChanged(item)">
+                    <a class="dropdown-item" role="button" @onclick="async () => await SelectedValueChanged(item)">
                         @item?.Value
                     </a>
                 </li>
@@ -39,13 +48,11 @@
 </div>
 
 @code {
-    [Parameter] public List<KeyValue> List { get; set; } = new();
+    List<KeyValue>? List { get; set; } = new();
 
     [Parameter] public bool AutoComplete { get; set; } = false;
 
     [Parameter] public bool Boolean { get; set; } = false;
-
-    [Parameter] public EventCallback<string> GetList { get; set; }
 
     [Parameter] public Guid? Key { get; set; }
 
@@ -55,12 +62,12 @@
 
     protected override async Task OnInitializedAsync()
     {
-        if (!AutoComplete) await GetList.InvokeAsync();
+        if (!AutoComplete) List = await Service.GetKeyValue(null);
     }
 
     private async Task GetAll()
     {
-        await GetList.InvokeAsync();
+        List = await Service.GetKeyValue(null);
         await SelectedValueChanged();
     }
 

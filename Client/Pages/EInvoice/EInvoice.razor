@@ -2,7 +2,6 @@
 @using EInvoiceDemo.Client.Pages.Customer
 @inherits GeneralComponent
 @inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoice
-@inject IGenericService<CustomersFilter, CustomerDto> customers
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
@@ -17,7 +16,7 @@
         </Field>
 
         <Field Name="Customer" For="@(() => dto.CustomerName)">
-            <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId" List="customersList" GetList="GetCustomers" />
+            <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId" TDto="CustomerDto" TFilter="CustomersFilter" />
         </Field>
 
         <Field Name="Date" For="@(() => dto.DateTimeIssued)">
@@ -39,9 +38,8 @@
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
-                    <Grid TType=EInvoiceLineDto TFilter=EInvoiceLineFilter Model=lineFilter
-                        WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false                        
-                        Context=line TableDesignType=TableDesign.List>
+                    <Grid TDto=EInvoiceLineDto TFilter=EInvoiceLineFilter Model=lineFilter TableDesignType=TableDesign.List
+                          WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false Context=line>
                         <CustomActions>
                             <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
                                  ClickAction="@(() => ShowModal(
@@ -76,8 +74,6 @@
 @code {
     EInvoiceDto dto = new();
     EInvoiceLineFilter lineFilter = new();
-    List<KeyValue>? customersList = new();
-    List<KeyValue>? typesList = new();
 
     protected override async Task OnInitializedAsync() => await GetEInvoice();
 
@@ -140,9 +136,6 @@
             await ShowResultMessage(response);
         }
     }
-
-    private async Task GetCustomers(string? filter)
-        => customersList = await customers.GetKeyValue(filter);
 
     private void Calculate()
         => dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;

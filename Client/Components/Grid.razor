@@ -1,20 +1,20 @@
 ﻿@using System.Diagnostics.CodeAnalysis;
 @using System.ComponentModel.DataAnnotations;
-@typeparam TType where TType : DtoBase
-@typeparam TFilter where TFilter : GlobalFilter<TType>, new()
-@inject IGenericService<TFilter, TType> Service
+@typeparam TDto where TDto : DtoBase
+@typeparam TFilter where TFilter : GlobalFilter<TDto>, new()
+@inject IGenericService<TFilter, TDto> Service
 @inherits GeneralComponent
 @if (ShowActions)
 {
-    <div class="d-flex justify-content-between rounded shadow p-2 my-1 flex-wrap">
-        @if (SearchTemplate is not null)
-        {
-            <div class="d-flex">
+    <div class="d-flex justify-content-between rounded shadow p-2 mb-3 flex-wrap">
+        <div class="d-flex">
+            @if (SearchTemplate is not null)
+            {
                 <span class="btn btn-light disabled"><i class="bi bi-search"></i></span>
                 @SearchTemplate.Invoke((Model, new EventCallback(null, Filter)))
-            </div>
-        }
-        <div class="d-flex justify-content-end align-items-center gap-2">
+            }
+        </div>
+        <div class="d-flex align-items-center gap-2">
             <Btn class="btn-primary" ClickAction="Clear" Icon="bi bi-x" />
             <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" />
             @if (ActionsAsModal)
@@ -31,7 +31,7 @@
 }
 @if (FilterTemplate is not null)
 {
-    <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 my-2">
+    <div class="d-flex justify-content-start align-items-center flex-wrap gap-2 mb-3">
         @FilterTemplate.Invoke(Model)
     </div>
 }
@@ -51,7 +51,7 @@
                             <div>
                                 <select class="form-select py-0 px-2" @onchange="SortBy">
                                     <option value="">Default</option>
-                                    @foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                    @foreach (var item in typeof(TDto).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                                     {
                                         <option value="@item.Name">
                                             @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
@@ -63,7 +63,7 @@
                         <label>Actions</label>
                     </div>
                 </li>
-                @foreach ((TType item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
+                @foreach ((TDto item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
                 {
                     var properties = item.GetType().GetProperties();
                     <li class="list-group-item">
@@ -134,7 +134,7 @@
                             </th>
                             @if (ShowSort)
                             {
-                                foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                foreach (var item in typeof(TDto).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                                 {
                                     <th scope="col" class="border-end" @onclick="async () => await SortBy(item.Name)">
                                         @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
@@ -143,7 +143,7 @@
                             }
                             else
                             {
-                                foreach (var item in typeof(TType).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
+                                foreach (var item in typeof(TDto).GetProperties().Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                                 {
                                     <th scope="col" class="border-end">
                                         @(item.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name)
@@ -176,7 +176,7 @@
                         </tr>
                     </thead>
                     <tbody>
-                        @foreach ((TType item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
+                        @foreach ((TDto item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
                         {
                             var properties = item.GetType().GetProperties();
                             <tr class="@(item.IsSelected ? "table-active" : "")">
@@ -214,7 +214,7 @@
         else
         {
             if (RowTemplate is not null)
-                foreach ((TType item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
+                foreach ((TDto item, int index) in Model.Items.Select((value, i) => (value, i + 1)))
                     RowTemplate(item);
         }
         @ExtraData
@@ -247,10 +247,10 @@
     public RenderFragment<TFilter>? FilterTemplate { get; set; }
 
     [Parameter]
-    public RenderFragment<TType>? RowTemplate { get; set; }
+    public RenderFragment<TDto>? RowTemplate { get; set; }
 
     [Parameter]
-    public RenderFragment<TType>? CustomActions { get; set; }
+    public RenderFragment<TDto>? CustomActions { get; set; }
 
     [Parameter]
     public RenderFragment? ExtraData { get; set; }
@@ -287,7 +287,7 @@
 
     [CascadingParameter]
     public EditContext? EditContext { get; set; }
-    // protected override async Task OnParametersSetAsync() => await Filter();
+
     protected override async Task OnInitializedAsync() => await Filter();
 
     private async Task Filter()

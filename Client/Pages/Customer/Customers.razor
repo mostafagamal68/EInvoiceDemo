@@ -1,6 +1,6 @@
 ﻿@page "/Customers"
 
-<Grid FormType=@typeof(Customer) TType=CustomerDto TFilter=CustomersFilter TableDesignType=TableDesign.Table>
+<Grid FormType=@typeof(Customer) TDto=CustomerDto TFilter=CustomersFilter TableDesignType=TableDesign.Table>
     <SearchTemplate>
         <input class="form-control shadow-none" @bind="context.filter.CustomerName" @bind:event="oninput" @bind:after="context.action.InvokeAsync" />
     </SearchTemplate>

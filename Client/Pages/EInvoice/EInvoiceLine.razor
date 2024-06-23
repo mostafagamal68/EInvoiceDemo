@@ -1,15 +1,13 @@
 ﻿@using EInvoiceDemo.Client.Pages.Item
 @using EInvoiceDemo.Client.Pages.Tax
 @inherits GeneralComponent
-@inject IGenericService<ItemsFilter, ItemDto> items
-@inject IGenericService<TaxesFilter, TaxDto> taxes
 
 <EditForm Model="dto">
     <ObjectGraphDataAnnotationsValidator />
     <div class="col-md-12 my-1">
         
         <Field Name="Item" For="@(() => dto.ItemName)">
-            <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" List="itemsList" GetList="GetItems" />
+            <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" TDto="ItemDto" TFilter="ItemsFilter" />
         </Field>
         
         <Field Name="Quantity" For="@(() => dto.Quantity)">
@@ -25,15 +23,14 @@
                 <div class="col-md-3 mb-1">
                     <Btn class="btn-violet" Text="Add Tax" ClickAction="Add" Icon="bi bi-check-circle" />
                 </div>
-                <Grid TType=EInvoiceLineTaxDto TFilter=EInvoiceLineTaxFilter Model=taxFilter
-                                     WithEdit=false WithDelete=false WithPagination=false ShowActions=false ShowSort=false
-                                     Context=taxes TableDesignType=TableDesign.List>
+                <Grid TDto=EInvoiceLineTaxDto TFilter=EInvoiceLineTaxFilter Model=taxFilter TableDesignType=TableDesign.List
+                      WithEdit=false WithDelete=false WithPagination=false ShowActions=false ShowSort=false Context=taxes>
                     <RowTemplate>
                         <span>
                             <span class="badge rounded-pill shadow-sm">
                                 Tax:
                             </span>
-                            <Select @bind-Value="taxes.TaxName" @bind-Key="taxes.TaxId" List="taxesList" GetList="GetTaxes" />
+                            <Select @bind-Value="taxes.TaxName" @bind-Key="taxes.TaxId" TDto="TaxDto" TFilter="TaxesFilter" />
                             <ValidationMessage For="@(() => taxes.TaxName)" />
                         </span>
                         <span>
@@ -78,12 +75,10 @@
     [Parameter]
     public List<EInvoiceLineDto> List { get; set; } = new();
 
-    EInvoiceLineTaxFilter taxFilter = new();
-    List<KeyValue>? itemsList = new();
-    List<KeyValue>? taxesList = new();
-
     [CascadingParameter]
     BlazoredModalInstance BlazoredModal { get; set; } = new();
+
+    EInvoiceLineTaxFilter taxFilter = new();
 
     protected override void OnInitialized()
     {
@@ -167,10 +162,4 @@
         dto.Total = dto.EInvoiceLineTaxes.Sum(c => c.Amount);
         dto.ItemNetAmount = (dto.AmountSold * dto.Quantity) + dto.Total;
     }
-
-    private async Task GetItems(string? filter)
-        => itemsList = await items.GetKeyValue(filter);
-
-    private async Task GetTaxes(string? filter)
-        => taxesList = await taxes.GetKeyValue(filter);
 }

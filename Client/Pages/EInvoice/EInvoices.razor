@@ -1,7 +1,6 @@
 ﻿@page "/EInvoices"
-@inject IGenericService<CustomersFilter, CustomerDto> customers
 
-<Grid FormType=@typeof(EInvoice) TType=EInvoiceDto TFilter=EInvoicesFilter
+<Grid FormType=@typeof(EInvoice) TDto=EInvoiceDto TFilter=EInvoicesFilter
                      MultiSelect=true TableDesignType=TableDesign.Table ActionsAsModal=false>
     <FilterTemplate Context="filter">
         <div class="flex-grow-1">
@@ -11,7 +10,7 @@
         <div class="flex-grow-1">
             <label>Customer</label>
             <Select AutoComplete="true" @bind-Value="filter.CustomerName" @bind-Key="filter.CustomerId"
-                    List="customersList" GetList="GetCustomers" />
+                    TDto="CustomerDto" TFilter="CustomersFilter" />
         </div>
         <div class="flex-grow-1">
             <label>Date From</label>
@@ -25,8 +24,5 @@
 </Grid>
 
 @code {
-    List<KeyValue>? customersList = new();
 
-    private async Task GetCustomers(string? filter)
-        => customersList = await customers.GetKeyValue(filter);
 }

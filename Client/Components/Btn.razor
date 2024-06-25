@@ -3,15 +3,26 @@
     <a @ref="Element" class="btn rounded-3 shadow-sm @classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
         @if (IsActionRun)
         {
-            <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+            switch (SpinnerType)
+            {
+                case SpinnerType.Grow:
+                    <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+                    break;
+                case SpinnerType.Border:
+                    <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
+                    break;
+            }
         }
-        @if (Text.HasValue())
+        else
         {
-            <label class="mx-1">@Text</label>
-        }
-        @if (Icon.HasValue())
-        {
-            <i class="@Icon mx-1"></i>
+            if (Text.HasValue())
+            {
+                <label class="mx-1">@Text</label>
+            }
+            if (Icon.HasValue())
+            {
+                <i class="@Icon mx-1"></i>
+            }
         }
     </a>
 </span>
@@ -22,6 +33,12 @@
 @code {
     [Parameter]
     public string? Text { get; set; }
+
+    [Parameter]
+    public bool IsActionRun { get; set; }
+
+    [Parameter]
+    public SpinnerType SpinnerType { get; set; } = SpinnerType.Grow;
 
     [Parameter]
     public EventCallback ClickAction { get; set; }
@@ -46,7 +63,6 @@
 
     private Dictionary<string, object>? AdditionalAttributes { get; set; }
     private string? classes { get; set; }
-    private bool IsActionRun = false;
     private ElementReference Element;
 
     protected override void OnParametersSet()

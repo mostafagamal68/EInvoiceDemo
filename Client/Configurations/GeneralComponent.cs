@@ -30,14 +30,6 @@ public class GeneralComponent : ComponentBase
     [Parameter]
     public bool AsModal { get; set; } = false;
 
-    public ModalOptions ModalOptions { get; set; } = new()
-    {
-        ActivateFocusTrap = true,
-        AnimationType = ModalAnimationType.FadeInOut,
-        Position = ModalPosition.Middle,
-        Size = ModalSize.Large,
-    };
-
     public async Task ShowResultMessage(HttpResponseMessage result)
     {
         if (result.StatusCode == HttpStatusCode.Created)
@@ -66,7 +58,7 @@ public class GeneralComponent : ComponentBase
 
     public async Task ShowModal(Type component, string title, ModalParameters? parameters = null, Func<Task>? afterClose = null)
     {
-        var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true), ModalOptions);
+        var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true));
         await modal.Result;
         if (afterClose is not null)
         {

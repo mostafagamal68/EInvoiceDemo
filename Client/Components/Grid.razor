@@ -1,5 +1,7 @@
 ﻿@using System.Diagnostics.CodeAnalysis;
 @using System.ComponentModel.DataAnnotations;
+@using System.Linq.Expressions
+@using System.Reflection
 @typeparam TDto where TDto : DtoBase
 @typeparam TFilter where TFilter : GlobalFilter<TDto>, new()
 @inject IGenericService<TFilter, TDto> Service
@@ -8,15 +10,15 @@
 {
     <div class="d-flex justify-content-between rounded shadow p-2 mb-3 flex-wrap">
         <div class="d-flex">
-            @if (SearchTemplate is not null)
+            @if (SearchProperty is not null)
             {
                 <span class="btn btn-light disabled"><i class="bi bi-search"></i></span>
-                @SearchTemplate.Invoke((Model, new EventCallback(null, Filter)))
+                <input class="form-control shadow-none" @bind="Search" @bind:event="oninput" @bind:after="Filter" />
             }
         </div>
         <div class="d-flex align-items-center gap-2">
-            <Btn class="btn-primary" ClickAction="Clear" Icon="bi bi-x" />
-            <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" />
+            <Btn class="btn-primary" ClickAction="Refresh" Icon="bi bi-arrow-clockwise" SpinnerType="SpinnerType.Border" IsActionRun="GridIsLoading" />
+            <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" SpinnerType="SpinnerType.Border"/>
             @if (ActionsAsModal)
             {
                 <Btn class="btn-violet" Icon="bi bi-plus-circle"
@@ -240,8 +242,23 @@
     [Parameter]
     public TFilter Model { get; set; } = new();
 
+    private string Search
+    {
+        get
+        {
+            var compiledExpression = SearchProperty.Compile();
+            return compiledExpression(Model);
+        }
+        set
+        {
+            var memberExpression = (MemberExpression)SearchProperty.Body;
+            var propertyInfo = (PropertyInfo)memberExpression.Member;
+            propertyInfo.SetValue(Model, value);
+        }
+    }
+
     [Parameter]
-    public RenderFragment<(TFilter filter, EventCallback action)>? SearchTemplate { get; set; }
+    public Expression<Func<TFilter, string>>? SearchProperty { get; set; }
 
     [Parameter]
     public RenderFragment<TFilter>? FilterTemplate { get; set; }
@@ -288,16 +305,28 @@
     [CascadingParameter]
     public EditContext? EditContext { get; set; }
 
-    protected override async Task OnInitializedAsync() => await Filter();
+    bool GridIsLoading;
 
+    protected override async Task OnInitializedAsync()
+    {
+        LoaderService.ToggleLoader();
+        await Filter();
+        LoaderService.ToggleLoader();
+        await base.OnInitializedAsync();
+    }
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (firstRender)
+            HeaderService.ChangeHeaderAndTitle(Service.api);
+        base.OnAfterRender(firstRender);
+    }
     private async Task Filter()
     {
         if (EditContext is null)
         {
-            LoaderService.ToggleLoader();
-            HeaderService.ChangeHeaderAndTitle(Service.api);
+            GridIsLoading = true;
             Model = await Service.GetList(Model);
-            LoaderService.ToggleLoader();
+            GridIsLoading = false;
         }
     }
     private async Task Edit(Guid id)
@@ -348,7 +377,7 @@
         // await Filter();
         await ShowResultMessage(response);
     }
-    private async Task Clear()
+    private async Task Refresh()
     {
         Model = new();
         await Filter();

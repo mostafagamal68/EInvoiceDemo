@@ -6,14 +6,14 @@
 <div class="dropdown">
     @if (AutoComplete)
     {
-        <input class="form-select @CssClass" placeholder="Auto Complete" data-bs-toggle="dropdown" aria-expanded="false" value="@CurrentValue"
-               @attributes="AdditionalAttributes" @oninput="(args) => Service.GetKeyValue(args?.Value?.ToString())"
-               @onblur="AutoCompleteBlured" @onclick="GetAll" />
+        <input class="form-select @CssClass" placeholder="Auto Complete" autocomplete="off"
+               data-bs-toggle="dropdown" aria-expanded="false" value="@CurrentValueAsString"
+               @attributes="AdditionalAttributes" @oninput="Search" @onclick="GetAll" />
     }
     else
     {
         <input class="form-select @CssClass" style="cursor:pointer;" data-bs-toggle="dropdown" aria-expanded="false"
-               value="@(Value ?? "Not Selected")" @attributes="AdditionalAttributes" readonly />
+               value="@(CurrentValue ?? "Not Selected")" @attributes="AdditionalAttributes" readonly />
     }
 
     <ul class="dropdown-menu w-100">
@@ -71,17 +71,17 @@
         await SelectedValueChanged();
     }
 
-    private async Task AutoCompleteBlured()
-    {
-        if (!Key.HasValue) await SelectedValueChanged();        
-    }
+    private async Task Search(ChangeEventArgs args)
+        => await Service.GetKeyValue(args?.Value?.ToString());
 
     private async Task SelectedValueChanged(KeyValue? newValue)
     {
         await KeyChanged.InvokeAsync(newValue?.Key);
         await ValueChanged.InvokeAsync(newValue?.Value);
+        if (newValue?.Value is not null)
+            EditContext?.NotifyFieldChanged(FieldIdentifier);
     }
-
-    private async Task SelectedValueChanged() 
+        
+    private async Task SelectedValueChanged()
         => await SelectedValueChanged(null);
 }

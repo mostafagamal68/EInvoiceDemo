@@ -15,10 +15,10 @@
     // private async Task Cancel() => await BlazoredModal.CancelAsync();
 
     [CascadingParameter]
-    public IMgModal ModalService { get; set; }
+    public Services.IModalService ModalService { get; set; }
 
     [CascadingParameter]
-    public ModalObject ModalObject { get; set; }
+    public ModalData ModalObject { get; set; }
 
     private void Confirm()
     {

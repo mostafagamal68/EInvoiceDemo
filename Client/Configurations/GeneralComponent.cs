@@ -26,7 +26,7 @@ public class GeneralComponent : ComponentBase
     //public IModalService Modal { get; set; } = default!;
 
     [CascadingParameter]
-    public IMgModal ModalService { get; set; }
+    public IModalService ModalService { get; set; }
 
     [Parameter]
     public Guid? Id { get; set; }
@@ -61,7 +61,7 @@ public class GeneralComponent : ComponentBase
     //}
     public async Task<bool> ShowConfirm(string title, string message)
     {
-        var confirm = ModalService.Show(typeof(ConfirmDialog), title, new ModalParameters().Add(nameof(ConfirmDialog.Text), message));
+        var confirm = ModalService.Show(typeof(ConfirmDialog), title, new ModalParameters().Add(nameof(ConfirmDialog.Text), message), null);
         await confirm.Closing;
 
         return confirm.Value.CastTo<bool?>() == true;
@@ -79,7 +79,7 @@ public class GeneralComponent : ComponentBase
     //    }
     //    else await InvokeAsync(StateHasChanged);
     //}
-    public async Task ShowModal(Type component, string title, ModalParameters? parameters = null, Func<Task>? afterClose = null)
+    public async Task ShowModal(Type component, string title, ModalParameters? parameters, Func<Task>? afterClose)
     {
         var modal = ModalService.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true), afterClose);
         await modal.Closing;

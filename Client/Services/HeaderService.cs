@@ -1,4 +1,4 @@
-﻿namespace EInvoiceDemo.Client.Configurations;
+﻿namespace EInvoiceDemo.Client.Services;
 
 public class HeaderService
 {

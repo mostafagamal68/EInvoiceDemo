@@ -65,10 +65,10 @@
     // BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
     [CascadingParameter]
-    public IMgModal ModalService { get; set; }
+    public Services.IModalService ModalService { get; set; }
 
     [CascadingParameter]
-    public ModalObject ModalObject { get; set; }
+    public ModalData ModalObject { get; set; }
 
     private Dictionary<string, object>? AdditionalAttributes { get; set; }
     private string? classes { get; set; }
@@ -88,7 +88,8 @@
             var confirm = ModalService.Show(
                 typeof(ConfirmDialog),
                 "There are unsaved changes!", 
-                new ModalParameters().Add(nameof(ConfirmDialog.Text), "Do you want to leave?")
+                new ModalParameters().Add(nameof(ConfirmDialog.Text), "Do you want to leave?"),
+                null
             );
 
             await confirm.Closing;

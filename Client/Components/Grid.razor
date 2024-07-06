@@ -26,7 +26,7 @@
             @if (ActionsAsModal)
             {
                 <Btn class="btn-violet" Icon="bi bi-plus-circle"
-                     ClickAction="@(() => ShowModal(FormType, $"Add - {FormType.Name}", afterClose: Filter))" />
+                     ClickAction="@(async () => await ModalService.Show(new ModalData(FormType, $"Add - {FormType.Name}", Filter)))" />
             }
             else
             {
@@ -336,11 +336,12 @@
     private async Task Edit(Guid id)
     {
         if (ActionsAsModal)
-            await ShowModal(
-                    FormType,
-                    $"Edit - {FormType.Name}",
-                    new ModalParameters().Add(nameof(AsModal), true).Add(nameof(Id), id),
-                    async () => await ReloadById(id));
+            await ModalService.Show(new ModalData(
+                FormType,
+                $"Edit - {FormType.Name}",
+                new ModalParameters().Add(nameof(AsModal), true).Add(nameof(Id), id).ToDictionary(),
+                async () => await ReloadById(id))
+            );
         else
             GoTo(FormType.Name, id);
     }

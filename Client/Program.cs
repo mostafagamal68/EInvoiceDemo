@@ -1,7 +1,5 @@
-using Blazored.Modal;
 using Blazored.Toast;
 using EInvoiceDemo.Client;
-using EInvoiceDemo.Client.Configurations;
 using EInvoiceDemo.Client.Services;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
@@ -16,7 +14,7 @@ builder.Services.AddSingleton(c => new JsonSerializerOptions { PropertyNameCaseI
 //builder.Services.AddBlazoredModal();
 builder.Services.AddBlazoredToast();
 builder.Services.AddScoped(typeof(IGenericService<,>), typeof(GenericService<,>));
-builder.Services.AddScoped<IMgModal, MgModal>();
+builder.Services.AddScoped<IModalService, ModalService>();
 builder.Services.AddScoped<LoaderService>();
 builder.Services.AddScoped<HeaderService>();
 await builder.Build().RunAsync();

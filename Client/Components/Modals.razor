@@ -1,4 +1,4 @@
-﻿@inject IMgModal modalService
+﻿@inject IModalService modalService
 @implements IDisposable
 @if (modals.Count != 0)
 {
@@ -10,9 +10,14 @@
                 <div class="modal-dialog" role="document">
                     <div class="modal-content">
                         <div class="modal-header">
-                            <h5 class="modal-title">@modal.Title</h5>
-                            <br />
-                            <button type="button" class="btn-close" @onclick=@(() => CloseModal(modal))></button>
+                            <h5 class="modal-title">
+                                @if (modal.Icon.HasValue())
+                                {
+                                    <i class="@modal.Icon mx-2"></i>                                
+                                }
+                                @modal.Title
+                            </h5>
+                            <button type="button" class="btn-close" @onclick=@(async () => await RemoveModal(modal))></button>
                         </div>
                         <div class="modal-body">
                             <DynamicComponent Type=modal.ComponentType Parameters="modal.Parameters" />
@@ -26,19 +31,19 @@
 }
 
 @code {
-    List<ModalObject> modals = new();
+    List<ModalData> modals = new();
     protected override void OnInitialized()
     {
-        modalService.OnModalAdded += OpenModal;
-        modalService.OnModalClosed += CloseModal;
+        modalService.OnModalAdded += AddModal;
+        modalService.OnModalClosed += RemoveModal;
         base.OnInitialized();
     }
-    async Task OpenModal(ModalObject modal)
+    async Task AddModal(ModalData modal)
     {
         modals.Add(modal);
         await InvokeAsync(StateHasChanged);
     }
-    async Task CloseModal(ModalObject modal)
+    async Task RemoveModal(ModalData modal)
     {
         modal.EndAwait();
         modals.Remove(modal);
@@ -46,7 +51,7 @@
     }
     public void Dispose()
     {
-        modalService.OnModalAdded -= OpenModal;
-        modalService.OnModalClosed -= CloseModal;
+        modalService.OnModalAdded -= AddModal;
+        modalService.OnModalClosed -= RemoveModal;
     }
 }

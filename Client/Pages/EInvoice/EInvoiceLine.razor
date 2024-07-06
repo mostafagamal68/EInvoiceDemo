@@ -75,8 +75,10 @@
     [Parameter]
     public List<EInvoiceLineDto> List { get; set; } = new();
 
+    // [CascadingParameter]
+    // BlazoredModalInstance BlazoredModal { get; set; } = new();
     [CascadingParameter]
-    BlazoredModalInstance BlazoredModal { get; set; } = new();
+    public ModalData ModalObject { get; set; }
 
     EInvoiceLineTaxFilter taxFilter = new();
 
@@ -96,7 +98,7 @@
         {
             List?.Remove(List.First(c => c.Id == Id));
             ToastService.ShowSuccess("Deleted Successfully");
-            await BlazoredModal.CancelAsync();
+            ModalService.Close(ModalObject);
         }
     }
 

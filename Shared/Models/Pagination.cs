@@ -9,7 +9,7 @@ public class Pagination
     public int PagesCount { get; set; } = 0;
     public int StartPage { get; set; } = 1;
     public static Pagination GetPagination<TModel, TFilter, TDto>(IQueryable<TModel> query, TFilter filter)
-        where TModel : class
+        where TModel : Entity
         where TDto : DtoBase
         where TFilter : GlobalFilter<TDto>
     {

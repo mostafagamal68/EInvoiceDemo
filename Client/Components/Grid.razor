@@ -20,7 +20,7 @@
             <Btn class="btn-primary" ClickAction="Refresh" Icon="bi bi-arrow-clockwise" SpinnerType="SpinnerType.Border" IsActionRun="GridIsLoading" />
             @if (FilterTemplate is not null)
             {
-                <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" SpinnerType="SpinnerType.Border" />                
+                <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" SpinnerType="SpinnerType.Border" />
             }
 
             @if (ActionsAsModal)
@@ -327,11 +327,7 @@
     private async Task Filter()
     {
         if (EditContext is null)
-        {
-            GridIsLoading = true;
             Model = await Service.GetList(Model);
-            GridIsLoading = false;
-        }
     }
     private async Task Edit(Guid id)
     {
@@ -339,7 +335,11 @@
             await ModalService.Show(new ModalData(
                 FormType,
                 $"Edit - {FormType.Name}",
-                new ModalParameters().Add(nameof(AsModal), true).Add(nameof(Id), id).ToDictionary(),
+                new Dictionary<string, object>
+                        {
+                    { nameof(AsModal), true },
+                    { nameof(Id), id }
+                        },
                 async () => await ReloadById(id))
             );
         else
@@ -380,7 +380,7 @@
                     {
                         var Ids = SelectedItems.Select(c => c.Id).ToList();
                         response = await Service.Bulk(Ids, BulkOperation.Delete);
-                            // Model.Items.Where(c => Ids.Contains(c.Id)).ToList().ForEach(c => Model.Items.Remove(c));
+                        // Model.Items.Where(c => Ids.Contains(c.Id)).ToList().ForEach(c => Model.Items.Remove(c));
                     }
                     break;
                 };
@@ -396,7 +396,9 @@
     private async Task Refresh()
     {
         Model = new();
+        GridIsLoading = true;
         await Filter();
+        GridIsLoading = false;
     }
     private async Task SortBy(string Field)
     {

@@ -8,7 +8,7 @@ public class EInvoiceDto : DtoBase
 {
     [Display(Name = "Code")]
     [Required(ErrorMessage = "*")]
-    public int EInvoiceCode { get; set; }
+    public int Code { get; set; }
 
     [Display(Name = "Type")]
     [Required(ErrorMessage = "*")]

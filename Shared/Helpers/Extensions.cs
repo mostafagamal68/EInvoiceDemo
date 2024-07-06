@@ -1,6 +1,5 @@
 ﻿using EInvoiceDemo.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
 using System.Linq.Expressions;
 using System.Text;
 
@@ -31,22 +30,28 @@ public static class Extensions
 
     public static IQueryable<T> OrderWith<T>(this IQueryable<T> source, string? Field, SortingType SortingType = SortingType.Asc)
         => Field.HasValue() ?
-           SortingType == SortingType.Asc ?
-           source.OrderBy(c => EF.Property<object>(c, Field!))
-           :
-           source.OrderByDescending(c => EF.Property<object>(c, Field!))
-           :
+               SortingType == SortingType.Asc ?
+               source.OrderBy(c => EF.Property<object>(c, Field!))
+               :
+               source.OrderByDescending(c => EF.Property<object>(c, Field!))
+               :
            source;
+    public static IQueryable<T> OrderAndPaginate<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter)
+        where TDto : DtoBase
+        => source
+            .OrderWith(filter.SortField, filter.SortApproach)
+            .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
+            .Take(filter.Pagination.RowsCount);
 
     public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool Condition, Expression<Func<T, bool>> expression)
         => Condition ? source.Where(expression) : source;
 
-    public static async ValueTask<T> FindOrErrorAsync<T>(this DbSet<T> source, Guid Id, Exception? exception = null) where T : class
+    public static async Task<T> FindOrErrorAsync<T>(this DbSet<T> source, Guid Id, Exception? exception = null) where T : Entity
         => await source.FindAsync(Id) ?? throw exception ?? new KeyNotFoundException();
 
-    public static async Task<T> FirstOrErrorAsync<T>(this IQueryable<T> source, Expression<Func<T, bool>> expression, Exception? exception = null) where T : class
+    public static async Task<T> FirstOrErrorAsync<T>(this IQueryable<T> source, Expression<Func<T, bool>> expression, Exception? exception = null) where T : Entity
         => await source.FirstOrDefaultAsync(expression) ?? throw exception ?? new KeyNotFoundException();
         
-    public static T CloneJson<T>(this T source)
-        => JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace })!;
+    //public static T CloneJson<T>(this T source)
+    //    => JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace })!;
 }

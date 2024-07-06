@@ -61,7 +61,8 @@ public class GeneralComponent : ComponentBase
     //}
     public async Task<bool> ShowConfirm(string title, string message)
     {
-        var confirm = ModalService.Show(typeof(ConfirmDialog), title, new ModalParameters().Add(nameof(ConfirmDialog.Text), message), null);
+        var parameters = new Dictionary<string, object> { { nameof(ConfirmDialog.Text), message } };
+        var confirm = ModalService.Show(typeof(ConfirmDialog), title, parameters, null);
         await confirm.Closing;
 
         return confirm.Value.CastTo<bool?>() == true;
@@ -79,19 +80,7 @@ public class GeneralComponent : ComponentBase
     //    }
     //    else await InvokeAsync(StateHasChanged);
     //}
-    public async Task ShowModal(Type component, string title, ModalParameters? parameters, Func<Task>? afterClose)
-    {
-        var modal = ModalService.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true), afterClose);
-        await modal.Closing;
 
-        if (modal.Value is not null)
-        {
-
-        }
-
-        if (modal.AfterClose is not null)
-            await modal.AfterClose.Invoke();
-    }
     public void GoTo(string PageRoute, Guid? Id = null)
         => Navigation.NavigateTo($"/{PageRoute}{(Id.HasValue ? "/" + Id : "")}");
 }

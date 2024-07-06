@@ -5,6 +5,7 @@ using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace EInvoiceDemo.Server.Repositories;
 
@@ -15,11 +16,11 @@ internal class EInvoiceRepository(EInvoiceContext context)
     {
         EInvoice eInvoice = new()
         {
-            EInvoiceId = dto.Id,
+            Id = dto.Id,
             CustomerId = dto.CustomerId.GetValueOrDefault(),
-            EInvoiceCode = dto.EInvoiceCode,
+            Code = dto.Code,
             DateTimeIssued = dto.DateTimeIssued.GetValueOrDefault(),
-            EInvoiceType = dto.EInvoiceType,
+            EInvoiceType = dto.EInvoiceType.GetValueOrDefault(),
             NetAmount = dto.NetAmount,
         };
         foreach (var line in dto.EInvoiceLines)
@@ -30,7 +31,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
             }
             EInvoiceLine eInvoiceLine = new()
             {
-                EInvoiceLineId = line.Id,
+                Id = line.Id,
                 EInvoiceId = line.EInvoiceId.GetValueOrDefault(),
                 AmountSold = line.AmountSold.GetValueOrDefault(),
                 ItemId = line.ItemId.GetValueOrDefault(),
@@ -42,7 +43,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
             {
                 EInvoiceLineTax eInvoiceLineTax = new()
                 {
-                    EInvoiceLineTaxId = tax.Id,
+                    Id = tax.Id,
                     EInvoiceLineId = tax.EInvoiceLineId.GetValueOrDefault(),
                     TaxId = tax.TaxId.GetValueOrDefault(),
                     Amount = tax.Amount.GetValueOrDefault(),
@@ -62,7 +63,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
 
     public async Task<string> Bulk(Bulk ids)
     {
-        await Query().Where(c => ids.Guids.Contains(c.EInvoiceId)).ExecuteDeleteAsync();
+        await Query().Where(c => ids.Guids.Contains(c.Id)).ExecuteDeleteAsync();
         return "Deleted Successfully";
     }
 
@@ -70,14 +71,14 @@ internal class EInvoiceRepository(EInvoiceContext context)
 
     public async Task Delete(Guid id)
     {
-        var eInvoice = await Query().FirstOrErrorAsync(c => c.EInvoiceId == id);
+        var eInvoice = await Query().FirstOrErrorAsync(c => c.Id == id);
         DbModel().Remove(eInvoice);
         await _context.SaveChangesAsync();
     }
 
-    public bool Exists(Guid id) => DbModel().Any(e => e.EInvoiceId == id);
+    public bool Exists(Guid id) => DbModel().Any(e => e.Id == id);
 
-    public async Task<int> GetCode() => (await DbModel().MaxAsync(c => (int?)c.EInvoiceCode) ?? 0) + 1;
+    public async Task<int> GetCode() => (await DbModel().MaxAsync(c => (int?)c.Code) ?? 0) + 1;
 
     public Task<List<KeyValue>> GetKeyValue(string? filter)
     {
@@ -99,12 +100,12 @@ internal class EInvoiceRepository(EInvoiceContext context)
         filter.Items = await query
             .Select(c => new EInvoiceDto
             {
-                Id = c.EInvoiceId,
+                Id = c.Id,
                 CustomerId = c.CustomerId,
                 CustomerName = c.Customer.CustomerName,
                 EInvoiceType = c.EInvoiceType,
                 DateTimeIssued = c.DateTimeIssued,
-                EInvoiceCode = c.EInvoiceCode,
+                Code = c.Code,
                 NetAmount = c.NetAmount,
             })
             .OrderWith(filter.SortField, filter.SortApproach)
@@ -117,20 +118,20 @@ internal class EInvoiceRepository(EInvoiceContext context)
 
     public async Task<EInvoiceDto> GetSingle(Guid id)
     {
-        var eInvoice = await Query().FirstOrErrorAsync(c => c.EInvoiceId == id);
+        var eInvoice = await Query().FirstOrErrorAsync(c => c.Id == id);
 
         return new EInvoiceDto
         {
-            Id = eInvoice.EInvoiceId,
+            Id = eInvoice.Id,
             CustomerId = eInvoice.CustomerId,
             CustomerName = eInvoice.Customer?.CustomerName,
             EInvoiceType = eInvoice.EInvoiceType,
             DateTimeIssued = eInvoice.DateTimeIssued,
-            EInvoiceCode = eInvoice.EInvoiceCode,
+            Code = eInvoice.Code,
             NetAmount = eInvoice.NetAmount,
             EInvoiceLines = eInvoice.EInvoiceLines.Select(c => new EInvoiceLineDto
             {
-                Id = c.EInvoiceLineId,
+                Id = c.Id,
                 EInvoiceId = c.EInvoiceId,
                 ItemId = c.ItemId,
                 ItemName = c.Item?.ItemName,
@@ -140,7 +141,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
                 ItemNetAmount = c.ItemNetAmount,
                 EInvoiceLineTaxes = c.EInvoiceLineTaxes.Select(x => new EInvoiceLineTaxDto
                 {
-                    Id = x.EInvoiceLineTaxId,
+                    Id = x.Id,
                     EInvoiceLineId = x.EInvoiceLineId,
                     TaxId = x.TaxId,
                     TaxName = x.Tax.TaxName,
@@ -161,15 +162,15 @@ internal class EInvoiceRepository(EInvoiceContext context)
 
     public async Task Update(EInvoiceDto dto)
     {
-        var eInvoice = await Query().FirstOrErrorAsync(c => c.EInvoiceId == dto.Id);
+        var eInvoice = await Query().FirstOrErrorAsync(c => c.Id == dto.Id);
 
         _context.Entry(eInvoice).State = EntityState.Modified;
 
-        eInvoice.EInvoiceId = dto.Id;
+        eInvoice.Id = dto.Id;
         eInvoice.CustomerId = dto.CustomerId.GetValueOrDefault();
-        eInvoice.EInvoiceCode = dto.EInvoiceCode;
+        eInvoice.Code = dto.Code;
         eInvoice.DateTimeIssued = dto.DateTimeIssued.GetValueOrDefault();
-        eInvoice.EInvoiceType = dto.EInvoiceType;
+        eInvoice.EInvoiceType = dto.EInvoiceType.GetValueOrDefault();
         eInvoice.NetAmount = dto.NetAmount;
 
         foreach (var line in dto.EInvoiceLines)
@@ -178,12 +179,12 @@ internal class EInvoiceRepository(EInvoiceContext context)
             {
                 if (item.Taxes.Count() > 1) throw new Exception($"Item {line.ItemName} with Net Amount {line.ItemNetAmount} has duplicated taxes.");
             }
-            var eInvoiceLine = eInvoice.EInvoiceLines.FirstOrDefault(c => c.EInvoiceLineId == line.Id);
+            var eInvoiceLine = eInvoice.EInvoiceLines.FirstOrDefault(c => c.Id == line.Id);
             if (eInvoiceLine is null)
             {
                 eInvoiceLine = new()
                 {
-                    EInvoiceLineId = line.Id,
+                    Id = line.Id,
                     EInvoiceId = line.EInvoiceId.GetValueOrDefault(),
                     AmountSold = line.AmountSold.GetValueOrDefault(),
                     ItemId = line.ItemId.GetValueOrDefault(),
@@ -197,7 +198,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
                 {
                     EInvoiceLineTax eInvoiceLineTax = new()
                     {
-                        EInvoiceLineTaxId = tax.Id,
+                        Id = tax.Id,
                         EInvoiceLineId = tax.EInvoiceLineId.GetValueOrDefault(),
                         TaxId = tax.TaxId.GetValueOrDefault(),
                         Amount = tax.Amount.GetValueOrDefault(),
@@ -210,7 +211,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
             {
                 _context.Entry(eInvoiceLine).State = EntityState.Modified;
 
-                eInvoiceLine.EInvoiceLineId = line.Id;
+                eInvoiceLine.Id = line.Id;
                 eInvoiceLine.EInvoiceId = line.EInvoiceId.GetValueOrDefault();
                 eInvoiceLine.AmountSold = line.AmountSold.GetValueOrDefault();
                 eInvoiceLine.ItemId = line.ItemId.GetValueOrDefault();
@@ -219,12 +220,12 @@ internal class EInvoiceRepository(EInvoiceContext context)
                 eInvoiceLine.ItemNetAmount = line.ItemNetAmount.GetValueOrDefault();
                 foreach (var tax in line.EInvoiceLineTaxes)
                 {
-                    var eInvoiceLineTax = eInvoiceLine.EInvoiceLineTaxes.FirstOrDefault(c => c.EInvoiceLineTaxId == tax.Id);
+                    var eInvoiceLineTax = eInvoiceLine.EInvoiceLineTaxes.FirstOrDefault(c => c.Id == tax.Id);
                     if (eInvoiceLineTax is null)
                     {
                         eInvoiceLineTax = new()
                         {
-                            EInvoiceLineTaxId = tax.Id,
+                            Id = tax.Id,
                             EInvoiceLineId = tax.EInvoiceLineId.GetValueOrDefault(),
                             TaxId = tax.TaxId.GetValueOrDefault(),
                             Amount = tax.Amount.GetValueOrDefault(),
@@ -236,13 +237,13 @@ internal class EInvoiceRepository(EInvoiceContext context)
                     {
                         _context.Entry(eInvoiceLineTax).State = EntityState.Modified;
 
-                        eInvoiceLineTax.EInvoiceLineTaxId = tax.Id;
+                        eInvoiceLineTax.Id = tax.Id;
                         eInvoiceLineTax.EInvoiceLineId = tax.EInvoiceLineId.GetValueOrDefault();
                         eInvoiceLineTax.TaxId = tax.TaxId.GetValueOrDefault();
                         eInvoiceLineTax.Amount = tax.Amount.GetValueOrDefault();
                     }
                 }
-                var deletedLineTaxes = eInvoiceLine.EInvoiceLineTaxes.Where(c => !line.EInvoiceLineTaxes.Any(x => c.EInvoiceLineTaxId == x.Id));
+                var deletedLineTaxes = eInvoiceLine.EInvoiceLineTaxes.Where(c => !line.EInvoiceLineTaxes.Any(x => c.Id == x.Id));
                 if (deletedLineTaxes.Any())
                 {
                     foreach (var item in deletedLineTaxes)
@@ -253,7 +254,7 @@ internal class EInvoiceRepository(EInvoiceContext context)
                 }
             }
         }
-        var deletedLines = eInvoice.EInvoiceLines.Where(c => !dto.EInvoiceLines.Any(x => c.EInvoiceLineId == x.Id)).ToList();
+        var deletedLines = eInvoice.EInvoiceLines.Where(c => !dto.EInvoiceLines.Any(x => c.Id == x.Id)).ToList();
         if (deletedLines.Any())
         {
             foreach (var item in deletedLines)
@@ -263,5 +264,15 @@ internal class EInvoiceRepository(EInvoiceContext context)
             }
         }
         await _context.SaveChangesAsync();
+    }
+
+    public async Task<List<KeyValue>> GetKeyValue(string? filter, Expression<Func<EInvoice, bool>>? filterPredicate = null)
+    {
+        return await GetKeyValue(filter);
+    }
+
+    public async Task<EInvoicesFilter> GetList(EInvoicesFilter? filter, Func<IQueryable<EInvoice>>? queryable = null)
+    {
+        return await GetList(filter);
     }
 }

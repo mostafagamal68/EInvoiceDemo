@@ -7,8 +7,8 @@
     <DataAnnotationsValidator />
     <div class="col-md-12 my-1">
 
-        <Field Name="Code" For="@(() => dto.EInvoiceCode)">
-            <InputNumber class="form-control" @bind-Value="dto.EInvoiceCode" />
+        <Field Name="Code" For="@(() => dto.Code)">
+            <InputNumber class="form-control" @bind-Value="dto.Code" />
         </Field>
 
         <Field Name="Type" For="@(() => dto.EInvoiceType)">
@@ -16,7 +16,8 @@
         </Field>
 
         <Field Name="Customer" For="@(() => dto.CustomerName)">
-            <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId" TDto="CustomerDto" TFilter="CustomersFilter" />
+            <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId"
+                    TDto="CustomerDto" TFilter="CustomersFilter" />
         </Field>
 
         <Field Name="Date" For="@(() => dto.DateTimeIssued)">
@@ -27,14 +28,15 @@
             <div class="card-body">
                 <div class="col-md-3 mb-1">
                     <Btn class="btn-violet" Text="Add Item" Icon="bi bi-check-circle"
-                         ClickAction="@(() => ShowModal(
-                            typeof(EInvoiceLine),
-                            "EInvoice Line",
-                            new ModalParameters()
-                                .Add(nameof(EInvoiceLine.List), dto.EInvoiceLines)
-                                .Add(nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.Id }),
-                            async () => Calculate())
-                            )" />
+                         ClickAction="@(async () => await ModalService.Show(new ModalData
+                                (typeof(EInvoiceLine),
+                                "EInvoice Line",
+                                new Dictionary<string, object>
+                                {
+                                    { nameof(EInvoiceLine.List), dto.EInvoiceLines },
+                                    { nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.Id } }
+                                },
+                                async () => Calculate())))" />
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
@@ -42,14 +44,15 @@
                           WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false Context=line>
                         <CustomActions>
                             <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
-                                 ClickAction="@(() => ShowModal(
-                                    typeof(EInvoiceLine),
-                                    "EInvoice Line",
-                                    new ModalParameters()
-                                    .Add(nameof(EInvoiceLine.List), dto.EInvoiceLines)
-                                    .Add(nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone()),
-                                    async () => Calculate())
-                                    )" />
+                                 ClickAction="@(async () => await ModalService.Show(new ModalData
+                                        (typeof(EInvoiceLine),
+                                        "EInvoice Line",
+                                        new Dictionary<string, object>
+                                        {
+                                            { nameof(EInvoiceLine.List), dto.EInvoiceLines },
+                                            { nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone() }
+                                        },
+                                        async () => Calculate())))" />
                         </CustomActions>
                     </Grid>
                 }
@@ -86,7 +89,7 @@
         else
         {
             dto.Id = Guid.NewGuid();
-            dto.EInvoiceCode = await einvoice.GetCode();
+            dto.Code = await einvoice.GetCode();
         }
         lineFilter.Items = dto.EInvoiceLines;
         LoaderService.ToggleLoader();

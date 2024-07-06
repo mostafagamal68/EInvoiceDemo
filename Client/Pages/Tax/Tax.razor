@@ -6,8 +6,8 @@
     <DataAnnotationsValidator />
     <div class="col-md-12 my-2">
 
-        <Field Name="Code" For="@(() => dto.TaxCode)">
-            <InputNumber class="form-control" @bind-Value="dto.TaxCode" />
+        <Field Name="Code" For="@(() => dto.Code)">
+            <InputNumber class="form-control" @bind-Value="dto.Code" />
         </Field>
 
         <Field Name="Name" For="@(() => dto.TaxName)">
@@ -19,7 +19,7 @@
         </Field>
 
     </div>
-    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
+    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap mt-3">
         @if (Id.HasValue)
         {
             <Btn class="btn-info" Text="New" ClickAction="New" />
@@ -39,7 +39,7 @@
         if (!AsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Tax)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue) dto = await tax.GetSingle(Id);
-        else dto.TaxCode = await tax.GetCode();
+        else dto.Code = await tax.GetCode();
         LoaderService.ToggleLoader();
     }
     private async Task HandleValidSubmit()

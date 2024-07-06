@@ -5,6 +5,10 @@ namespace EInvoiceDemo.Shared.DTOs;
 
 public class TaxDto : DtoBase
 {
+    [Display(Name = "Code")]
+    [Required(ErrorMessage = "*")]
+    public int Code { get; set; }
+
     [Display(Name = "Tax")]
     [Required]
     [StringLength(50)]
@@ -13,7 +17,4 @@ public class TaxDto : DtoBase
     [Display(Name = "Description")]
     [StringLength(150)]
     public string TaxDescription { get; set; } = string.Empty;
-
-    [Required]
-    public int TaxCode { get; set; }
 }

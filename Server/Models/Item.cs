@@ -1,16 +1,17 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EInvoiceDemo.Shared.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Server.Models;
 
-public class Item
+public class Item : Entity
 {
     public Item()
     {
-        EInvoiceLines = new List<EInvoiceLine>();
+        EInvoiceLines = [];
     }
 
-    [Key]
-    public Guid ItemId { get; set; }
+    [Required]
+    public int Code { get; set; }
 
     [Required]
     [StringLength(50)]
@@ -19,8 +20,6 @@ public class Item
     [StringLength(150)]
     public string ItemDescription { get; set; } = string.Empty;
 
-    [Required]
-    public int ItemCode { get; set; }
     public IList<EInvoiceLine> EInvoiceLines { get; set; }
 
 }

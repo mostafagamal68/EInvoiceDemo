@@ -1,17 +1,14 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EInvoiceDemo.Shared.Models;
 using System.ComponentModel.DataAnnotations.Schema;
 
 namespace EInvoiceDemo.Server.Models;
 
-public class EInvoiceLine
+public class EInvoiceLine : Entity
 {
     public EInvoiceLine()
     {
-        EInvoiceLineTaxes = new List<EInvoiceLineTax>();
+        EInvoiceLineTaxes = [];
     }
-
-    [Key]
-    public Guid EInvoiceLineId { get; set; }
 
     public Guid ItemId { get; set; }
     public Item? Item { get; set; }

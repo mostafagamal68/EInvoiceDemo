@@ -1,23 +1,22 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using EInvoiceDemo.Shared.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Server.Models;
 
-public class Customer
+public class Customer : Entity
 {
     public Customer()
     {
-        EInvoices = new List<EInvoice>();
+        EInvoices = [];
     }
 
-    [Key]
-    public Guid CustomerId { get; set; }
+    [Required]
+    public int Code { get; set; }
 
     [Required]
     [StringLength(50)]
     public string? CustomerName { get; set; }
 
-    [Required]
-    public int CustomerCode { get; set; }
     public IList<EInvoice> EInvoices { get; set; }
 
 }

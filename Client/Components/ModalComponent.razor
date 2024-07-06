@@ -1,0 +1,52 @@
+﻿@inject IMgModal modalService
+@implements IDisposable
+@if (modals.Count != 0)
+{
+    foreach (var (modal, index) in modals.Select((c, i) => (c, i)))
+    {
+        <CascadingValue Value="modal">
+
+            <div class="modal bg d-block" tabindex="@(index+10)" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title">@modal.Title</h5>
+                            <br />
+                            <button type="button" class="btn-close" @onclick=@(() => CloseModal(modal))></button>
+                        </div>
+                        <div class="modal-body">
+                            <DynamicComponent Type=modal.ComponentType Parameters="modal.Parameters" />
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </CascadingValue>
+    }
+}
+
+@code {
+    List<ModalObject> modals = new();
+    protected override void OnInitialized()
+    {
+        modalService.OnModalAdded += OpenModal;
+        modalService.OnModalClosed += CloseModal;
+        base.OnInitialized();
+    }
+    async Task OpenModal(ModalObject modal)
+    {
+        modals.Add(modal);
+        await InvokeAsync(StateHasChanged);
+    }
+    async Task CloseModal(ModalObject modal)
+    {
+        modal.EndAwait();
+        modals.Remove(modal);
+        await InvokeAsync(StateHasChanged);
+    }
+    public void Dispose()
+    {
+        modalService.OnModalAdded -= OpenModal;
+        modalService.OnModalClosed -= CloseModal;
+    }
+}

@@ -13,9 +13,10 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.AddSingleton(c => new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-builder.Services.AddBlazoredModal();
+//builder.Services.AddBlazoredModal();
 builder.Services.AddBlazoredToast();
 builder.Services.AddScoped(typeof(IGenericService<,>), typeof(GenericService<,>));
+builder.Services.AddScoped<IMgModal, MgModal>();
 builder.Services.AddScoped<LoaderService>();
 builder.Services.AddScoped<HeaderService>();
 await builder.Build().RunAsync();

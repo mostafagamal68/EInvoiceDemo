@@ -1,4 +1,5 @@
 ﻿@inherits LayoutComponentBase
+@inject IMgModal ModalService
 @using Blazored.Toast.Configuration
 
 <BlazoredToasts Position="ToastPosition.BottomRight"
@@ -12,16 +13,23 @@
                 WarningIcon="bi bi-exclamation-triangle" />
 
 <div class="page">
-    <div class="sidebar">
-        <NavMenu />
-    </div>
+    <CascadingValue Value="ModalService">
+        <ModalComponent />
+        <div class="sidebar">
+            <NavMenu />
+        </div>
 
-    <main>
-        <Header />
+        <main>
+            <Header />
 
-        <article>
-            <Loader />
-            @Body
-        </article>
-    </main>
+            <article>
+                <Loader />
+                @Body
+            </article>
+        </main>
+    </CascadingValue>
 </div>
+
+@code {
+
+}

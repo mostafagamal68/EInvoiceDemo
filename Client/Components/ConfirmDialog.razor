@@ -3,15 +3,27 @@
     <h5 class="my-0">@Text</h5>
     <div class="d-flex justify-content-center align-items-center mt-3">
         <a role="button" class="btn btn-danger mx-1" @onclick="Confirm">Confirm</a>
-        <a role="button" class="btn btn-secondary mx-1" @onclick="Cancel">Cancel</a>
+        <a role="button" class="btn btn-secondary mx-1" @onclick="Close">Cancel</a>
     </div>
 </div>
 @code {
     [Parameter]
     public string Text { get; set; } = string.Empty;
 
-    [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
-    private async Task Confirm() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
-    private async Task Cancel() => await BlazoredModal.CancelAsync();
+    // [CascadingParameter] BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    // private async Task Confirm() => await BlazoredModal.CloseAsync(ModalResult.Ok(true));
+    // private async Task Cancel() => await BlazoredModal.CancelAsync();
 
+    [CascadingParameter]
+    public IMgModal ModalService { get; set; }
+
+    [CascadingParameter]
+    public ModalObject ModalObject { get; set; }
+
+    private void Confirm()
+    {
+        ModalObject.Value = true;
+        Close();
+    }
+    private void Close() => ModalService.Close(ModalObject);
 }

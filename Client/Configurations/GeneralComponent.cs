@@ -1,7 +1,8 @@
 ﻿using Blazored.Modal;
-using Blazored.Modal.Services;
 using Blazored.Toast.Services;
 using EInvoiceDemo.Client.Components;
+using EInvoiceDemo.Client.Services;
+using EInvoiceDemo.Shared.Helpers;
 using Microsoft.AspNetCore.Components;
 using System.Net;
 
@@ -21,8 +22,11 @@ public class GeneralComponent : ComponentBase
     [Inject]
     public IToastService ToastService { get; set; }
 
+    //[CascadingParameter]
+    //public IModalService Modal { get; set; } = default!;
+
     [CascadingParameter]
-    public IModalService Modal { get; set; } = default!;
+    public IMgModal ModalService { get; set; }
 
     [Parameter]
     public Guid? Id { get; set; }
@@ -41,34 +45,53 @@ public class GeneralComponent : ComponentBase
     }
     public async Task<bool> ShowDeleteConfirmation(string item)
         => await ShowConfirm("Delete Confirmation", $"Are you sure to delete this {item}?");
+    //public async Task<bool> ShowConfirm(string title, string message)
+    //{
+    //    var confirm = Modal.Show<ConfirmDialog>(title, new ModalParameters().Add(nameof(ConfirmDialog.Text), message),
+    //    new ModalOptions()
+    //    {
+    //        Size = ModalSize.Medium,
+    //        Position = ModalPosition.TopCenter,
+    //        DisableBackgroundCancel = true,
+    //        HideCloseButton = true,
+    //        AnimationType = ModalAnimationType.PopInOut,
+    //    });
+    //    var result = await confirm.Result;
+    //    return result.Confirmed;
+    //}
     public async Task<bool> ShowConfirm(string title, string message)
     {
-        var confirm = Modal.Show<ConfirmDialog>(title, new ModalParameters().Add(nameof(ConfirmDialog.Text), message),
-        new ModalOptions()
-        {
-            Size = ModalSize.Medium,
-            Position = ModalPosition.TopCenter,
-            DisableBackgroundCancel = true,
-            HideCloseButton = true,
-            AnimationType = ModalAnimationType.PopInOut,
-        });
-        var result = await confirm.Result;
-        return result.Confirmed;
+        var confirm = ModalService.Show(typeof(ConfirmDialog), title, new ModalParameters().Add(nameof(ConfirmDialog.Text), message));
+        await confirm.Closing;
+
+        return confirm.Value.CastTo<bool?>() == true;
     }
 
+    //public async Task ShowModal(Type component, string title, ModalParameters? parameters = null, Func<Task>? afterClose = null)
+    //{
+    //    var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true));
+    //    await modal.Result;
+    //    if (afterClose is not null)
+    //    {
+    //        LoaderService.ToggleLoader();
+    //        await afterClose.Invoke();
+    //        LoaderService.ToggleLoader();
+    //    }
+    //    else await InvokeAsync(StateHasChanged);
+    //}
     public async Task ShowModal(Type component, string title, ModalParameters? parameters = null, Func<Task>? afterClose = null)
     {
-        var modal = Modal.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true));
-        await modal.Result;
-        if (afterClose is not null)
-        {
-            LoaderService.ToggleLoader();
-            await afterClose.Invoke();
-            LoaderService.ToggleLoader();
-        }
-        else await InvokeAsync(StateHasChanged);
-    }
+        var modal = ModalService.Show(component, title, parameters ?? new ModalParameters().Add(nameof(AsModal), true), afterClose);
+        await modal.Closing;
 
+        if (modal.Value is not null)
+        {
+
+        }
+
+        if (modal.AfterClose is not null)
+            await modal.AfterClose.Invoke();
+    }
     public void GoTo(string PageRoute, Guid? Id = null)
         => Navigation.NavigateTo($"/{PageRoute}{(Id.HasValue ? "/" + Id : "")}");
 }

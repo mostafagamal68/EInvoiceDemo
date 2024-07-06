@@ -56,29 +56,45 @@
     public Dictionary<string, object>? OtherAttributes { get; set; }
 
     [CascadingParameter]
-    public EditContext? EditContext { get; set; }
+    EditContext? EditContext { get; set; }
+
+    // [CascadingParameter]
+    // IModalService Modal { get; set; } = default!;
+
+    // [CascadingParameter]
+    // BlazoredModalInstance BlazoredModal { get; set; } = default!;
 
     [CascadingParameter]
-    BlazoredModalInstance BlazoredModal { get; set; } = default!;
+    public IMgModal ModalService { get; set; }
+
+    [CascadingParameter]
+    public ModalObject ModalObject { get; set; }
 
     private Dictionary<string, object>? AdditionalAttributes { get; set; }
     private string? classes { get; set; }
     private ElementReference Element;
 
-    protected override void OnParametersSet()
+    protected override void OnInitialized()
     {
         classes = OtherAttributes?.GetValueOrDefault("class")?.ToString();
         OtherAttributes?.Remove("class");
         AdditionalAttributes = OtherAttributes;
-        base.OnParametersSet();
     }
 
     private async Task CheckForModification(LocationChangingContext context)
     {
         if (EditContext?.IsModified() == true)
         {
-            var confirm = await JS.InvokeAsync<bool>("window.confirm", "There are unsaved changes!, Do you want to leave?");
-            if (!confirm) context.PreventNavigation();
+            var confirm = ModalService.Show(
+                typeof(ConfirmDialog),
+                "There are unsaved changes!", 
+                new ModalParameters().Add(nameof(ConfirmDialog.Text), "Do you want to leave?")
+            );
+
+            await confirm.Closing;
+
+            if (confirm.Value.CastTo<bool?>() == true) 
+                context.PreventNavigation();
         }
     }
     private async Task RunAction()
@@ -91,8 +107,8 @@
                 await ClickAction.InvokeAsync();
                 if (CloseAfterSave)
                 {
-                    if (BlazoredModal is not null)
-                        await BlazoredModal.CloseAsync();
+                    if (ModalObject is not null)
+                        ModalService.Close(ModalObject);
                     else
                         await JS.InvokeVoidAsync("history.back");
                 }

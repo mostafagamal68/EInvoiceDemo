@@ -26,7 +26,7 @@
 }
 else
 {
-    <select class="form-select @CssClass" value="@Value" name="@DisplayName" @onchange="ValueHasChanged" @onblur="OnInputBlurred">
+    <select class="form-select @CssClass" value="@Value" name="@DisplayName" @onchange="ValueHasChanged">
         @if (ShowChoose)
         {
             <option value="">Select</option>
@@ -40,33 +40,13 @@ else
 @code {
     [Parameter]
     public bool AsRadioButtons { get; set; }
+
     [Parameter]
     public bool ShowChoose { get; set; }
-    // [Parameter]
-    // public T? Value { get; set; }
-    // [Parameter]
-    // public EventCallback<T?> ValueChanged { get; set; }
-    // [Parameter]
-    // public Expression<Func<T?>>? ValueExpression { get; set; }
-    // [CascadingParameter]
-    // public EditContext? EditContext { get; set; }
 
-    // private FieldIdentifier fieldIdentifier;
-    // private string? cssClass;
-    // protected override void OnInitialized()
-    // {
-    //     fieldIdentifier = FieldIdentifier.Create(ValueExpression);
-    //     base.OnInitialized();
-    // }
-    void OnInputBlurred()
+    void ValueHasChanged(ChangeEventArgs args)
     {
-        if (EditContext is not null)
-            EditContext.NotifyFieldChanged(FieldIdentifier);
-    }
-    async Task ValueHasChanged(ChangeEventArgs args)
-    {
-        Value = args.Value.CastAs<string?>().HasValue() ? Enum.Parse<T>(args.Value.ToString()) : null;
-        await ValueChanged.InvokeAsync(Value);
+        CurrentValue = args.Value is not null ? Enum.Parse<T>(args.Value.ToString()!) : null;
     }
     protected override bool TryParseValueFromString(string? value, out T? result, [NotNullWhen(false)] out string? validationErrorMessage)
     {

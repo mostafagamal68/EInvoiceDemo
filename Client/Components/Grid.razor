@@ -18,7 +18,11 @@
         </div>
         <div class="d-flex align-items-center gap-2">
             <Btn class="btn-primary" ClickAction="Refresh" Icon="bi bi-arrow-clockwise" SpinnerType="SpinnerType.Border" IsActionRun="GridIsLoading" />
-            <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" SpinnerType="SpinnerType.Border"/>
+            @if (FilterTemplate is not null)
+            {
+                <Btn class="btn-success" ClickAction="Filter" Icon="bi bi-funnel-fill" SpinnerType="SpinnerType.Border" />                
+            }
+
             @if (ActionsAsModal)
             {
                 <Btn class="btn-violet" Icon="bi bi-plus-circle"
@@ -336,11 +340,22 @@
                     FormType,
                     $"Edit - {FormType.Name}",
                     new ModalParameters().Add(nameof(AsModal), true).Add(nameof(Id), id),
-                    Filter);
+                    async () => await ReloadById(id));
         else
             GoTo(FormType.Name, id);
     }
-
+    private async Task ReloadById(Guid id)
+    {
+        var oldItem = Model.Items.FirstOrDefault(c => c.Id == id);
+        if (oldItem is not null)
+        {
+            var oldItemIndex = Model.Items.IndexOf(oldItem);
+            Model.Items.Remove(oldItem);
+            var newItem = await Service.GetSingle(id);
+            if (newItem is not null)
+                Model.Items.Insert(oldItemIndex, newItem);
+        }
+    }
     private async Task Delete(Guid id)
     {
         if (await ShowDeleteConfirmation(FormType.Name))
@@ -364,8 +379,7 @@
                     {
                         var Ids = SelectedItems.Select(c => c.Id).ToList();
                         response = await Service.Bulk(Ids, BulkOperation.Delete);
-                        if (response.IsSuccessStatusCode)
-                            Model.Items.Where(c => Ids.Contains(c.Id)).ToList().ForEach(c => Model.Items.Remove(c));
+                            // Model.Items.Where(c => Ids.Contains(c.Id)).ToList().ForEach(c => Model.Items.Remove(c));
                     }
                     break;
                 };
@@ -374,7 +388,8 @@
                     break;
                 }
         }
-        // await Filter();
+        if (response.IsSuccessStatusCode)
+            await Filter();
         await ShowResultMessage(response);
     }
     private async Task Refresh()

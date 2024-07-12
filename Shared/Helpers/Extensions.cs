@@ -51,7 +51,14 @@ public static class Extensions
 
     public static async Task<T> FirstOrErrorAsync<T>(this IQueryable<T> source, Expression<Func<T, bool>> expression, Exception? exception = null) where T : Entity
         => await source.FirstOrDefaultAsync(expression) ?? throw exception ?? new KeyNotFoundException();
+
+    public static MemberExpression? GetMemberExpression<T, TValue>(this Expression<Func<T, TValue>> expr)
+    {
+        if (expr.Body is UnaryExpression unary)
+            return unary.Operand as MemberExpression;
         
+        return expr.Body as MemberExpression;
+    }
     //public static T CloneJson<T>(this T source)
     //    => JsonConvert.DeserializeObject<T>(JsonConvert.SerializeObject(source), new JsonSerializerSettings { ObjectCreationHandling = ObjectCreationHandling.Replace })!;
 }

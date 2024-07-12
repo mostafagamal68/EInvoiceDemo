@@ -4,6 +4,7 @@
 @using System.Reflection
 @typeparam TDto where TDto : DtoBase
 @typeparam TFilter where TFilter : GlobalFilter<TDto>, new()
+@typeparam TForm where TForm : GeneralComponent
 @inject IGenericService<TFilter, TDto> Service
 @inherits GeneralComponent
 @if (ShowActions)
@@ -26,11 +27,11 @@
             @if (ActionsAsModal)
             {
                 <Btn class="btn-violet" Icon="bi bi-plus-circle"
-                     ClickAction="@(async () => await ModalService.Show(new ModalData(FormType, $"Add - {FormType.Name}", Filter)))" />
+                     ClickAction="@(async () => await ModalService.Show(new ModalBuilder<TForm>("Add", Filter).Build()))" />
             }
             else
             {
-                <Btn class="btn-violet" ClickAction="() => GoTo(FormType.Name)" Icon="bi bi-plus-circle" />
+                <Btn class="btn-violet" ClickAction="() => GoTo(typeof(TForm).Name)" Icon="bi bi-plus-circle" />
             }
         </div>
     </div>
@@ -241,9 +242,6 @@
     bool SelectAll;
 
     [Parameter]
-    public Type FormType { get; set; }
-
-    [Parameter]
     public TFilter Model { get; set; } = new();
 
     private string Search
@@ -310,6 +308,7 @@
     public EditContext? EditContext { get; set; }
 
     bool GridIsLoading;
+    string FormName;
 
     protected override async Task OnInitializedAsync()
     {
@@ -321,7 +320,10 @@
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
+        {
+            FormName = typeof(TForm).Name;
             HeaderService.ChangeHeaderAndTitle(Service.api);
+        }
         base.OnAfterRender(firstRender);
     }
     private async Task Filter()
@@ -332,18 +334,13 @@
     private async Task Edit(Guid id)
     {
         if (ActionsAsModal)
-            await ModalService.Show(new ModalData(
-                FormType,
-                $"Edit - {FormType.Name}",
-                new Dictionary<string, object>
-                        {
-                    { nameof(AsModal), true },
-                    { nameof(Id), id }
-                        },
-                async () => await ReloadById(id))
+            await ModalService.Show(
+                new ModalBuilder<TForm>("Edit", async () => await ReloadById(id))
+                .AddParameter(c => c.Id, id)
+                .Build()
             );
         else
-            GoTo(FormType.Name, id);
+            GoTo(FormName, id);
     }
     private async Task ReloadById(Guid id)
     {
@@ -359,7 +356,7 @@
     }
     private async Task Delete(Guid id)
     {
-        if (await ShowDeleteConfirmation(FormType.Name))
+        if (await ShowDeleteConfirmation(FormName))
         {
             var response = await Service.Delete(id);
             if (response.IsSuccessStatusCode)
@@ -376,7 +373,7 @@
         {
             case BulkOperation.Delete:
                 {
-                    if (await ShowDeleteConfirmation(FormType.Name))
+                    if (await ShowDeleteConfirmation(FormName))
                     {
                         var Ids = SelectedItems.Select(c => c.Id).ToList();
                         response = await Service.Bulk(Ids, BulkOperation.Delete);

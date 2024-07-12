@@ -28,31 +28,23 @@
             <div class="card-body">
                 <div class="col-md-3 mb-1">
                     <Btn class="btn-violet" Text="Add Item" Icon="bi bi-check-circle"
-                         ClickAction="@(async () => await ModalService.Show(new ModalData
-                                (typeof(EInvoiceLine),
-                                "EInvoice Line",
-                                new Dictionary<string, object>
-                                {
-                                    { nameof(EInvoiceLine.List), dto.EInvoiceLines },
-                                    { nameof(EInvoiceLine.dto), new EInvoiceLineDto() { EInvoiceId = dto.Id } }
-                                },
-                                async () => Calculate())))" />
+                         ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", async () => Calculate())
+                                    .AddParameter(c => c.List, dto.EInvoiceLines)
+                                    .AddParameter(c => c.dto, new EInvoiceLineDto() { EInvoiceId = dto.Id })
+                                    .Build()
+                                ))" />
                 </div>
                 @if (!LoaderService.IsLoading)
                 {
-                    <Grid TDto=EInvoiceLineDto TFilter=EInvoiceLineFilter Model=lineFilter TableDesignType=TableDesign.List
+                    <Grid TForm=EInvoiceLine TDto=EInvoiceLineDto TFilter=EInvoiceLineFilter Model=lineFilter TableDesignType=TableDesign.List
                           WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false Context=line>
                         <CustomActions>
                             <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
-                                 ClickAction="@(async () => await ModalService.Show(new ModalData
-                                        (typeof(EInvoiceLine),
-                                        "EInvoice Line",
-                                        new Dictionary<string, object>
-                                        {
-                                            { nameof(EInvoiceLine.List), dto.EInvoiceLines },
-                                            { nameof(EInvoiceLine.dto), (EInvoiceLineDto)line.Clone() }
-                                        },
-                                        async () => Calculate())))" />
+                                 ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", async () => Calculate())
+                                            .AddParameter(c => c.List, dto.EInvoiceLines)
+                                            .AddParameter(c => c.dto, (EInvoiceLineDto)line.Clone())
+                                            .Build()
+                                        ))" />
                         </CustomActions>
                     </Grid>
                 }

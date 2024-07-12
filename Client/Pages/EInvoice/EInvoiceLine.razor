@@ -23,7 +23,7 @@
                 <div class="col-md-3 mb-1">
                     <Btn class="btn-violet" Text="Add Tax" ClickAction="Add" Icon="bi bi-check-circle" />
                 </div>
-                <Grid TDto=EInvoiceLineTaxDto TFilter=EInvoiceLineTaxFilter Model=taxFilter TableDesignType=TableDesign.List
+                <Grid TForm=EInvoiceLine TDto=EInvoiceLineTaxDto TFilter=EInvoiceLineTaxFilter Model=taxFilter TableDesignType=TableDesign.List
                       WithEdit=false WithDelete=false WithPagination=false ShowActions=false ShowSort=false Context=taxes>
                     <RowTemplate>
                         <span>
@@ -72,11 +72,10 @@
 @code {
     [Parameter]
     public EInvoiceLineDto dto { get; set; } = new();
+
     [Parameter]
     public List<EInvoiceLineDto> List { get; set; } = new();
 
-    // [CascadingParameter]
-    // BlazoredModalInstance BlazoredModal { get; set; } = new();
     [CascadingParameter]
     public ModalData ModalObject { get; set; }
 

@@ -1,6 +1,6 @@
 ﻿@page "/Taxes"
 
-<Grid FormType=@typeof(Tax) TDto=TaxDto TFilter=TaxesFilter TableDesignType=TableDesign.Table SearchProperty="filter => filter.TaxName"/>
+<Grid TForm=Tax TDto=TaxDto TFilter=TaxesFilter TableDesignType=TableDesign.Table SearchProperty="filter => filter.TaxName"/>
 
 @code {
 

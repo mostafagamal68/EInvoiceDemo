@@ -12,9 +12,15 @@ public class ModalService : IModalService
         OnModalClosed.Invoke(modal);
     }
 
-    public ModalData Show(Type component, string title, IDictionary<string, object> parameters, Func<Task>? afterClose)
+    public ModalData Show(Type component, string title, Dictionary<string, object> parameters, Func<Task>? afterClose)
     {
-        var modal  = new ModalData(component, title, parameters, afterClose);
+        var modal  = new ModalData
+        {
+            ComponentType = component,
+            Title = title,
+            Parameters = parameters,
+            AfterClose = afterClose
+        };
         OnModalAdded?.Invoke(modal);
         return modal;
     }

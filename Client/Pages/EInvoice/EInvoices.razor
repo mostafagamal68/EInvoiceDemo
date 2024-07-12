@@ -1,6 +1,6 @@
 ﻿@page "/EInvoices"
 
-<Grid FormType=@typeof(EInvoice) TDto=EInvoiceDto TFilter=EInvoicesFilter TableDesignType=TableDesign.Table MultiSelect=true ActionsAsModal=false>
+<Grid TForm=EInvoice TDto=EInvoiceDto TFilter=EInvoicesFilter TableDesignType=TableDesign.Table MultiSelect=true ActionsAsModal=false>
     <FilterTemplate Context="filter">
         <div class="flex-grow-1">
             <label>Type</label>

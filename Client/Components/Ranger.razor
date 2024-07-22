@@ -1,0 +1,23 @@
+﻿@using System.Linq.Expressions
+@using System.Reflection
+@typeparam T
+
+<div class="d-flex gap-2">
+    <Field Name="From" For="@(() => Value.From)">
+        <InputNumber class="form-control" @bind-Value="Value.From" />
+    </Field>
+    <Field Name="To" For="@(() => Value.To)">
+        <InputNumber class="form-control" @bind-Value="Value.To" />
+    </Field>
+</div>
+
+@code {
+    [Parameter]
+    public Range<T> Value { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<Range<T>> ValueChanged { get; set; }
+
+    [Parameter]
+    public Expression<Func<Range<T>>> ValueExpression { get; set; }
+}

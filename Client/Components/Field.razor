@@ -1,14 +1,20 @@
 ﻿@using System.Linq.Expressions
 <div class="row my-1">
-    <div class="col-md-2 my-auto">
-        <label>@Name</label>
-    </div>
-    <div class="col-md-5">
+    @if (Name.HasValue())
+    {
+        <div class="col-lg-2 col-md-3 my-auto">
+            <label>@Name</label>
+        </div>
+    }
+    <div class="col-lg-7 col-md-9">
         @ChildContent
     </div>
-    <div class="col-md my-auto">
-        <ValidationMessage For="For" />
-    </div>
+    @if (For is not null)
+    {
+        <div class="col-lg-3 col-md-12 my-auto">
+            <ValidationMessage For="For" />
+        </div>
+    }
 </div>
 
 @code {

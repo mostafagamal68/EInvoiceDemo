@@ -6,22 +6,20 @@
     {
         <CascadingValue Value="modal">
 
-            <div class="modal bg d-block" tabindex="@(index+10)" role="dialog" data-bs-backdrop="static" data-bs-keyboard="false" aria-hidden="true">
-                <div class="modal-dialog modal-lg" role="document">
+            <div class="modal overlay" tabindex="@(index+10)" role="dialog">
+                <div class="modal-dialog @modal.AnimationClass @(modal.IsConfirm ? "modal-dialog-centered" : "modal-xl")" role="document">
                     <div class="modal-content">
-                        <div class="modal-header">
+                        <div class="modal-header shadow-sm">
                             <h5 class="modal-title">
                                 @if (modal.Icon.HasValue())
                                 {
-                                    <i class="@modal.Icon mx-2"></i>                                
+                                    <i class="@modal.Icon mx-2"></i>
                                 }
                                 @modal.Title
                             </h5>
-                            <button type="button" class="btn-close" @onclick=@(async () => await RemoveModal(modal))></button>
+                            <button type="button" class="btn-close" @onclick=@(async () => await DismissModal(modal))></button>
                         </div>
-                        <div class="modal-body">
-                            <DynamicComponent Type=modal.ComponentType Parameters="modal.Parameters" />
-                        </div>
+                        <DynamicComponent Type=modal.ComponentType Parameters="modal.Parameters" />
                     </div>
                 </div>
             </div>
@@ -34,24 +32,34 @@
     List<ModalData> modals = new();
     protected override void OnInitialized()
     {
-        modalService.OnModalAdded += AddModal;
+        modalService.OnModalOpened += AddModal;
         modalService.OnModalClosed += RemoveModal;
         base.OnInitialized();
     }
     async Task AddModal(ModalData modal)
     {
+        modal.IsConfirm = modal.ComponentType == typeof(ConfirmDialog);
+        modal.AnimationClass = modal.IsConfirm ? "popIn" : "fadeInDown";
         modals.Add(modal);
         await InvokeAsync(StateHasChanged);
     }
     async Task RemoveModal(ModalData modal)
     {
         modal.EndAwait();
+        modal.AnimationClass = modal.IsConfirm ? "popOut" : "fadeOutUp";
+        await Task.Delay(200);
         modals.Remove(modal);
         await InvokeAsync(StateHasChanged);
     }
+    async Task DismissModal(ModalData modal)
+    {
+        if (modal.OnDismiss is not null)
+            await modal.OnDismiss();
+        await RemoveModal(modal);
+    }
     public void Dispose()
     {
-        modalService.OnModalAdded -= AddModal;
+        modalService.OnModalOpened -= AddModal;
         modalService.OnModalClosed -= RemoveModal;
     }
 }

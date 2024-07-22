@@ -1,5 +1,4 @@
-﻿using Blazored.Modal;
-using Blazored.Toast.Services;
+﻿using Blazored.Toast.Services;
 using EInvoiceDemo.Client.Components;
 using EInvoiceDemo.Client.Services;
 using EInvoiceDemo.Shared.Helpers;

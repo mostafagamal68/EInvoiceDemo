@@ -1,10 +1,8 @@
-﻿using Blazored.Modal;
-
-namespace EInvoiceDemo.Client.Services;
+﻿namespace EInvoiceDemo.Client.Services;
 
 public class ModalService : IModalService
 {
-    public event Func<ModalData, Task> OnModalAdded;
+    public event Func<ModalData, Task> OnModalOpened;
     public event Func<ModalData, Task> OnModalClosed;
 
     public void Close(ModalData modal)
@@ -19,15 +17,15 @@ public class ModalService : IModalService
             ComponentType = component,
             Title = title,
             Parameters = parameters,
-            AfterClose = afterClose
+            OnClose = afterClose
         };
-        OnModalAdded?.Invoke(modal);
+        OnModalOpened?.Invoke(modal);
         return modal;
     }
 
     public async Task Show(ModalData modal)
     {
-        OnModalAdded?.Invoke(modal);
+        OnModalOpened?.Invoke(modal);
         await modal.Closing;
 
         if (modal.Value is not null)
@@ -35,7 +33,7 @@ public class ModalService : IModalService
 
         }
 
-        if (modal.AfterClose is not null)
-            await modal.AfterClose.Invoke();
+        if (modal.OnClose is not null)
+            await modal.OnClose.Invoke();
     }
 }

@@ -1,10 +1,8 @@
-﻿using Blazored.Modal;
-
-namespace EInvoiceDemo.Client.Services;
+﻿namespace EInvoiceDemo.Client.Services;
 
 public interface IModalService
 {
-    event Func<ModalData, Task> OnModalAdded;
+    event Func<ModalData, Task> OnModalOpened;
     event Func<ModalData, Task> OnModalClosed;
 
     Task Show(ModalData modal);

@@ -1,6 +1,10 @@
 ﻿@page "/Customers"
 
-<Grid TForm=Customer TDto=CustomerDto TFilter=CustomersFilter TableDesignType=TableDesign.Table SearchProperty="filter => filter.CustomerName"/>
+<Grid TForm=Customer
+      TDto=CustomerDto 
+      TFilter=CustomersFilter 
+      TableDesignType=TableDesign.Table 
+      SearchProperty="filter => filter.CustomerName" />
 
 @code {
 

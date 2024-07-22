@@ -1,6 +1,10 @@
 ﻿@page "/Items"
 
-<Grid TForm=Item TDto=ItemDto TFilter=ItemsFilter TableDesignType=TableDesign.Table SearchProperty="filter => filter.ItemName"/>
+<Grid TForm=Item
+      TDto=ItemDto
+      TFilter=ItemsFilter
+      TableDesignType=TableDesign.Table
+      SearchProperty="filter => filter.ItemName" />
 
 @code {
 

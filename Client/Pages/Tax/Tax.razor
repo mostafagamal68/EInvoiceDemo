@@ -1,10 +1,12 @@
 ﻿@page "/Tax/{Id:decimal}"
 @inherits GeneralComponent
-@inject IGenericService<TaxesFilter, TaxDto> tax
 
-<EditForm Model="dto">
-    <DataAnnotationsValidator />
-    <div class="col-md-12 my-2">
+<Form TDto=TaxDto
+      TFilter=TaxesFilter
+      Item=@nameof(Tax)
+      AsModal=AsModal
+      Id=Id>
+    <Content Context="dto">
 
         <Field Name="Code" For="@(() => dto.Code)">
             <InputNumber class="form-control" @bind-Value="dto.Code" />
@@ -18,64 +20,9 @@
             <InputTextArea class="form-control" @bind-Value="dto.TaxDescription" />
         </Field>
 
-    </div>
-    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap mt-3">
-        @if (Id.HasValue)
-        {
-            <Btn class="btn-info" Text="New" ClickAction="New" />
-            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
-            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
-        }
-        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
-    </div>
-</EditForm>
+    </Content>
+</Form>
+
 @code {
-    TaxDto dto = new();
 
-    protected override async Task OnInitializedAsync() => await GetTax();
-
-    private async Task GetTax()
-    {
-        if (!AsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(Tax)}");
-        LoaderService.ToggleLoader();
-        if (Id.HasValue) dto = await tax.GetSingle(Id);
-        else dto.Code = await tax.GetCode();
-        LoaderService.ToggleLoader();
-    }
-    private async Task HandleValidSubmit()
-    {
-        HttpResponseMessage httpResponseMessage;
-        if (!Id.HasValue)
-        {
-            dto.Id = Guid.NewGuid();
-            httpResponseMessage = await tax.Create(dto);
-            if (httpResponseMessage.IsSuccessStatusCode)
-                Id = dto.Id;
-            // GoTo("Tax", "Taxes", true, dto.TaxId);
-        }
-        else
-            httpResponseMessage = await tax.Edit(dto);
-        await ShowResultMessage(httpResponseMessage);
-    }
-    private async Task New()
-    {
-        Id = null;
-        dto = new TaxDto();
-        await GetTax();
-    }
-    private async Task Copy()
-    {
-        Id = null;
-        await GetTax();
-    }
-    private async Task Delete()
-    {
-        if (await ShowDeleteConfirmation("Tax"))
-        {
-            var response = await tax.Delete(Id);
-            if (response.IsSuccessStatusCode)
-                GoTo("Taxes");
-            await ShowResultMessage(response);
-        }
-    }
 }

@@ -112,12 +112,12 @@
         await GetEInvoice();
         dto.EInvoiceLines.ForEach(c =>
             {
-                c.EInvoiceId = dto.Id;
                 c.Id = Guid.NewGuid();
+                c.EInvoiceId = dto.Id;
                 c.EInvoiceLineTaxes.ForEach(x =>
                     {
-                        x.EInvoiceLineId = c.Id;
                         x.Id = Guid.NewGuid();
+                        x.EInvoiceLineId = c.Id;
                     });
             });
     }

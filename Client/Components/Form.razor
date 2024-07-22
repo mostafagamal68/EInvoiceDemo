@@ -1,0 +1,108 @@
+﻿@inherits GeneralComponent
+@typeparam TDto where TDto : DtoBase, new()
+@typeparam TFilter where TFilter : GlobalFilter<TDto>
+@inject IGenericService<TFilter, TDto> Service
+
+<EditForm Model="dto">
+    <DataAnnotationsValidator />
+    @if (AsModal)
+    {
+        <div class="modal-body">
+            @Content.Invoke(dto)
+        </div>
+        <div class="modal-footer shadow">
+            <div class="d-flex justify-content-end align-items-center gap-2">
+                @Actions?.Invoke(dto)
+                @if (Id.HasValue)
+                {
+                    <Btn class="btn-info" Text="New" ClickAction="New" />
+                    <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+                    <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
+                }
+                <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card rounded shadow">
+            <div class="card-body">
+                @Content.Invoke(dto)
+            </div>
+            <div class="card-footer">
+                <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap py-2">
+                    @Actions?.Invoke(dto)
+                    @if (Id.HasValue)
+                    {
+                        <Btn class="btn-info" Text="New" ClickAction="New" />
+                        <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+                        <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
+                    }
+                    <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
+                </div>
+            </div>
+        </div>
+    }
+</EditForm>
+
+@code {
+    [Parameter] public string Item { get; set; }
+    [Parameter] public RenderFragment<TDto> Content { get; set; }
+    [Parameter] public RenderFragment<TDto>? Actions { get; set; }
+
+    TDto dto = new();
+
+    protected override async Task OnInitializedAsync() => await GetData();
+
+    private async Task GetData()
+    {
+        if (!AsModal)
+            HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {Item}");
+
+        LoaderService.ToggleLoader();
+
+        if (Id.HasValue)
+            dto = await Service.GetSingle(Id);
+        else
+        {
+            dto.Id = Guid.NewGuid();
+            dto.CastTo<dynamic>().Code = await Service.GetCode();
+        }
+
+        LoaderService.ToggleLoader();
+    }
+    private async Task HandleValidSubmit()
+    {
+        HttpResponseMessage httpResponseMessage;
+        if (!Id.HasValue)
+        {
+            httpResponseMessage = await Service.Create(dto);
+            if (httpResponseMessage.IsSuccessStatusCode)
+                Id = dto.Id;
+        }
+        else
+            httpResponseMessage = await Service.Edit(dto);
+        await ShowResultMessage(httpResponseMessage);
+    }
+    private async Task New()
+    {
+        Id = null;
+        dto = new TDto();
+        await GetData();
+    }
+    private async Task Copy()
+    {
+        Id = null;
+        await GetData();
+    }
+    private async Task Delete()
+    {
+        if (await ShowDeleteConfirmation(Item))
+        {
+            var response = await Service.Delete(Id);
+            if (response.IsSuccessStatusCode)
+                GoTo(Item + "s");
+            await ShowResultMessage(response);
+        }
+    }
+}

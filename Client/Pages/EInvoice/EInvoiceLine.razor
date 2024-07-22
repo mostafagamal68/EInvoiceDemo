@@ -2,18 +2,18 @@
 @using EInvoiceDemo.Client.Pages.Tax
 @inherits GeneralComponent
 
-<EditForm Model="dto">
+<EditForm Model="dto" class="p-3">
     <ObjectGraphDataAnnotationsValidator />
     <div class="col-md-12 my-1">
-        
+
         <Field Name="Item" For="@(() => dto.ItemName)">
             <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" TDto="ItemDto" TFilter="ItemsFilter" />
         </Field>
-        
+
         <Field Name="Quantity" For="@(() => dto.Quantity)">
             <InputNumber class="form-control" @bind-Value="dto.Quantity" @bind-Value:after="Calculate" />
         </Field>
-        
+
         <Field Name="Amount Sold" For="@(() => dto.AmountSold)">
             <InputNumber class="form-control" @bind-Value="dto.AmountSold" @bind-Value:after="Calculate" />
         </Field>
@@ -46,7 +46,7 @@
                     <CustomActions>
                         <Btn class="btn-sm btn-danger" ClickAction="() => DeleteRow(taxes)" Icon="bi bi-trash" />
                     </CustomActions>
-                    <ExtraData>                        
+                    <ExtraData>
                         <Field Name="Total" For="@(() => dto.Total)">
                             <h5>@dto.Total?.ToString(2)</h5>
                         </Field>
@@ -54,7 +54,7 @@
                 </Grid>
             </div>
         </div>
-        
+
         <Field Name="Item Net Amount" For="@(() => dto.ItemNetAmount)">
             <h5>@dto.ItemNetAmount?.ToString(2)</h5>
         </Field>

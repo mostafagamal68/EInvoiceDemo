@@ -308,7 +308,7 @@
     public EditContext? EditContext { get; set; }
 
     bool GridIsLoading;
-    string FormName;
+    Type FormType;
 
     protected override async Task OnInitializedAsync()
     {
@@ -321,7 +321,7 @@
     {
         if (firstRender)
         {
-            FormName = typeof(TForm).Name;
+            FormType = typeof(TForm);
             HeaderService.ChangeHeaderAndTitle(Service.api);
         }
         base.OnAfterRender(firstRender);
@@ -340,7 +340,7 @@
                 .Build()
             );
         else
-            GoTo(FormName, id);
+            GoTo(FormType.Name, id);
     }
     private async Task ReloadById(Guid id)
     {
@@ -356,7 +356,7 @@
     }
     private async Task Delete(Guid id)
     {
-        if (await ShowDeleteConfirmation(FormName))
+        if (await ShowDeleteConfirmation(FormType.Name))
         {
             var response = await Service.Delete(id);
             if (response.IsSuccessStatusCode)
@@ -373,7 +373,7 @@
         {
             case BulkOperation.Delete:
                 {
-                    if (await ShowDeleteConfirmation(FormName))
+                    if (await ShowDeleteConfirmation(FormType.Name))
                     {
                         var Ids = SelectedItems.Select(c => c.Id).ToList();
                         response = await Service.Bulk(Ids, BulkOperation.Delete);

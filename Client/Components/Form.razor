@@ -1,36 +1,20 @@
 ﻿@inherits GeneralComponent
+@inject IJSRuntime JS
 @typeparam TDto where TDto : DtoBase, new()
 @typeparam TFilter where TFilter : GlobalFilter<TDto>
 @inject IGenericService<TFilter, TDto> Service
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
-    @if (AsModal)
+    @if (!LoaderService.IsLoading)
     {
-        <div class="modal-body">
-            @Content.Invoke(dto)
-        </div>
-        <div class="modal-footer shadow">
-            <div class="d-flex justify-content-end align-items-center gap-2">
-                @Actions?.Invoke(dto)
-                @if (Id.HasValue)
-                {
-                    <Btn class="btn-info" Text="New" ClickAction="New" />
-                    <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
-                    <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
-                }
-                <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
-            </div>
-        </div>
-    }
-    else
-    {
-        <div class="card rounded shadow">
-            <div class="card-body">
+        if (AsModal)
+        {
+            <div class="modal-body">
                 @Content.Invoke(dto)
             </div>
-            <div class="card-footer">
-                <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap py-2">
+            <div class="modal-footer shadow">
+                <div class="d-flex justify-content-end align-items-center gap-2">
                     @Actions?.Invoke(dto)
                     @if (Id.HasValue)
                     {
@@ -41,7 +25,27 @@
                     <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
                 </div>
             </div>
-        </div>
+        }
+        else
+        {
+            <div class="card rounded shadow">
+                <div class="card-body" @ref=formBody>
+                    @Content.Invoke(dto)
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap py-2">
+                        @Actions?.Invoke(dto)
+                        @if (Id.HasValue)
+                        {
+                            <Btn class="btn-info" Text="New" ClickAction="New" />
+                            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+                            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
+                        }
+                        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
+                    </div>
+                </div>
+            </div>
+        }
     }
 </EditForm>
 
@@ -51,8 +55,15 @@
     [Parameter] public RenderFragment<TDto>? Actions { get; set; }
 
     TDto dto = new();
-
-    protected override async Task OnInitializedAsync() => await GetData();
+    ElementReference formBody;
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await GetData();
+            await JS.InvokeVoidAsync("focusFirstInput", formBody);
+        }
+    }
 
     private async Task GetData()
     {

@@ -18,5 +18,4 @@ public class ModalData
     public string Class { get; set; }
     public string AnimationClass { get; set; }
     public bool IsConfirm { get; set; }
-    public ElementReference ModalElement { get; set; }
 }

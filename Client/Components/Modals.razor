@@ -7,26 +7,7 @@
     {
         <CascadingValue Value="modal">
 
-            <div class="modal overlay @modal.Class" tabindex="@(index+10)" role="dialog" @onclick=HandleBackdrop @onkeydown=HandleKeyDown>
-                <div class="modal-dialog @(modal.IsConfirm ? "modal-dialog-centered" : "modal-xl") @modal.AnimationClass" role="document">
-                    <div class="modal-content" @onclick:stopPropagation @ref=modal.ModalElement>
-                        <div class="modal-header shadow-sm">
-                            <h5 class="modal-title">
-                                @if (modal.Icon.HasValue())
-                                {
-                                    <i class="@modal.Icon mx-2"></i>
-                                }
-                                @modal.Title
-                            </h5>
-                            @if (!modal.IsConfirm)
-                            {
-                                <button type="button" class="btn-close" @onclick=DismissModal></button>
-                            }
-                        </div>
-                        <DynamicComponent Type=modal.ComponentType Parameters="modal.Parameters" />
-                    </div>
-                </div>
-            </div>
+            <ModalDialog Dismiss="DismissModal" />
 
         </CascadingValue>
     }
@@ -58,7 +39,6 @@
         modal.AnimationClass = modal.IsConfirm ? "popIn" : "fadeInDown";
         modals.Add(modal);
         await InvokeAsync(StateHasChanged);
-        await modal.ModalElement.FocusAsync();
     }
     async Task RemoveModal(ModalData modal)
     {
@@ -68,32 +48,12 @@
         modals.Remove(modal);
         await InvokeAsync(StateHasChanged);
     }
-    async Task DismissModal() => await RemoveModal(modals.Last());
     async Task DismissModal(ModalData modal)
     {
         if (modal.OnDismiss is not null)
             await modal.OnDismiss();
         await RemoveModal(modal);
-    }
-    async Task HandleBackdrop()
-    {
-        var modal = modals.Last();
-        if (modal.IsConfirm)
-        {
-            modal.Class = "modal-static";
-            await Task.Delay(100);
-            modal.Class = "";
-        }
-        else
-            await DismissModal(modal);
-    }
-    async Task HandleKeyDown(KeyboardEventArgs e)
-    {
-        if (e.Key == "Escape")
-        {
-            await DismissModal();
-        }
-    }
+    }    
     public void Dispose()
     {
         ModalService.OnModalOpened -= AddModal;

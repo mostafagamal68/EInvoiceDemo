@@ -1,0 +1,58 @@
+﻿@inject IJSRuntime JS
+
+<div @ref=ModalElement class="modal overlay @Modal.Class" tabindex="-1" role="dialog" @onclick=HandleBackdrop @onkeydown=HandleKeyDown>
+    <div class="modal-dialog @(Modal.IsConfirm ? "modal-dialog-centered" : "modal-xl") @Modal.AnimationClass" role="document">
+        <div class="modal-content" @onclick:stopPropagation>
+            <div class="modal-header shadow-sm">
+                <h5 class="modal-title">
+                    @if (Modal.Icon.HasValue())
+                    {
+                        <i class="@Modal.Icon mx-2"></i>
+                    }
+                    @Modal.Title
+                </h5>
+                @if (!Modal.IsConfirm)
+                {
+                    <button type="button" class="btn-close" @onclick=Close></button>
+                }
+            </div>
+            <DynamicComponent Type=Modal.ComponentType Parameters="Modal.Parameters" />
+        </div>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+            await ModalElement.FocusAsync();
+        await base.OnAfterRenderAsync(firstRender);
+    }
+    ElementReference ModalElement;
+
+    [CascadingParameter]
+    public ModalData Modal { get; set; }
+
+    [Parameter]
+    public EventCallback<ModalData> Dismiss { get; set; }
+
+    async Task Close() => await Dismiss.InvokeAsync(Modal);
+    async Task HandleBackdrop()
+    {
+        if (Modal.IsConfirm)
+        {
+            Modal.Class = "modal-static";
+            await Task.Delay(100);
+            Modal.Class = "";
+        }
+        else
+            await Close();
+    }
+    async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await Close();
+        }
+    }
+}

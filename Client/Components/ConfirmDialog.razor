@@ -1,4 +1,6 @@
-﻿<div class="d-flex flex-column justify-content-center align-items-center p-2">
+﻿@inject IModalService ModalService
+
+<div class="d-flex flex-column justify-content-center align-items-center p-2">
     <h1 class="my-0 text-warning"><i class="bi bi-exclamation-triangle"></i></h1>
     <h5 class="my-0">@Text</h5>
     <div class="d-flex justify-content-center align-items-center mt-3">
@@ -6,12 +8,10 @@
         <a role="button" class="btn btn-secondary mx-1" @onclick="Close">Cancel</a>
     </div>
 </div>
+
 @code {
     [Parameter]
     public string Text { get; set; } = string.Empty;
-
-    [CascadingParameter]
-    public Services.IModalService ModalService { get; set; }
 
     [CascadingParameter]
     public ModalData ModalObject { get; set; }

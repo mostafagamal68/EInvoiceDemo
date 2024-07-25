@@ -1,4 +1,6 @@
-﻿namespace EInvoiceDemo.Client.Services;
+﻿using Microsoft.AspNetCore.Components;
+
+namespace EInvoiceDemo.Client.Services;
 
 public class ModalData
 {
@@ -13,6 +15,8 @@ public class ModalData
     public object? Value { get; set; }
     public void EndAwait() => _result.SetResult();
     public Task Closing => _result.Task;
+    public string Class { get; set; }
     public string AnimationClass { get; set; }
     public bool IsConfirm { get; set; }
+    public ElementReference ModalElement { get; set; }
 }

@@ -1,4 +1,5 @@
-﻿@inject IModalService modalService
+﻿@inject IModalService ModalService
+@inject NavigationManager Navigation
 @implements IDisposable
 @if (modals.Count != 0)
 {
@@ -6,9 +7,9 @@
     {
         <CascadingValue Value="modal">
 
-            <div class="modal overlay" tabindex="@(index+10)" role="dialog">
-                <div class="modal-dialog @modal.AnimationClass @(modal.IsConfirm ? "modal-dialog-centered" : "modal-xl")" role="document">
-                    <div class="modal-content">
+            <div class="modal overlay @modal.Class" tabindex="@(index+10)" role="dialog" @onclick=HandleBackdrop @onkeydown=HandleKeyDown>
+                <div class="modal-dialog @(modal.IsConfirm ? "modal-dialog-centered" : "modal-xl") @modal.AnimationClass" role="document">
+                    <div class="modal-content" @onclick:stopPropagation @ref=modal.ModalElement>
                         <div class="modal-header shadow-sm">
                             <h5 class="modal-title">
                                 @if (modal.Icon.HasValue())
@@ -17,7 +18,10 @@
                                 }
                                 @modal.Title
                             </h5>
-                            <button type="button" class="btn-close" @onclick=@(async () => await DismissModal(modal))></button>
+                            @if (!modal.IsConfirm)
+                            {
+                                <button type="button" class="btn-close" @onclick=DismissModal></button>
+                            }
                         </div>
                         <DynamicComponent Type=modal.ComponentType Parameters="modal.Parameters" />
                     </div>
@@ -30,11 +34,23 @@
 
 @code {
     List<ModalData> modals = new();
-    protected override void OnInitialized()
+    protected override void OnAfterRender(bool firstRender)
     {
-        modalService.OnModalOpened += AddModal;
-        modalService.OnModalClosed += RemoveModal;
-        base.OnInitialized();
+        if (firstRender)
+        {
+            ModalService.OnModalOpened += AddModal;
+            ModalService.OnModalClosed += RemoveModal;
+            Navigation.LocationChanged += CloseModals;
+        }
+        base.OnAfterRender(firstRender);
+    }
+    void CloseModals(object? sender, LocationChangedEventArgs args)
+    {
+        if (modals.Count != 0)
+        {
+            modals.RemoveRange(0, modals.Count);
+            StateHasChanged();
+        }
     }
     async Task AddModal(ModalData modal)
     {
@@ -42,6 +58,7 @@
         modal.AnimationClass = modal.IsConfirm ? "popIn" : "fadeInDown";
         modals.Add(modal);
         await InvokeAsync(StateHasChanged);
+        await modal.ModalElement.FocusAsync();
     }
     async Task RemoveModal(ModalData modal)
     {
@@ -51,15 +68,36 @@
         modals.Remove(modal);
         await InvokeAsync(StateHasChanged);
     }
+    async Task DismissModal() => await RemoveModal(modals.Last());
     async Task DismissModal(ModalData modal)
     {
         if (modal.OnDismiss is not null)
             await modal.OnDismiss();
         await RemoveModal(modal);
     }
+    async Task HandleBackdrop()
+    {
+        var modal = modals.Last();
+        if (modal.IsConfirm)
+        {
+            modal.Class = "modal-static";
+            await Task.Delay(100);
+            modal.Class = "";
+        }
+        else
+            await DismissModal(modal);
+    }
+    async Task HandleKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Escape")
+        {
+            await DismissModal();
+        }
+    }
     public void Dispose()
     {
-        modalService.OnModalOpened -= AddModal;
-        modalService.OnModalClosed -= RemoveModal;
+        ModalService.OnModalOpened -= AddModal;
+        ModalService.OnModalClosed -= RemoveModal;
+        Navigation.LocationChanged -= CloseModals;
     }
 }

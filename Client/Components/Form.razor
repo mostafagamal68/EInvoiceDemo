@@ -6,46 +6,69 @@
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
-    @if (!LoaderService.IsLoading)
+    @if (AsModal)
     {
-        if (AsModal)
-        {
-            <div class="modal-body">
-                @Content.Invoke(dto)
-            </div>
-            <div class="modal-footer shadow">
-                <div class="d-flex justify-content-end align-items-center gap-2">
-                    @Actions?.Invoke(dto)
-                    @if (Id.HasValue)
-                    {
-                        <Btn class="btn-info" Text="New" ClickAction="New" />
-                        <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
-                        <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
-                    }
-                    <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
-                </div>
-            </div>
-        }
-        else
-        {
-            <div class="card rounded shadow">
-                <div class="card-body" @ref=formBody>
-                    @Content.Invoke(dto)
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap py-2">
-                        @Actions?.Invoke(dto)
-                        @if (Id.HasValue)
-                        {
-                            <Btn class="btn-info" Text="New" ClickAction="New" />
-                            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
-                            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
-                        }
-                        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" />
+        <div class="modal-body">
+            @if (LoaderService.IsLoading)
+            {
+                <div class="row my-1 placeholder-glow">
+                    <div class="col-lg-2 col-md-3 my-auto">
+                        <label class="placeholder">0000000000</label>
+                    </div>
+                    <div class="col-lg-7 col-md-9">
+                        <input class="placeholder form-control" type="text" />
                     </div>
                 </div>
+                <div class="row my-1 placeholder-glow">
+                    <div class="col-lg-2 col-md-3 my-auto">
+                        <label class="placeholder">0000000000</label>
+                    </div>
+                    <div class="col-lg-7 col-md-9">
+                        <input class="placeholder form-control" type="text" />
+                    </div>
+                </div>
+            }
+            else
+            {
+                @Content.Invoke(dto)
+            }
+        </div>
+        <div class="modal-footer shadow">
+            @formFooter
+        </div>
+    }
+    else
+    {
+        <div class="card rounded shadow">
+            <div class="card-body mb-3" @ref=bodyElement>
+                @if (LoaderService.IsLoading)
+                {
+                    <div class="row my-1 placeholder-glow">
+                        <div class="col-lg-2 col-md-3 my-auto">
+                            <label class="placeholder">0000000000</label>
+                        </div>
+                        <div class="col-lg-7 col-md-9">
+                            <input class="placeholder form-control" type="text" />
+                        </div>
+                    </div>
+                    <div class="row my-1 placeholder-glow">
+                        <div class="col-lg-2 col-md-3 my-auto">
+                            <label class="placeholder">0000000000</label>
+                        </div>
+                        <div class="col-lg-7 col-md-9">
+                            <input class="placeholder form-control" type="text" />
+                        </div>
+                    </div>
+                }
+                else
+                {
+                    @Content.Invoke(dto)
+                }
             </div>
-        }
+            <div class="card-footer">
+                @formFooter
+            </div>
+        </div>
     }
 </EditForm>
 
@@ -55,14 +78,42 @@
     [Parameter] public RenderFragment<TDto>? Actions { get; set; }
 
     TDto dto = new();
-    ElementReference formBody;
+    ElementReference bodyElement;
+    bool SavedWithNew = false;
+    RenderFragment formFooter =>
+    @<div class="d-flex justify-content-end align-items-center gap-2">
+        @Actions?.Invoke(dto)
+        @if (Id.HasValue)
+    {
+        <Btn class="btn-info" Text="New" ClickAction="New" />
+        <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+        <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
+    }
+        @if (SavedWithNew)
+    {
+        <Btn class="btn-success" Text="Save & New" ValidateModel="true" CloseAfterSave="false" ClickAction="SaveThenNew">
+
+            <li><Btn Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" IsSubBtn="true" /></li>
+        </Btn>
+    }
+    else
+    {
+        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit">
+            <li><Btn Text="Save & New" ValidateModel="true" CloseAfterSave="false" ClickAction="SaveThenNew" IsSubBtn="true" /></li>
+        </Btn>
+    }
+    </div>
+    ;
+
+    protected override async Task OnInitializedAsync() => await GetData();
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            await GetData();
-            await JS.InvokeVoidAsync("focusFirstInput", formBody);
+            if (!AsModal)
+                await JS.InvokeVoidAsync("focusFirstInput", bodyElement);
         }
+        await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task GetData()
@@ -100,6 +151,12 @@
         Id = null;
         dto = new TDto();
         await GetData();
+    }
+    private async Task SaveThenNew()
+    {
+        await HandleValidSubmit();
+        await New();
+        SavedWithNew = true;
     }
     private async Task Copy()
     {

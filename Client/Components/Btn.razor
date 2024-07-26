@@ -1,31 +1,25 @@
 ﻿@inject IJSRuntime JS
-<span>
-    <a @ref="Element" class="btn rounded-3 shadow-sm @classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
-        @if (IsActionRun)
+@inject IModalService ModalService
+
+@if (IsSubBtn)
+{
+    @Button  
+}
+else
+{
+    <span class="btn-group">
+        @Button
+        @if (ChildContent is not null)
         {
-            switch (SpinnerType)
-            {
-                case SpinnerType.Grow:
-                    <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
-                    break;
-                case SpinnerType.Border:
-                    <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
-                    break;
-            }
+            <a role="button" class="btn shadow-sm dropdown-toggle dropdown-toggle-split @classes" data-bs-toggle="dropdown" aria-expanded="false">
+                <span class="visually-hidden">Toggle Dropdown</span>
+            </a>
+            <ul class="dropdown-menu">
+                @ChildContent
+            </ul>
         }
-        else
-        {
-            if (Text.HasValue())
-            {
-                <label class="mx-1">@Text</label>
-            }
-            if (Icon.HasValue())
-            {
-                <i class="@Icon mx-1"></i>
-            }
-        }
-    </a>
-</span>
+    </span>
+}
 @if (EditContext is not null && ValidateModel)
 {
     <NavigationLock OnBeforeInternalNavigation="CheckForModification" />
@@ -47,10 +41,16 @@
     public string? Icon { get; set; }
 
     [Parameter]
-    public bool ValidateModel { get; set; } = false;
+    public bool ValidateModel { get; set; }
 
     [Parameter]
-    public bool CloseAfterSave { get; set; } = false;
+    public bool IsSubBtn { get; set; }
+
+    [Parameter]
+    public bool CloseAfterSave { get; set; } = true;
+
+    [Parameter]
+    public RenderFragment ChildContent { get; set; }
 
     [Parameter(CaptureUnmatchedValues = true)]
     public Dictionary<string, object>? OtherAttributes { get; set; }
@@ -58,21 +58,39 @@
     [CascadingParameter]
     EditContext? EditContext { get; set; }
 
-    // [CascadingParameter]
-    // IModalService Modal { get; set; } = default!;
-
-    // [CascadingParameter]
-    // BlazoredModalInstance BlazoredModal { get; set; } = default!;
-
     [CascadingParameter]
-    public Services.IModalService ModalService { get; set; }
-
-    [CascadingParameter]
-    public ModalData ModalObject { get; set; }
+    public ModalData Modal { get; set; }
 
     private Dictionary<string, object>? AdditionalAttributes { get; set; }
     private string? classes { get; set; }
     private ElementReference Element;
+    RenderFragment Button =>
+    @<a @ref="Element" class="@(IsSubBtn ? "dropdown-item" : "btn shadow-sm") @classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
+        @if (IsActionRun)
+    {
+    switch (SpinnerType)
+    {
+    case SpinnerType.Grow:
+        <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+    break;
+    case SpinnerType.Border:
+        <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
+    break;
+    }
+    }
+    else
+    {
+    if (Text.HasValue())
+    {
+        <span class="mx-1">@Text</span>
+    }
+    if (Icon.HasValue())
+    {
+        <i class="@Icon mx-1"></i>
+    }
+    }
+    </a>
+    ;
 
     protected override void OnInitialized()
     {
@@ -81,51 +99,57 @@
         AdditionalAttributes = OtherAttributes;
     }
 
-    private async Task CheckForModification(LocationChangingContext context)
+    async Task CheckForModification(LocationChangingContext context)
     {
         if (EditContext?.IsModified() == true)
         {
             var confirm = ModalService.Show(
                 typeof(ConfirmDialog),
-                "There are unsaved changes!", 
+                "There are unsaved changes!",
                 new Dictionary<string, object>
-                {
+                                    {
                     { nameof(ConfirmDialog.Text), "Do you want to leave?" }
-                },
+                                    },
                 null
             );
 
             await confirm.Closing;
 
-            if (confirm.Value.CastTo<bool?>() == true) 
+            if (confirm.Value.CastTo<bool?>() == true)
                 context.PreventNavigation();
         }
     }
-    private async Task RunAction()
+
+    async Task RunAction()
     {
-        if (EditContext == null || !ValidateModel || EditContext.Validate())
+        IsActionRun = true;
+        try
         {
-            IsActionRun = true;
-            try
+            if (EditContext is not null)
             {
-                await ClickAction.InvokeAsync();
-                if (CloseAfterSave)
+                if (!ValidateModel || EditContext.Validate())
                 {
-                    if (ModalObject is not null)
-                        ModalService.Close(ModalObject);
-                    else
-                        await JS.InvokeVoidAsync("history.back");
+                    await ClickAction.InvokeAsync();
+                    if (CloseAfterSave)
+                    {
+                        if (Modal is not null)
+                            ModalService.Close(Modal);
+                        else
+                            await JS.InvokeVoidAsync("history.back");
+                    }
                 }
             }
-            catch (Exception ex)
-            {
-                throw new Exception(ex.Message);
-            }
-            finally
-            {
-                IsActionRun = false;
-            }
-
+            else
+                await ClickAction.InvokeAsync();
         }
+        catch (Exception ex)
+        {
+            throw new Exception(ex.Message);
+        }
+        finally
+        {
+            IsActionRun = false;
+        }
+
     }
 }

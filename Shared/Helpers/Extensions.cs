@@ -28,20 +28,24 @@ public static class Extensions
     public static string ToDateString(this DateTime Value)
         => Value.ToString("dd/MM/yyyy hh:mm:ss tt");
 
-    public static IQueryable<T> OrderWith<T>(this IQueryable<T> source, string? Field, SortingType SortingType = SortingType.Asc)
-        => Field.HasValue() ?
-               SortingType == SortingType.Asc ?
-               source.OrderBy(c => EF.Property<object>(c, Field!))
-               :
-               source.OrderByDescending(c => EF.Property<object>(c, Field!))
-               :
-           source;
-    public static IQueryable<T> OrderAndPaginate<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter)
-        where TDto : DtoBase
+    public static IQueryable<T> OrderWith<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter) where TDto : DtoBase
+    {
+        if (string.IsNullOrEmpty(filter.SortField))
+            filter.SortField = nameof(Entity.ModifiedDate);
+
+        return filter.SortApproach == SortingType.Desc ?
+        source.OrderByDescending(c => EF.Property<object>(c, filter.SortField))
+        :
+        source.OrderBy(c => EF.Property<object>(c, filter.SortField))
+        ;
+    }
+    public static IQueryable<T> Paginate<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter) where TDto : DtoBase
         => source
-            .OrderWith(filter.SortField, filter.SortApproach)
             .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
             .Take(filter.Pagination.RowsCount);
+
+    public static IQueryable<T> OrderAndPaginate<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter) where TDto : DtoBase
+        => source.OrderWith(filter).Paginate(filter);
 
     public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool Condition, Expression<Func<T, bool>> expression)
         => Condition ? source.Where(expression) : source;
@@ -56,7 +60,7 @@ public static class Extensions
     {
         if (expr.Body is UnaryExpression unary)
             return unary.Operand as MemberExpression;
-        
+
         return expr.Body as MemberExpression;
     }
     //public static T CloneJson<T>(this T source)

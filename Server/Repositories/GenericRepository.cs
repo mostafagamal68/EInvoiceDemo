@@ -58,16 +58,14 @@ public class GenericRepository<TModel, TDto, TFilter>(EInvoiceContext context, I
 
     public async Task<TFilter> GetList(TFilter? filter, Func<IQueryable<TModel>>? queryable)
     {
-        filter ??= new TFilter();
         var query = queryable?.Invoke() ?? Query();
+        filter ??= new TFilter();
         filter.Pagination = Pagination.GetPagination<TModel, TFilter, TDto>(query, filter);
-
         filter.Items = await query
-            .Select(c => mapper.CreateDtoFromEntity(c))
             .OrderAndPaginate(filter)
+            .Select(c => mapper.CreateDtoFromEntity(c))
             .AsNoTracking()
             .ToListAsync();
-
         return filter;
     }
 

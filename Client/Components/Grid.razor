@@ -400,7 +400,12 @@
     private async Task SortBy(string Field)
     {
         Model.SortField = Field;
-        Model.SortApproach = Model.SortApproach;
+        Model.SortApproach = Model.SortApproach switch
+        {
+            SortingType.Asc => SortingType.Desc,
+            SortingType.Desc => SortingType.Asc,
+            _ => SortingType.Asc,
+        };
         await Filter();
     }
 

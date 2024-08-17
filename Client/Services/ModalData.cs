@@ -1,6 +1,4 @@
-﻿using Microsoft.AspNetCore.Components;
-
-namespace EInvoiceDemo.Client.Services;
+﻿namespace EInvoiceDemo.Client.Services;
 
 public class ModalData
 {

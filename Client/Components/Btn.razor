@@ -3,7 +3,7 @@
 
 @if (IsSubBtn)
 {
-    @Button  
+    @Button
 }
 else
 {
@@ -11,7 +11,7 @@ else
         @Button
         @if (ChildContent is not null)
         {
-            <a role="button" class="btn shadow-sm dropdown-toggle dropdown-toggle-split @classes" data-bs-toggle="dropdown" aria-expanded="false">
+            <a role="button" class="btn shadow-sm dropdown-toggle dropdown-toggle-split @Classes" data-bs-toggle="dropdown" aria-expanded="false">
                 <span class="visually-hidden">Toggle Dropdown</span>
             </a>
             <ul class="dropdown-menu">
@@ -47,7 +47,7 @@ else
     public bool IsSubBtn { get; set; }
 
     [Parameter]
-    public bool CloseAfterSave { get; set; } = true;
+    public bool CloseAfterSave { get; set; }
 
     [Parameter]
     public RenderFragment ChildContent { get; set; }
@@ -62,10 +62,11 @@ else
     public ModalData Modal { get; set; }
 
     private Dictionary<string, object>? AdditionalAttributes { get; set; }
-    private string? classes { get; set; }
+    private bool IsSaved { get; set; }
+    private string? Classes { get; set; }
     private ElementReference Element;
     RenderFragment Button =>
-    @<a @ref="Element" class="@(IsSubBtn ? "dropdown-item" : "btn shadow-sm") @classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
+    @<a @ref="Element" class="@(IsSubBtn ? "dropdown-item" : "btn shadow-sm") @Classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
         @if (IsActionRun)
     {
     switch (SpinnerType)
@@ -94,28 +95,27 @@ else
 
     protected override void OnInitialized()
     {
-        classes = OtherAttributes?.GetValueOrDefault("class")?.ToString();
+        Classes = OtherAttributes?.GetValueOrDefault("class")?.ToString();
         OtherAttributes?.Remove("class");
         AdditionalAttributes = OtherAttributes;
     }
 
     async Task CheckForModification(LocationChangingContext context)
     {
-        if (EditContext?.IsModified() == true)
+        if (!IsSaved && EditContext?.IsModified() == true)
         {
             var confirm = ModalService.Show(
                 typeof(ConfirmDialog),
                 "There are unsaved changes!",
                 new Dictionary<string, object>
-                                    {
+                { 
                     { nameof(ConfirmDialog.Text), "Do you want to leave?" }
-                                    },
-                null
-            );
+                },
+                null);
 
             await confirm.Closing;
 
-            if (confirm.Value.CastTo<bool?>() == true)
+            if (confirm.Value.CastTo<bool?>() is not true)
                 context.PreventNavigation();
         }
     }
@@ -130,6 +130,7 @@ else
                 if (!ValidateModel || EditContext.Validate())
                 {
                     await ClickAction.InvokeAsync();
+                    IsSaved = true;
                     if (CloseAfterSave)
                     {
                         if (Modal is not null)

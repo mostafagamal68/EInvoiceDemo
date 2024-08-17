@@ -3,12 +3,14 @@ using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Models;
 using Riok.Mapperly.Abstractions;
 
-namespace EInvoiceDemo.Server.Repositories.Mappers;
+namespace EInvoiceDemo.Server.Mappers;
 
 [Mapper]
 public partial class TaxMapper : KeyValueMapper, IMapper<TaxDto, Tax>
 {
     public partial TaxDto CreateDtoFromEntity(Tax entity);
+
+    public partial Tax CreateEntityFromDto(TaxDto dto);
 
     public KeyValue CreateKeyValue(Tax entity)
     {

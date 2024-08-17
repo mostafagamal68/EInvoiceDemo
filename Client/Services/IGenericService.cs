@@ -1,4 +1,5 @@
-﻿using EInvoiceDemo.Shared.Models;
+﻿using EInvoiceDemo.Shared.Enums;
+using EInvoiceDemo.Shared.Models;
 using System.Net.Http;
 
 namespace EInvoiceDemo.Client.Services;

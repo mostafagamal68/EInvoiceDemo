@@ -1,23 +1,16 @@
 ﻿using EInvoiceDemo.Shared.Models;
 using Microsoft.EntityFrameworkCore;
-using System.Linq.Expressions;
 
 namespace EInvoiceDemo.Server.Repositories;
 
-public interface IGenericRepository<TModel, TDto, TFilter>
-    where TModel : Entity 
-    where TDto : DtoBase 
-    where TFilter : GlobalFilter<TDto>
+public interface IGenericRepository<TEntity> where TEntity : Entity
 {
-    DbSet<TModel> DbModel();
-    IQueryable<TModel> Query();
-    Task<List<KeyValue>> GetKeyValue(string? filter, Expression<Func<TModel, bool>>? filterPredicate);
-    Task<int> GetCode();
-    Task<TFilter> GetList(TFilter? filter, Func<IQueryable<TModel>>? queryable);
-    Task<TDto> GetSingle(Guid id);
-    Task Update(TDto dto);
-    Task Add(TModel model);
-    Task Delete(Guid id);
-    Task<string> Bulk(Bulk bulk);
+    DbSet<TEntity> DbSet { get; }
+    IQueryable<TEntity> Query();
+    Task<TEntity> GetAsync(Guid id);
+    void Update(TEntity model);
+    void Add(TEntity model);
+    void Delete(TEntity id);
     bool Exists(Guid id);
+    Task<int> SaveChangesAsync();
 }

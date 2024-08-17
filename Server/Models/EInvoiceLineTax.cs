@@ -12,6 +12,6 @@ public class EInvoiceLineTax : Entity
 
     [Column(TypeName = "decimal(28, 8)")]
     public decimal Amount { get; set; }
-    public EInvoiceLine? EInvoiceLine { get; set; }
+    public EInvoiceLine EInvoiceLine { get; set; }
 
 }

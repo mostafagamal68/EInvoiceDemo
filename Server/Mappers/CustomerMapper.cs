@@ -1,15 +1,16 @@
 ﻿using EInvoiceDemo.Server.Models;
-using EInvoiceDemo.Server.Repositories.Mappers;
 using EInvoiceDemo.Shared.DTOs;
 using EInvoiceDemo.Shared.Models;
 using Riok.Mapperly.Abstractions;
 
-namespace EInvoiceDemo.Server.Repositories;
+namespace EInvoiceDemo.Server.Mappers;
 
 [Mapper]
 public partial class CustomerMapper : KeyValueMapper, IMapper<CustomerDto, Customer>
 {
     public partial CustomerDto CreateDtoFromEntity(Customer entity);
+
+    public partial Customer CreateEntityFromDto(CustomerDto dto);
 
     public KeyValue CreateKeyValue(Customer entity)
     {

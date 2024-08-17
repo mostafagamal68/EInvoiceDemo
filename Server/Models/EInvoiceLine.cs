@@ -11,10 +11,10 @@ public class EInvoiceLine : Entity
     }
 
     public Guid ItemId { get; set; }
-    public Item? Item { get; set; }
+    public Item Item { get; set; }
 
     public Guid EInvoiceId { get; set; }
-    public EInvoice? EInvoice { get; set; }
+    public EInvoice EInvoice { get; set; }
 
     [Column(TypeName = "decimal(28, 8)")]
     public decimal Quantity { get; set; }

@@ -1,15 +1,15 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using EInvoiceDemo.Server.Handlers;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Shared.DTOs;
-using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Server.Repositories;
 using EInvoiceDemo.Shared.Helpers;
+using EInvoiceDemo.Shared.Models;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EInvoiceDemo.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class TaxesController(IGenericRepository<Tax, TaxDto, TaxesFilter> taxRepository) : ControllerBase
+public class TaxesController(IGenericHandler<Tax, TaxDto, TaxesFilter> taxRepository) : ControllerBase
 {
     // GET: api/Taxes/KeyValue
     [HttpGet("KeyValue")]
@@ -24,8 +24,7 @@ public class TaxesController(IGenericRepository<Tax, TaxDto, TaxesFilter> taxRep
     [HttpPost("{filter}")]
     public async Task<ActionResult<TaxesFilter>> GetTaxes(TaxesFilter filter)
         => await taxRepository.GetList(filter,
-                () => taxRepository.Query()
-                    .WhereIf(filter.TaxName.HasValue(), c => (c.Code + " " + c.TaxName).Contains(filter.TaxName!))
+                c => c.WhereIf(filter.TaxName.HasValue(), c => (c.Code + " " + c.TaxName).Contains(filter.TaxName!))
         );
 
     // GET: api/Taxes/5
@@ -37,16 +36,16 @@ public class TaxesController(IGenericRepository<Tax, TaxDto, TaxesFilter> taxRep
     [HttpPut]
     public async Task<IActionResult> PutTax(TaxDto dto)
     {
-        await taxRepository.Update(dto);
+        await taxRepository.Edit(dto);
         return Ok("Saved Successfully");
     }
 
     // POST: api/Taxes
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPost]
-    public async Task<ActionResult<Tax>> PostTax(Tax tax)
+    public async Task<ActionResult<Tax>> PostTax(TaxDto tax)
     {
-        await taxRepository.Add(tax);
+        await taxRepository.Create(tax);
         return CreatedAtAction("GetTax", new { id = tax.Id }, tax);
     }
 

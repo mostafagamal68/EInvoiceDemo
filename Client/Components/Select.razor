@@ -72,7 +72,7 @@
     }
 
     private async Task Search(ChangeEventArgs args)
-        => await Service.GetKeyValue(args?.Value?.ToString());
+        => List = await Service.GetKeyValue(args.Value.CastTo<string>());
 
     private async Task SelectedValueChanged(KeyValue? newValue)
     {

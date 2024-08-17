@@ -1,7 +1,7 @@
 ﻿using EInvoiceDemo.Shared.Models;
 using Riok.Mapperly.Abstractions;
 
-namespace EInvoiceDemo.Server.Repositories.Mappers;
+namespace EInvoiceDemo.Server.Mappers;
 
 [Mapper]
 public partial class KeyValueMapper

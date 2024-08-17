@@ -7,7 +7,8 @@ public class ModalService : IModalService
 
     public void Close(ModalData modal)
     {
-        OnModalClosed.Invoke(modal);
+        if (modal is not null)
+            OnModalClosed.Invoke(modal);
     }
 
     public ModalData Show(Type component, string title, Dictionary<string, object> parameters, Func<Task>? afterClose)

@@ -91,15 +91,14 @@
     }
         @if (SavedWithNew)
     {
-        <Btn class="btn-success" Text="Save & New" ValidateModel="true" CloseAfterSave="false" ClickAction="SaveThenNew">
-
+        <Btn class="btn-success" Text="Save & New" ValidateModel="true" ClickAction="SaveThenNew">
             <li><Btn Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" IsSubBtn="true" /></li>
         </Btn>
     }
     else
     {
         <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit">
-            <li><Btn Text="Save & New" ValidateModel="true" CloseAfterSave="false" ClickAction="SaveThenNew" IsSubBtn="true" /></li>
+            <li><Btn Text="Save & New" ValidateModel="true" ClickAction="SaveThenNew" IsSubBtn="true" /></li>
         </Btn>
     }
     </div>
@@ -133,18 +132,22 @@
 
         LoaderService.ToggleLoader();
     }
-    private async Task HandleValidSubmit()
+    private async Task<bool> HandleValidSubmit()
     {
-        HttpResponseMessage httpResponseMessage;
-        if (!Id.HasValue)
+        var successeded = await SendRequest();
+        if (successeded) Id = dto.Id;
+        return successeded;
+    }
+    private async Task<bool> SendRequest()
+    {
+        HttpResponseMessage response = Id switch
         {
-            httpResponseMessage = await Service.Create(dto);
-            if (httpResponseMessage.IsSuccessStatusCode)
-                Id = dto.Id;
-        }
-        else
-            httpResponseMessage = await Service.Edit(dto);
-        await ShowResultMessage(httpResponseMessage);
+            null => await Service.Create(dto),
+            _ => await Service.Edit(dto)
+        };
+
+        await ShowResultMessage(response);
+        return response.IsSuccessStatusCode;
     }
     private async Task New()
     {
@@ -154,9 +157,11 @@
     }
     private async Task SaveThenNew()
     {
-        await HandleValidSubmit();
-        await New();
-        SavedWithNew = true;
+        if (await HandleValidSubmit())
+        {
+            await New();
+            SavedWithNew = true;
+        }
     }
     private async Task Copy()
     {

@@ -20,7 +20,23 @@ public static class Extensions
         }
         return Value.ToString();
     }
-
+    public static void GetPagination<TEntity, TDto>(this GlobalFilter<TDto> filter, IQueryable<TEntity> query)
+        where TDto : DtoBase
+        where TEntity : Entity
+    {
+        var count = query.Count();
+        filter.Pagination.CurrentPage.ToString();
+        while ((filter.Pagination.PageNo * filter.Pagination.RowsCount) > count) filter.Pagination.PageNo--;
+        filter.Pagination = new Pagination
+        {
+            PageNo = filter.Pagination.PageNo,
+            CurrentPage = filter.Pagination.PageNo,
+            RowsCount = filter.Pagination.RowsCount,
+            TotalRows = count,
+            StartPage = Pagination.GetFirstPage((filter.Pagination.PageNo + 1).ToString()),
+            PagesCount = (int)Math.Ceiling((decimal)count / filter.Pagination.RowsCount)
+        };
+    }
     public static bool HasValue(this string? Value)
         => !string.IsNullOrEmpty(Value) && !string.IsNullOrWhiteSpace(Value);
     public static T? CastTo<T>(this object? value) => (T?)value;
@@ -39,22 +55,24 @@ public static class Extensions
         source.OrderBy(c => EF.Property<object>(c, filter.SortField))
         ;
     }
-    public static IQueryable<T> Paginate<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter) where TDto : DtoBase
+    public static IQueryable<TEntity> Paginate<TEntity, TDto>(this IQueryable<TEntity> source, GlobalFilter<TDto> filter)
+        where TDto : DtoBase
         => source
             .Skip(filter.Pagination.PageNo * filter.Pagination.RowsCount)
             .Take(filter.Pagination.RowsCount);
 
-    public static IQueryable<T> OrderAndPaginate<T, TDto>(this IQueryable<T> source, GlobalFilter<TDto> filter) where TDto : DtoBase
+    public static IQueryable<TEntity> OrderAndPaginate<TEntity, TDto>(this IQueryable<TEntity> source, GlobalFilter<TDto> filter)
+        where TDto : DtoBase
         => source.OrderWith(filter).Paginate(filter);
 
     public static IQueryable<T> WhereIf<T>(this IQueryable<T> source, bool Condition, Expression<Func<T, bool>> expression)
         => Condition ? source.Where(expression) : source;
 
-    public static async Task<T> FindOrErrorAsync<T>(this DbSet<T> source, Guid Id, Exception? exception = null) where T : Entity
-        => await source.FindAsync(Id) ?? throw exception ?? new KeyNotFoundException();
+    public static async Task<T> FindOrErrorAsync<T>(this DbSet<T> source, Guid id, Exception? exception = null) where T : Entity
+        => await source.FindAsync(id) ?? throw exception ?? new KeyNotFoundException();
 
-    public static async Task<T> FirstOrErrorAsync<T>(this IQueryable<T> source, Expression<Func<T, bool>> expression, Exception? exception = null) where T : Entity
-        => await source.FirstOrDefaultAsync(expression) ?? throw exception ?? new KeyNotFoundException();
+    public static async Task<T> FirstOrErrorAsync<T>(this IQueryable<T> source, Guid id, Exception? exception = null) where T : Entity
+        => await source.FirstOrDefaultAsync(c => c.Id == id) ?? throw exception ?? new KeyNotFoundException();
 
     public static MemberExpression? GetMemberExpression<T, TValue>(this Expression<Func<T, TValue>> expr)
     {

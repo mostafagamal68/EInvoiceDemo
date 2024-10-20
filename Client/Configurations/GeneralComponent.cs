@@ -27,8 +27,10 @@ public class GeneralComponent : ComponentBase
     [Parameter]
     public Guid? Id { get; set; }
 
-    [Parameter]
-    public bool AsModal { get; set; } = false;
+    [CascadingParameter]
+    public ModalData Modal { get; set; }
+
+    public bool InModal => Modal is not null;
 
     public async Task ShowResultMessage(HttpResponseMessage result)
     {

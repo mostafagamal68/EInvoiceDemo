@@ -10,7 +10,6 @@ public class ModalBuilder<T> where T : GeneralComponent
     private ModalBuilder()
     {
         modal = new() { ComponentType = typeof(T) };
-        modal.Parameters.Add(nameof(GeneralComponent.AsModal), true);
     }
     public ModalBuilder(string title)
         : this() => modal.Title = $"{title} {modal.ComponentType.Name}";

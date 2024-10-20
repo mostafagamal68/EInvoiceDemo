@@ -6,31 +6,12 @@
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
-    @if (AsModal)
+    @if (InModal)
     {
         <div class="modal-body">
-            @if (LoaderService.IsLoading)
+            @if (!LoaderService.IsLoading)
             {
-                <div class="row my-1 placeholder-glow">
-                    <div class="col-lg-2 col-md-3 my-auto">
-                        <label class="placeholder">0000000000</label>
-                    </div>
-                    <div class="col-lg-7 col-md-9">
-                        <input class="placeholder form-control" type="text" />
-                    </div>
-                </div>
-                <div class="row my-1 placeholder-glow">
-                    <div class="col-lg-2 col-md-3 my-auto">
-                        <label class="placeholder">0000000000</label>
-                    </div>
-                    <div class="col-lg-7 col-md-9">
-                        <input class="placeholder form-control" type="text" />
-                    </div>
-                </div>
-            }
-            else
-            {
-                @Content.Invoke(dto)
+                @Content?.Invoke(dto)
             }
         </div>
         <div class="modal-footer shadow">
@@ -41,28 +22,9 @@
     {
         <div class="card rounded shadow">
             <div class="card-body mb-3" @ref=bodyElement>
-                @if (LoaderService.IsLoading)
+                @if (!LoaderService.IsLoading)
                 {
-                    <div class="row my-1 placeholder-glow">
-                        <div class="col-lg-2 col-md-3 my-auto">
-                            <label class="placeholder">0000000000</label>
-                        </div>
-                        <div class="col-lg-7 col-md-9">
-                            <input class="placeholder form-control" type="text" />
-                        </div>
-                    </div>
-                    <div class="row my-1 placeholder-glow">
-                        <div class="col-lg-2 col-md-3 my-auto">
-                            <label class="placeholder">0000000000</label>
-                        </div>
-                        <div class="col-lg-7 col-md-9">
-                            <input class="placeholder form-control" type="text" />
-                        </div>
-                    </div>
-                }
-                else
-                {
-                    @Content.Invoke(dto)
+                    @Content?.Invoke(dto)
                 }
             </div>
             <div class="card-footer">
@@ -74,12 +36,14 @@
 
 @code {
     [Parameter] public string Item { get; set; }
+    [Parameter] public EventCallback<TDto> OnLoadCreate { get; set; }
+    [Parameter] public EventCallback<TDto> OnLoadUpdate { get; set; }
     [Parameter] public RenderFragment<TDto> Content { get; set; }
     [Parameter] public RenderFragment<TDto>? Actions { get; set; }
 
     TDto dto = new();
     ElementReference bodyElement;
-    bool SavedWithNew = false;
+    bool savedWithNew;
     RenderFragment formFooter =>
     @<div class="d-flex justify-content-end align-items-center gap-2">
         @Actions?.Invoke(dto)
@@ -89,7 +53,7 @@
         <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
         <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
     }
-        @if (SavedWithNew)
+        @if (savedWithNew)
     {
         <Btn class="btn-success" Text="Save & New" ValidateModel="true" ClickAction="SaveThenNew">
             <li><Btn Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" IsSubBtn="true" /></li>
@@ -105,11 +69,12 @@
     ;
 
     protected override async Task OnInitializedAsync() => await GetData();
+
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            if (!AsModal)
+            if (!InModal)
                 await JS.InvokeVoidAsync("focusFirstInput", bodyElement);
         }
         await base.OnAfterRenderAsync(firstRender);
@@ -117,27 +82,36 @@
 
     private async Task GetData()
     {
-        if (!AsModal)
+
+        if (!InModal)
             HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {Item}");
 
         LoaderService.ToggleLoader();
 
         if (Id.HasValue)
+        {
             dto = await Service.GetSingle(Id);
+            if (OnLoadUpdate.HasDelegate)
+                await OnLoadUpdate.InvokeAsync(dto);
+        }
         else
         {
             dto.Id = Guid.NewGuid();
+            if (OnLoadCreate.HasDelegate)
+                await OnLoadCreate.InvokeAsync(dto);
             dto.CastTo<dynamic>().Code = await Service.GetCode();
         }
 
         LoaderService.ToggleLoader();
     }
+
     private async Task<bool> HandleValidSubmit()
     {
         var successeded = await SendRequest();
         if (successeded) Id = dto.Id;
         return successeded;
     }
+
     private async Task<bool> SendRequest()
     {
         HttpResponseMessage response = Id switch
@@ -149,25 +123,29 @@
         await ShowResultMessage(response);
         return response.IsSuccessStatusCode;
     }
+
     private async Task New()
     {
         Id = null;
         dto = new TDto();
         await GetData();
     }
+
     private async Task SaveThenNew()
     {
         if (await HandleValidSubmit())
         {
             await New();
-            SavedWithNew = true;
+            savedWithNew = true;
         }
     }
+
     private async Task Copy()
     {
         Id = null;
         await GetData();
     }
+
     private async Task Delete()
     {
         if (await ShowDeleteConfirmation(Item))

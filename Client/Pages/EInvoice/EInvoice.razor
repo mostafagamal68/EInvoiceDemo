@@ -74,7 +74,8 @@
 
     private async Task GetEInvoice()
     {
-        if (!AsModal) HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
+        if (!InModal) 
+            HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
             dto = await einvoice.GetSingle(Id);

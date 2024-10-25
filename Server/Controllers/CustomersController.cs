@@ -9,28 +9,28 @@ namespace EInvoiceDemo.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
-public class CustomersController(IGenericHandler<Customer, CustomerDto, CustomersFilter> handler): ControllerBase
+public class CustomersController(IGenericHandler<Customer, CustomerDto, CustomersFilter> handler) : ControllerBase
 {
     // GET: api/Customers/KeyValue
     [HttpGet("KeyValue")]
     public async Task<ActionResult<List<KeyValue>>> GetKeyValue([FromQuery] string? filter)
         => await handler.GetKeyValue(filter, c => (c.Code + " " + c.CustomerName).Contains(filter!));
-    
+
     // GET: api/Customers/Code
     [HttpGet("Code")]
     public async Task<ActionResult<int>> GetCustomerCode() => await handler.GetCode();
 
     // GET: api/Customers
     [HttpPost("{filter}")]
-    public async Task<ActionResult<CustomersFilter>> GetCustomers(CustomersFilter? filter)
+    public async Task<ActionResult<CustomersFilter>> GetCustomers(CustomersFilter filter)
         => await handler.GetList(filter,
             c => c.WhereIf(filter.CustomerName.HasValue(), c => (c.Code + " " + c.CustomerName).Contains(filter.CustomerName!))
         );
-    
+
     // GET: api/Customers/5
     [HttpGet("{id}")]
     public async Task<ActionResult<CustomerDto>> GetCustomer(Guid id) => await handler.GetSingle(id);
-    
+
     // PUT: api/Customers/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut]

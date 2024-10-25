@@ -1,8 +1,9 @@
 ﻿@using System.Linq.Expressions;
+@inherits InputText
 @typeparam TDto where TDto : DtoBase
 @typeparam TFilter where TFilter : GlobalFilter<TDto>
-@inherits InputText
 @inject IGenericService<TFilter, TDto> Service
+
 <div class="dropdown">
     @if (AutoComplete)
     {
@@ -48,7 +49,7 @@
 </div>
 
 @code {
-    List<KeyValue>? List { get; set; } = new();
+    List<KeyValue> List { get; set; } = new();
 
     [Parameter] public bool AutoComplete { get; set; } = false;
 
@@ -72,7 +73,7 @@
     }
 
     private async Task Search(ChangeEventArgs args)
-        => List = await Service.GetKeyValue(args.Value.CastTo<string>());
+        => List = await Service.GetKeyValue(args.Value.CastTo<string?>());
 
     private async Task SelectedValueChanged(KeyValue? newValue)
     {

@@ -2,19 +2,19 @@
 @using System.ComponentModel.DataAnnotations;
 @using System.Linq.Expressions
 @using System.Reflection
+@inherits GeneralComponent
 @typeparam TDto where TDto : DtoBase
 @typeparam TFilter where TFilter : GlobalFilter<TDto>, new()
-@typeparam TForm where TForm : GeneralComponent
+@typeparam TForm where TForm : class, IForm
 @inject IGenericService<TFilter, TDto> Service
-@inherits GeneralComponent
+
 @if (ShowActions)
 {
     <div class="d-flex justify-content-between rounded shadow p-2 mb-3 flex-wrap">
         <div class="d-flex">
             @if (SearchProperty is not null)
             {
-                <span class="btn btn-light disabled"><i class="bi bi-search"></i></span>
-                <input class="form-control shadow-none" @bind="Search" @bind:event="oninput" @bind:after="Filter" />
+                <input type="search" class="form-control" placeholder="Search" @bind="Search" @bind:event="oninput" @bind:after="Filter" />
             }
         </div>
         <div class="d-flex align-items-center gap-2">
@@ -95,10 +95,19 @@
                                     else
                                     {
                                         <span>
-                                            <span class="badge rounded-pill shadow-sm">
+                                            <span class="badge rounded-pill shadow-sm mx-1">
                                                 @(property.GetCustomAttributes(typeof(DisplayAttribute), true).Cast<DisplayAttribute>().Single().Name):
                                             </span>
-                                            @property.GetValue(item)?.ToString(2)
+                                            @{
+                                                var propertyValue = property.GetValue(item);
+                                                var value = propertyValue switch
+                                                {
+                                                    null => null,
+                                                    decimal number => number.Rnd().ToString(),
+                                                    _ => propertyValue.ToString()
+                                                };
+                                            }
+                                            @value
                                         </span>
                                     }
                                 }
@@ -196,7 +205,18 @@
                                 </td>
                                 @foreach (var property in properties.Where(c => Attribute.IsDefined(c, typeof(DisplayAttribute))))
                                 {
-                                    <td class="border-end">@property.GetValue(item)?.ToString(2)</td>
+                                    <td class="border-end">
+                                        @{
+                                            var propertyValue = property.GetValue(item);
+                                            var value = propertyValue switch
+                                            {
+                                                null => null,
+                                                decimal number => number.Rnd().ToString(),
+                                                _ => propertyValue.ToString()
+                                            };
+                                        }
+                                        @value
+                                    </td>
                                 }
                                 <td>
                                     @CustomActions?.Invoke(item)
@@ -260,7 +280,7 @@
     }
 
     [Parameter]
-    public Expression<Func<TFilter, string>>? SearchProperty { get; set; }
+    public Expression<Func<TFilter, string>> SearchProperty { get; set; }
 
     [Parameter]
     public RenderFragment<TFilter>? FilterTemplate { get; set; }
@@ -317,20 +337,23 @@
         LoaderService.ToggleLoader();
         await base.OnInitializedAsync();
     }
+
     protected override void OnAfterRender(bool firstRender)
     {
         if (firstRender)
         {
             FormType = typeof(TForm);
-            HeaderService.ChangeHeaderAndTitle(Service.api);
+            HeaderService.ChangeHeaderAndTitle(Service.Api);
         }
         base.OnAfterRender(firstRender);
     }
+
     private async Task Filter()
     {
         if (EditContext is null)
             Model = await Service.GetList(Model);
     }
+
     private async Task Edit(Guid id)
     {
         if (ActionsAsModal)
@@ -342,6 +365,7 @@
         else
             GoTo(FormType.Name, id);
     }
+
     private async Task ReloadById(Guid id)
     {
         var oldItem = Model.Items.FirstOrDefault(c => c.Id == id);
@@ -354,6 +378,7 @@
                 Model.Items.Insert(oldItemIndex, newItem);
         }
     }
+
     private async Task Delete(Guid id)
     {
         if (await ShowDeleteConfirmation(FormType.Name))
@@ -365,31 +390,28 @@
             await ShowResultMessage(response);
         }
     }
+
     private async Task Bulk(BulkOperation operation)
     {
-        var SelectedItems = Model.Items.Where(c => c.IsSelected);
-        HttpResponseMessage? response = null;
-        switch (operation)
+        var ids = Model.Items.Where(c => c.IsSelected).Select(c => c.Id).ToList();
+        HttpResponseMessage? response = operation switch
         {
-            case BulkOperation.Delete:
-                {
-                    if (await ShowDeleteConfirmation(FormType.Name))
-                    {
-                        var Ids = SelectedItems.Select(c => c.Id).ToList();
-                        response = await Service.Bulk(Ids, BulkOperation.Delete);
-                        // Model.Items.Where(c => Ids.Contains(c.Id)).ToList().ForEach(c => Model.Items.Remove(c));
-                    }
-                    break;
-                };
-            case BulkOperation.Update:
-                {
-                    break;
-                }
+            BulkOperation.Delete when await ShowDeleteConfirmation(Service.Api) =>
+                await Service.Bulk(ids, BulkOperation.Delete),
+
+            BulkOperation.Update => await Service.Bulk(ids, BulkOperation.Update),
+
+            _ => null
+        };
+
+        if (response is not null)
+        {
+            if (response.IsSuccessStatusCode)
+                await Filter();
+            await ShowResultMessage(response);
         }
-        if (response.IsSuccessStatusCode)
-            await Filter();
-        await ShowResultMessage(response);
     }
+
     private async Task Refresh()
     {
         Model = new();
@@ -397,6 +419,7 @@
         await Filter();
         GridIsLoading = false;
     }
+
     private async Task SortBy(string Field)
     {
         Model.SortField = Field;
@@ -410,7 +433,7 @@
     }
 
     private async Task SortBy(ChangeEventArgs Field)
-        => await SortBy((string)Field.Value!);
+        => await SortBy(Field.Value.CastTo<string>()!);
 
     private void CheckedChanged()
         => SelectAll = Model.Items.All(c => c.IsSelected);

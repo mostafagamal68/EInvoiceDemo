@@ -17,18 +17,18 @@ public class EInvoicesController(IEInvoiceHandler handler) : ControllerBase
 
     // GET: api/EInvoices
     [HttpPost("{filter}")]
-    public async Task<ActionResult<EInvoicesFilter>> GetEInvoices(EInvoicesFilter? filter)
+    public async Task<ActionResult<EInvoicesFilter>> GetEInvoices(EInvoicesFilter filter)
         => await handler.GetList(filter,
             c => c.WhereIf(filter.CustomerId.HasValue, c => c.CustomerId == filter.CustomerId)
                 .WhereIf(filter.EInvoiceType.HasValue, c => c.EInvoiceType == filter.EInvoiceType)
                 .WhereIf(filter.DateTimeIssuedFrom.HasValue, c => c.DateTimeIssued >= filter.DateTimeIssuedFrom)
                 .WhereIf(filter.DateTimeIssuedTo.HasValue, c => c.DateTimeIssued <= filter.DateTimeIssuedTo)
         );
- 
+
     // GET: api/EInvoices/5
     [HttpGet("{id}")]
     public async Task<ActionResult<EInvoiceDto>> GetEInvoice(Guid id) => await handler.GetSingle(id);
- 
+
     // PUT: api/EInvoices/5
     // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
     [HttpPut]

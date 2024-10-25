@@ -1,17 +1,17 @@
 ﻿@inherits GeneralComponent
-@inject IJSRuntime JS
 @typeparam TDto where TDto : DtoBase, new()
 @typeparam TFilter where TFilter : GlobalFilter<TDto>
-@inject IGenericService<TFilter, TDto> Service
+@inject IGenericService<TFilter, TDto> service
+@inject IJSRuntime JS
 
-<EditForm Model="dto">
+<EditForm Model="Dto">
     <DataAnnotationsValidator />
     @if (InModal)
     {
-        <div class="modal-body">
+        <div class="modal-body" @ref=bodyElement>
             @if (!LoaderService.IsLoading)
             {
-                @Content?.Invoke(dto)
+                @ChildContent?.Invoke(Dto)
             }
         </div>
         <div class="modal-footer shadow">
@@ -24,7 +24,7 @@
             <div class="card-body mb-3" @ref=bodyElement>
                 @if (!LoaderService.IsLoading)
                 {
-                    @Content?.Invoke(dto)
+                    @ChildContent?.Invoke(Dto)
                 }
             </div>
             <div class="card-footer">
@@ -35,19 +35,22 @@
 </EditForm>
 
 @code {
-    [Parameter] public string Item { get; set; }
-    [Parameter] public EventCallback<TDto> OnLoadCreate { get; set; }
-    [Parameter] public EventCallback<TDto> OnLoadUpdate { get; set; }
-    [Parameter] public RenderFragment<TDto> Content { get; set; }
+    public TDto Dto { get; set; } = new();
+    public IGenericService<TFilter, TDto> Service => service;
+
+    [Parameter] public Guid? Id { get; set; }
+    [Parameter] public EventCallback<Form<TDto, TFilter>> OnLoadCreate { get; set; }
+    [Parameter] public EventCallback<Form<TDto, TFilter>> OnLoadUpdate { get; set; }
+    [Parameter] public RenderFragment<TDto> ChildContent { get; set; }
     [Parameter] public RenderFragment<TDto>? Actions { get; set; }
 
-    TDto dto = new();
-    ElementReference bodyElement;
+    string item;
     bool savedWithNew;
+    ElementReference bodyElement;
     RenderFragment formFooter =>
     @<div class="d-flex justify-content-end align-items-center gap-2">
-        @Actions?.Invoke(dto)
-        @if (Id.HasValue)
+    @Actions?.Invoke(Dto)
+    @if (Id.HasValue)
     {
         <Btn class="btn-info" Text="New" ClickAction="New" />
         <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
@@ -55,51 +58,52 @@
     }
         @if (savedWithNew)
     {
-        <Btn class="btn-success" Text="Save & New" ValidateModel="true" ClickAction="SaveThenNew">
-            <li><Btn Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" IsSubBtn="true" /></li>
+        <Btn class="btn-success" Text="Save & New" ValidateModel=true ClickAction=SaveThenNew>
+            <li><Btn Text="Save" ValidateModel=true ClickAction=HandleValidSubmit IsSubBtn=true CloseAfterSave=InModal /></li>
         </Btn>
     }
     else
     {
-        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit">
-            <li><Btn Text="Save & New" ValidateModel="true" ClickAction="SaveThenNew" IsSubBtn="true" /></li>
+        <Btn class="btn-success" Text="Save" ValidateModel=true ClickAction=HandleValidSubmit CloseAfterSave=InModal>
+            <li><Btn Text="Save & New" ValidateModel=true ClickAction=SaveThenNew IsSubBtn=true /></li>
         </Btn>
     }
     </div>
     ;
 
-    protected override async Task OnInitializedAsync() => await GetData();
+    protected override async Task OnInitializedAsync()
+    { 
+        item = typeof(TDto).Name.Replace("Dto", "");
+        await GetData(); 
+    }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
-            if (!InModal)
-                await JS.InvokeVoidAsync("focusFirstInput", bodyElement);
+            await JS.InvokeVoidAsync("focusFirstInput", bodyElement);
         }
         await base.OnAfterRenderAsync(firstRender);
     }
 
     private async Task GetData()
     {
-
         if (!InModal)
-            HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {Item}");
+            HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {item}");
 
         LoaderService.ToggleLoader();
 
         if (Id.HasValue)
         {
-            dto = await Service.GetSingle(Id);
+            Dto = await service.GetSingle(Id);
             if (OnLoadUpdate.HasDelegate)
-                await OnLoadUpdate.InvokeAsync(dto);
+                await OnLoadUpdate.InvokeAsync(this);
         }
         else
         {
-            dto.Id = Guid.NewGuid();
+            Dto.Id = Guid.NewGuid();
             if (OnLoadCreate.HasDelegate)
-                await OnLoadCreate.InvokeAsync(dto);
-            dto.CastTo<dynamic>().Code = await Service.GetCode();
+                await OnLoadCreate.InvokeAsync(this);
         }
 
         LoaderService.ToggleLoader();
@@ -108,7 +112,7 @@
     private async Task<bool> HandleValidSubmit()
     {
         var successeded = await SendRequest();
-        if (successeded) Id = dto.Id;
+        if (successeded) Id = Dto.Id;
         return successeded;
     }
 
@@ -116,8 +120,8 @@
     {
         HttpResponseMessage response = Id switch
         {
-            null => await Service.Create(dto),
-            _ => await Service.Edit(dto)
+            null => await service.Create(Dto),
+            _ => await service.Edit(Dto)
         };
 
         await ShowResultMessage(response);
@@ -127,7 +131,7 @@
     private async Task New()
     {
         Id = null;
-        dto = new TDto();
+        Dto = new TDto();
         await GetData();
     }
 
@@ -148,11 +152,11 @@
 
     private async Task Delete()
     {
-        if (await ShowDeleteConfirmation(Item))
+        if (await ShowDeleteConfirmation(item))
         {
-            var response = await Service.Delete(Id);
+            var response = await service.Delete(Id);
             if (response.IsSuccessStatusCode)
-                GoTo(Item + "s");
+                GoTo(service.Api);
             await ShowResultMessage(response);
         }
     }

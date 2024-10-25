@@ -1,5 +1,5 @@
-﻿using EInvoiceDemo.Shared.Models;
-using EInvoiceDemo.Shared.Enums;
+﻿using EInvoiceDemo.Shared.Enums;
+using EInvoiceDemo.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -16,18 +16,18 @@ public class EInvoice : Entity
     public int Code { get; set; }
 
     [Required]
-    public EInvoiceTypeEnum EInvoiceType { get; set;}
+    public EInvoiceTypeEnum EInvoiceType { get; set; }
 
     [Required]
-    public Guid CustomerId { get; set;}
+    public Guid CustomerId { get; set; }
 
-    public Customer Customer { get; set;}
+    public Customer Customer { get; set; }
 
     [Required]
     public DateTime DateTimeIssued { get; set; }
 
     [Column(TypeName = "decimal(28, 8)")]
-    public decimal NetAmount { get; set;}
+    public decimal NetAmount { get; set; }
 
     public IList<EInvoiceLine> EInvoiceLines { get; set; }
 }

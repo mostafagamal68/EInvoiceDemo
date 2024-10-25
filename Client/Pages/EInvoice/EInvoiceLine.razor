@@ -1,6 +1,7 @@
 ﻿@using EInvoiceDemo.Client.Pages.Item
 @using EInvoiceDemo.Client.Pages.Tax
 @inherits GeneralComponent
+@implements IForm
 
 <EditForm Model="dto" class="p-3">
     <ObjectGraphDataAnnotationsValidator />
@@ -48,7 +49,7 @@
                     </CustomActions>
                     <ExtraData>
                         <Field Name="Total" For="@(() => dto.Total)">
-                            <h5>@dto.Total?.ToString(2)</h5>
+                            <h5>@dto.Total.Rnd()</h5>
                         </Field>
                     </ExtraData>
                 </Grid>
@@ -56,7 +57,7 @@
         </div>
 
         <Field Name="Item Net Amount" For="@(() => dto.ItemNetAmount)">
-            <h5>@dto.ItemNetAmount?.ToString(2)</h5>
+            <h5>@dto.ItemNetAmount.Rnd()</h5>
         </Field>
 
     </div>
@@ -71,13 +72,13 @@
 
 @code {
     [Parameter]
+    public Guid? Id { get; set; }
+
+    [Parameter]
     public EInvoiceLineDto dto { get; set; } = new();
 
     [Parameter]
     public List<EInvoiceLineDto> List { get; set; } = new();
-
-    [CascadingParameter]
-    public ModalData ModalObject { get; set; }
 
     EInvoiceLineTaxFilter taxFilter = new();
 
@@ -97,7 +98,7 @@
         {
             List?.Remove(List.First(c => c.Id == Id));
             ToastService.ShowSuccess("Deleted Successfully");
-            ModalService.Close(ModalObject);
+            ModalService.Close(Modal);
         }
     }
 

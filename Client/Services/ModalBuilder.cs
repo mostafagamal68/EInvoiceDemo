@@ -1,12 +1,11 @@
-﻿using EInvoiceDemo.Client.Configurations;
-using EInvoiceDemo.Shared.Helpers;
+﻿using EInvoiceDemo.Shared.Helpers;
 using System.Linq.Expressions;
 
 namespace EInvoiceDemo.Client.Services;
 
-public class ModalBuilder<T> where T : GeneralComponent
+public class ModalBuilder<T> where T : class
 {
-    readonly ModalData modal;
+    private readonly ModalData modal;
     private ModalBuilder()
     {
         modal = new() { ComponentType = typeof(T) };
@@ -25,8 +24,11 @@ public class ModalBuilder<T> where T : GeneralComponent
 
     public ModalBuilder<T> AddParameter<TValue>(Expression<Func<T, TValue>> expression, TValue value)
     {
-        var memberExpr = expression.GetMemberExpression() ?? throw new ArgumentNullException(nameof(expression));
-        modal.Parameters.Add(memberExpr.Member.Name, value);
+        if (value is not null)
+        {
+            var memberExpr = expression.GetMemberExpression() ?? throw new ArgumentNullException(nameof(expression));
+            modal.Parameters.Add(memberExpr.Member.Name, value);
+        }
         return this;
     }
     public ModalData Build() => modal;

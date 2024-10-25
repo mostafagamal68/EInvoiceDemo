@@ -4,9 +4,3 @@
         firstInput.focus();
     }
 }
-function focusElement(element) {
-    console.log(element)
-    if (element) {
-        element.focus();
-    }
-}

@@ -1,5 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
-using EInvoiceDemo.Shared.Models;
+﻿using EInvoiceDemo.Shared.Models;
+using System.ComponentModel.DataAnnotations;
 
 namespace EInvoiceDemo.Shared.DTOs;
 

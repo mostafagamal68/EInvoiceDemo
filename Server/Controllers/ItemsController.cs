@@ -22,9 +22,9 @@ public class ItemsController(IGenericHandler<Item, ItemDto, ItemsFilter> handler
 
     // GET: api/Items
     [HttpPost("{filter}")]
-    public async Task<ActionResult<ItemsFilter>> GetItems(ItemsFilter? filter)
+    public async Task<ActionResult<ItemsFilter>> GetItems(ItemsFilter filter)
         => await handler.GetList(filter,
-            c => c.WhereIf(filter.ItemName.HasValue(), c => (c.Code + " " + c.ItemName).Contains(filter.ItemName))
+            c => c.WhereIf(filter.ItemName.HasValue(), c => (c.Code + " " + c.ItemName).Contains(filter.ItemName!))
         );
 
     // GET: api/Items/5

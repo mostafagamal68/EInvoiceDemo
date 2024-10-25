@@ -20,10 +20,12 @@ else
         }
     </span>
 }
+
 @if (EditContext is not null && ValidateModel)
 {
     <NavigationLock OnBeforeInternalNavigation="CheckForModification" />
 }
+
 @code {
     [Parameter]
     public string? Text { get; set; }
@@ -61,34 +63,34 @@ else
     [CascadingParameter]
     public ModalData Modal { get; set; }
 
-    private Dictionary<string, object>? AdditionalAttributes { get; set; }
-    private bool IsSaved { get; set; }
-    private string? Classes { get; set; }
-    private ElementReference Element;
+    Dictionary<string, object>? AdditionalAttributes { get; set; }
+    bool IsSaved;
+    string? Classes;
+    ElementReference Element;
     RenderFragment Button =>
-    @<a @ref="Element" class="@(IsSubBtn ? "dropdown-item" : "btn shadow-sm") @Classes" @onclick="@RunAction" disabled="@IsActionRun" role="button" @attributes="AdditionalAttributes">
-        @if (IsActionRun)
+    @<a @ref=Element class=@(IsSubBtn ? "dropdown-item " : "btn shadow-sm " + Classes) @onclick=RunAction disabled=@IsActionRun role="button" @attributes=AdditionalAttributes>
+    @if (IsActionRun)
     {
-    switch (SpinnerType)
-    {
-    case SpinnerType.Grow:
-        <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
-    break;
-    case SpinnerType.Border:
-        <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
-    break;
-    }
+        switch (SpinnerType)
+        {
+            case SpinnerType.Grow:
+                <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+            break;
+            case SpinnerType.Border:
+                <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
+            break;
+        }
     }
     else
     {
-    if (Text.HasValue())
-    {
-        <span class="mx-1">@Text</span>
-    }
-    if (Icon.HasValue())
-    {
-        <i class="@Icon mx-1"></i>
-    }
+        if (Text.HasValue())
+        {
+            <span class="mx-1">@Text</span>
+        }
+        if (Icon.HasValue())
+        {
+            <i class="@Icon mx-1"></i>
+        }
     }
     </a>
     ;
@@ -100,7 +102,7 @@ else
         AdditionalAttributes = OtherAttributes;
     }
 
-    async Task CheckForModification(LocationChangingContext context)
+    private async Task CheckForModification(LocationChangingContext context)
     {
         if (!IsSaved && EditContext?.IsModified() == true)
         {
@@ -108,7 +110,7 @@ else
                 typeof(ConfirmDialog),
                 "There are unsaved changes!",
                 new Dictionary<string, object>
-                { 
+                {
                     { nameof(ConfirmDialog.Text), "Do you want to leave?" }
                 },
                 null);
@@ -120,7 +122,7 @@ else
         }
     }
 
-    async Task RunAction()
+    private async Task RunAction()
     {
         IsActionRun = true;
         try
@@ -151,6 +153,5 @@ else
         {
             IsActionRun = false;
         }
-
     }
 }

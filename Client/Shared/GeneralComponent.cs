@@ -5,7 +5,7 @@ using EInvoiceDemo.Shared.Helpers;
 using Microsoft.AspNetCore.Components;
 using System.Net;
 
-namespace EInvoiceDemo.Client.Configurations;
+namespace EInvoiceDemo.Client.Shared;
 
 public class GeneralComponent : ComponentBase
 {
@@ -24,9 +24,6 @@ public class GeneralComponent : ComponentBase
     [Inject]
     public IModalService ModalService { get; set; }
 
-    [Parameter]
-    public Guid? Id { get; set; }
-
     [CascadingParameter]
     public ModalData Modal { get; set; }
 
@@ -41,9 +38,7 @@ public class GeneralComponent : ComponentBase
         else
             ToastService.ShowError(await result.Content.ReadAsStringAsync());
     }
-    public async Task<bool> ShowDeleteConfirmation(string item)
-        => await ShowConfirm("Delete Confirmation", $"Are you sure to delete this {item}?");
-    
+
     public async Task<bool> ShowConfirm(string title, string message)
     {
         var parameters = new Dictionary<string, object> { { nameof(ConfirmDialog.Text), message } };
@@ -52,7 +47,10 @@ public class GeneralComponent : ComponentBase
 
         return confirm.Value.CastTo<bool?>() == true;
     }
-        
+
+    public async Task<bool> ShowDeleteConfirmation(string item)
+        => await ShowConfirm("Delete Confirmation", $"Are you sure to delete this {item}?");
+
     public void GoTo(string PageRoute, Guid? Id = null)
         => Navigation.NavigateTo($"/{PageRoute}{(Id.HasValue ? "/" + Id : "")}");
 }

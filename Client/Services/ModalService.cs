@@ -13,7 +13,7 @@ public class ModalService : IModalService
 
     public ModalData Show(Type component, string title, Dictionary<string, object> parameters, Func<Task>? afterClose)
     {
-        var modal  = new ModalData
+        var modal = new ModalData
         {
             ComponentType = component,
             Title = title,

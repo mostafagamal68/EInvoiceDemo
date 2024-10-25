@@ -6,17 +6,17 @@ using System.Text.Json;
 namespace EInvoiceDemo.Client.Services;
 
 public class GenericService<TFilter, TDto>(HttpClient httpClient, JsonSerializerOptions options) : IGenericService<TFilter, TDto>
-    where TDto : DtoBase
-    where TFilter : GlobalFilter<TDto>
+    where TDto : DtoBase, new()
+    where TFilter : GlobalFilter<TDto>, new()
 {
-    readonly string _api = $"api/{typeof(TFilter).Name.Replace("Filter", "")}";
-    public string api => _api.Replace("api/", "");
+    private readonly string _api = $"api/{typeof(TFilter).Name.Replace("Filter", "")}";
+    public string Api => _api.Replace("api/", "");
     public async Task<TFilter> GetList(TFilter filter)
-        => await (await httpClient.PostAsJsonAsync($"{_api}/Filter", filter)).Content.ReadFromJsonAsync<TFilter>(options);
-    public async Task<List<KeyValue>?> GetKeyValue(string? filter)
-        => await httpClient.GetFromJsonAsync<List<KeyValue>>($"{_api}/KeyValue?filter={filter}");
+        => await (await httpClient.PostAsJsonAsync($"{_api}/Filter", filter)).Content.ReadFromJsonAsync<TFilter>(options) ?? new();
+    public async Task<List<KeyValue>> GetKeyValue(string? filter)
+        => await httpClient.GetFromJsonAsync<List<KeyValue>>($"{_api}/KeyValue?filter={filter}") ?? [];
     public async Task<TDto> GetSingle(Guid? Id)
-        => await httpClient.GetFromJsonAsync<TDto>($"{_api}/{Id}");
+        => await httpClient.GetFromJsonAsync<TDto>($"{_api}/{Id}") ?? new();
     public async Task<int> GetCode()
         => await httpClient.GetFromJsonAsync<int>($"{_api}/Code");
     public async Task<HttpResponseMessage> Create(TDto dto)

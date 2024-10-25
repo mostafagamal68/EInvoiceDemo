@@ -1,23 +1,20 @@
 ﻿@page "/Customer/{Id:guid?}"
-@inherits GeneralComponent
+@implements IForm
 
-<Form TDto=CustomerDto 
+<Form TDto=CustomerDto
       TFilter=CustomersFilter
-      Item=@nameof(Customer)
+      OnLoadCreate="async form => form.Dto.Code = await form.Service.GetCode()"
       Id=Id>
-    <Content Context=dto>
+    <Field Name="Code" For="() => context.Code">
+        <InputNumber class="form-control" @bind-Value="context.Code" />
+    </Field>
 
-        <Field Name="Code" For="@(() => dto.Code)">
-            <InputNumber class="form-control" @bind-Value="dto.Code" />
-        </Field>
-
-        <Field Name="Name" For="@(() => dto.CustomerName)">
-            <InputText class="form-control" @bind-Value="dto.CustomerName" />
-        </Field>
-
-    </Content>
+    <Field Name="Name" For="() => context.CustomerName">
+        <InputText class="form-control" @bind-Value="context.CustomerName" />
+    </Field>
 </Form>
 
 @code {
-
+    [Parameter]
+    public Guid? Id { get; set; }
 }

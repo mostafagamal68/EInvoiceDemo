@@ -2,6 +2,7 @@
 @using EInvoiceDemo.Client.Pages.Customer
 @inherits GeneralComponent
 @inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoice
+@implements IForm
 
 <EditForm Model="dto">
     <DataAnnotationsValidator />
@@ -12,7 +13,7 @@
         </Field>
 
         <Field Name="Type" For="@(() => dto.EInvoiceType)">
-            <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadioButtons=true />
+            <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadios=true />
         </Field>
 
         <Field Name="Customer" For="@(() => dto.CustomerName)">
@@ -52,7 +53,7 @@
         </div>
 
         <Field Name="Net Amount" For="@(() => dto.NetAmount)">
-            <h5>@dto.NetAmount.ToString(2)</h5>
+            <h5>@dto.NetAmount.Rnd()</h5>
         </Field>
 
     </div>
@@ -67,6 +68,9 @@
     </div>
 </EditForm>
 @code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
     EInvoiceDto dto = new();
     EInvoiceLineFilter lineFilter = new();
 

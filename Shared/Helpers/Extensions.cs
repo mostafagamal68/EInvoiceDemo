@@ -1,25 +1,22 @@
 ﻿using EInvoiceDemo.Shared.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
-using System.Text;
 
 namespace EInvoiceDemo.Shared.Helpers;
 
 public static class Extensions
 {
-    public static string? ToString(this object Value, int Format)
+    public static decimal? Rnd(this decimal? Value)
     {
-        if (Value.GetType() == typeof(decimal))
-        {
-            if ((decimal)Value == 0M)
-                return "0";
-            StringBuilder stringBuilder = new();
-            for (int i = 0; i < new string[Format].Length; i++)
-                stringBuilder.Append('0');
-            return string.Format($"{{0:#.{stringBuilder}}}", Value);
-        }
-        return Value.ToString();
+        if (Value.HasValue)
+            return Value.Value.Rnd();
+        return Value;
     }
+    public static decimal Rnd(this decimal Value)
+    {
+        return Math.Round(Value, 2);
+    }
+
     public static void GetPagination<TEntity, TDto>(this GlobalFilter<TDto> filter, IQueryable<TEntity> query)
         where TDto : DtoBase
         where TEntity : Entity
@@ -37,10 +34,16 @@ public static class Extensions
             PagesCount = (int)Math.Ceiling((decimal)count / filter.Pagination.RowsCount)
         };
     }
+
     public static bool HasValue(this string? Value)
         => !string.IsNullOrEmpty(Value) && !string.IsNullOrWhiteSpace(Value);
-    public static T? CastTo<T>(this object? value) => (T?)value;
-    public static T? CastAs<T>(this object value) where T : class => value as T;
+
+    public static T? CastTo<T>(this object? value)
+        => (T?)value;
+
+    public static T? CastAs<T>(this object value) where T : class
+        => value as T;
+
     public static string ToDateString(this DateTime Value)
         => Value.ToString("dd/MM/yyyy hh:mm:ss tt");
 
@@ -50,11 +53,12 @@ public static class Extensions
             filter.SortField = nameof(Entity.ModifiedDate);
 
         return filter.SortApproach == SortingType.Desc ?
-        source.OrderByDescending(c => EF.Property<object>(c, filter.SortField))
+        source.OrderByDescending(c => EF.Property<object>(c!, filter.SortField))
         :
-        source.OrderBy(c => EF.Property<object>(c, filter.SortField))
+        source.OrderBy(c => EF.Property<object>(c!, filter.SortField))
         ;
     }
+
     public static IQueryable<TEntity> Paginate<TEntity, TDto>(this IQueryable<TEntity> source, GlobalFilter<TDto> filter)
         where TDto : DtoBase
         => source

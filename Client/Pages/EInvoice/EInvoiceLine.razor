@@ -12,11 +12,11 @@
         </Field>
 
         <Field Name="Quantity" For="@(() => dto.Quantity)">
-            <InputNumber class="form-control" @bind-Value="dto.Quantity" @bind-Value:after="Calculate" />
+            <InputDecimal class="form-control" @bind-Value="dto.Quantity" @bind-Value:after="Calculate" />
         </Field>
 
         <Field Name="Amount Sold" For="@(() => dto.AmountSold)">
-            <InputNumber class="form-control" @bind-Value="dto.AmountSold" @bind-Value:after="Calculate" />
+            <InputDecimal class="form-control" @bind-Value="dto.AmountSold" @bind-Value:after="Calculate" />
         </Field>
 
         <div class="card rounded-3 my-1">
@@ -39,7 +39,7 @@
                                 Amount:
                             </span>
                             <div>
-                                <InputNumber @bind-Value="taxes.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
+                                <InputDecimal @bind-Value="taxes.Amount" class="form-control d-inline" @bind-Value:after="Calculate" />
                             </div>
                             <ValidationMessage For="@(() => taxes.Amount)" />
                         </span>

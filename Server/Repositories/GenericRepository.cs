@@ -18,7 +18,7 @@ public class GenericRepository<TEntity>(EInvoiceContext context) : IGenericRepos
     public void Delete(TEntity model) => DbSet.Remove(model);
 
     public bool Exists(Guid id) => DbSet.Any(e => e.Id == id);
-    
+
     public async Task<TEntity> GetAsync(Guid id) => await Query().FirstOrErrorAsync(id);
 
     public virtual IQueryable<TEntity> Query() => DbSet.AsQueryable();

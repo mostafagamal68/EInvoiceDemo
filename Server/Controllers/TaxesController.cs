@@ -1,14 +1,16 @@
 ﻿using EInvoiceDemo.Server.Handlers;
 using EInvoiceDemo.Server.Models;
-using EInvoiceDemo.Shared.DTOs;
+using EInvoiceDemo.Shared.DTOs.Tax;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EInvoiceDemo.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class TaxesController(IGenericHandler<Tax, TaxDto, TaxesFilter> taxRepository) : ControllerBase
 {
     // GET: api/Taxes/KeyValue

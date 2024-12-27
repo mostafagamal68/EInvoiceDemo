@@ -2,7 +2,7 @@
 using EInvoiceDemo.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace EInvoiceDemo.Shared.DTOs;
+namespace EInvoiceDemo.Shared.DTOs.EInvoice;
 
 public class EInvoiceDto : DtoBase
 {

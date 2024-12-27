@@ -103,7 +103,7 @@
                                                 var value = propertyValue switch
                                                 {
                                                     null => null,
-                                                    decimal number => number.Rnd().ToString(),
+                                                    decimal number => number.TrimZeroes().ToString(),
                                                     _ => propertyValue.ToString()
                                                 };
                                             }
@@ -211,7 +211,7 @@
                                             var value = propertyValue switch
                                             {
                                                 null => null,
-                                                decimal number => number.Rnd().ToString(),
+                                                decimal number => number.TrimZeroes().ToString(),
                                                 _ => propertyValue.ToString()
                                             };
                                         }
@@ -345,6 +345,7 @@
             FormType = typeof(TForm);
             HeaderService.ChangeHeaderAndTitle(Service.Api);
         }
+
         base.OnAfterRender(firstRender);
     }
 
@@ -396,10 +397,11 @@
         var ids = Model.Items.Where(c => c.IsSelected).Select(c => c.Id).ToList();
         HttpResponseMessage? response = operation switch
         {
-            BulkOperation.Delete when await ShowDeleteConfirmation(Service.Api) =>
-                await Service.Bulk(ids, BulkOperation.Delete),
+            BulkOperation.Delete when await ShowDeleteConfirmation(Service.Api)
+                => await Service.Bulk(ids, BulkOperation.Delete),
 
-            BulkOperation.Update => await Service.Bulk(ids, BulkOperation.Update),
+            BulkOperation.Update
+                => await Service.Bulk(ids, BulkOperation.Update),
 
             _ => null
         };
@@ -433,7 +435,7 @@
     }
 
     private async Task SortBy(ChangeEventArgs Field)
-        => await SortBy(Field.Value.CastTo<string>()!);
+        => await SortBy(Field.Value?.CastTo<string>()!);
 
     private void CheckedChanged()
         => SelectAll = Model.Items.All(c => c.IsSelected);

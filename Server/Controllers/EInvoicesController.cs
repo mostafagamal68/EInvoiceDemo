@@ -1,13 +1,15 @@
 ﻿using EInvoiceDemo.Server.Handlers;
-using EInvoiceDemo.Shared.DTOs;
+using EInvoiceDemo.Shared.DTOs.EInvoice;
 using EInvoiceDemo.Shared.Helpers;
 using EInvoiceDemo.Shared.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EInvoiceDemo.Server.Controllers;
 
 [Route("api/[controller]")]
 [ApiController]
+[Authorize]
 public class EInvoicesController(IEInvoiceHandler handler) : ControllerBase
 {
 

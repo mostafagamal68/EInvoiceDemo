@@ -1,7 +1,7 @@
 ﻿using EInvoiceDemo.Server.Mappers;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Server.Repositories;
-using EInvoiceDemo.Shared.DTOs;
+using EInvoiceDemo.Shared.DTOs.EInvoice;
 
 namespace EInvoiceDemo.Server.Handlers;
 

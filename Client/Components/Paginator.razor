@@ -1,25 +1,27 @@
 ﻿<div>
     <ul class="pagination pagination-sm justify-content-end">
         <li class="page-item @(Pagination.PageNo == 0 ? "disabled" : "")">
-            <a role="button" class="page-link" @onclick="@(() => Get(0))">First</a>
+            <a role="button" class="page-link" @onclick="() => Get(0)">First</a>
         </li>
         <li class="page-item @(Pagination.PageNo == 0 ? "disabled" : "")">
-            <a role="button" class="page-link" @onclick="@(() => Get(Pagination.CurrentPage-1))">Previous</a>
+            <a role="button" class="page-link" @onclick="() => Get(Pagination.CurrentPage - 1)">Previous</a>
         </li>
-        @foreach (int page in Enumerable.Range(Pagination.StartPage, Pagination.PagesCount - Pagination.StartPage > 9 ? Pagination.StartPage + 9 : Pagination.PagesCount - Pagination.StartPage + 1))
-        {
-            <li class="page-item @($"{(page-1 == Pagination.CurrentPage ? "active-page" : "")}")">
-                <a role="button" class="page-link" @onclick="@(() => Get(page-1))">@(page)</a>
-            </li>
-        }
-        <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
-            <a role="button" class="page-link" @onclick="@(() => Get(Pagination.CurrentPage+1))">Next</a>
+        <li class="page-item active-page">
+            <select class="form-select form-select-sm shadow-none" value="@(Pagination.CurrentPage + 1)" @onchange=PageChanged>
+                @for (int p = 1; p <= Pagination.PagesCount; p++)
+                {
+                    <option value="@p">@p</option>                    
+                }
+            </select>
         </li>
         <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
-            <a role="button" class="page-link" @onclick="@(() => Get(Pagination.PagesCount-1))">Last</a>
+            <a role="button" class="page-link" @onclick="() => Get(Pagination.CurrentPage + 1)">Next</a>
+        </li>
+        <li class="page-item @(Pagination.PageNo == Pagination.PagesCount - 1 ? "disabled" : "")">
+            <a role="button" class="page-link" @onclick="() => Get(Pagination.PagesCount - 1)">Last</a>
         </li>
         <li>
-            <select class="form-select form-select-sm shadow-none" value="@Pagination.RowsCount" @onchange="RowsChanged">
+            <select class="form-select form-select-sm shadow-none" value="@Pagination.RowsCount" @onchange=RowsChanged>
                 <option value="1">1</option>
                 <option value="5">5</option>
                 <option value="10">10</option>
@@ -44,9 +46,14 @@
         Pagination.PageNo = page;
         await GetPage.InvokeAsync();
     }
+    private async Task PageChanged(ChangeEventArgs e)
+    {
+        int no = e.Value!.CastTo<string>().ToInt().GetValueOrDefault();
+        await Get(no == 0 ? 0 : no - 1);
+    }
     private async Task RowsChanged(ChangeEventArgs e)
     {
-        Pagination.RowsCount = Convert.ToInt32(e.Value);
+        Pagination.RowsCount = e.Value!.CastTo<string>().ToInt().GetValueOrDefault();
         await GetPage.InvokeAsync();
     }
 }

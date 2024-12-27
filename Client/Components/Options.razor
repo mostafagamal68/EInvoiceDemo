@@ -51,7 +51,7 @@ else
 
     void ValueHasChanged(ChangeEventArgs args)
     {
-        string? value = args.Value.CastTo<string?>();
+        string? value = args.Value?.CastTo<string>();
         CurrentValue = value.HasValue() ? Enum.Parse<T>(value!) : null;
     }
     protected override bool TryParseValueFromString(string? value, out T? result, [NotNullWhen(false)] out string? validationErrorMessage)

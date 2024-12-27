@@ -1,7 +1,7 @@
 ﻿using EInvoiceDemo.Shared.Enums;
 using EInvoiceDemo.Shared.Models;
 
-namespace EInvoiceDemo.Shared.DTOs;
+namespace EInvoiceDemo.Shared.DTOs.EInvoice;
 
 public class EInvoicesFilter : GlobalFilter<EInvoiceDto>
 {

@@ -7,6 +7,6 @@ public class InputDecimal : InputNumber<decimal?>
 {
     protected override string? FormatValueAsString(decimal? value)
     {
-        return base.FormatValueAsString(value.Rnd());
+        return base.FormatValueAsString(value?.TrimZeroes());
     }
 }

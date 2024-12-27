@@ -1,7 +1,7 @@
 ﻿using EInvoiceDemo.Shared.Models;
 using System.ComponentModel.DataAnnotations;
 
-namespace EInvoiceDemo.Shared.DTOs;
+namespace EInvoiceDemo.Shared.DTOs.EInvoice;
 
 public class EInvoiceLineDto : DtoBase, ICloneable
 {
@@ -33,7 +33,7 @@ public class EInvoiceLineDto : DtoBase, ICloneable
     [Range(0, int.MaxValue, ErrorMessage = "Min Value is 0")]
     public decimal? ItemNetAmount { get; set; }
 
-    [ValidateComplexType] 
+    [ValidateComplexType]
     public List<EInvoiceLineTaxDto> EInvoiceLineTaxes { get; set; } = [];
     public object Clone()
     {

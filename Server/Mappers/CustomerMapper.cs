@@ -1,5 +1,5 @@
 ﻿using EInvoiceDemo.Server.Models;
-using EInvoiceDemo.Shared.DTOs;
+using EInvoiceDemo.Shared.DTOs.Customers;
 using EInvoiceDemo.Shared.Models;
 using Riok.Mapperly.Abstractions;
 

@@ -1,5 +1,8 @@
 ﻿@using EInvoiceDemo.Client.Pages.Item
 @using EInvoiceDemo.Client.Pages.Tax
+@using EInvoiceDemo.Shared.DTOs.EInvoice
+@using EInvoiceDemo.Shared.DTOs.Item
+@using EInvoiceDemo.Shared.DTOs.Tax
 @inherits GeneralComponent
 @implements IForm
 
@@ -7,15 +10,15 @@
     <ObjectGraphDataAnnotationsValidator />
     <div class="col-md-12 my-1">
 
-        <Field Name="Item" For="@(() => dto.ItemName)">
+        <Field Name="Item" For="() => dto.ItemName">
             <Select AutoComplete="true" @bind-Value="dto.ItemName" @bind-Key="dto.ItemId" TDto="ItemDto" TFilter="ItemsFilter" />
         </Field>
 
-        <Field Name="Quantity" For="@(() => dto.Quantity)">
+        <Field Name="Quantity" For="() => dto.Quantity">
             <InputDecimal class="form-control" @bind-Value="dto.Quantity" @bind-Value:after="Calculate" />
         </Field>
 
-        <Field Name="Amount Sold" For="@(() => dto.AmountSold)">
+        <Field Name="Amount Sold" For="() => dto.AmountSold">
             <InputDecimal class="form-control" @bind-Value="dto.AmountSold" @bind-Value:after="Calculate" />
         </Field>
 
@@ -32,7 +35,7 @@
                                 Tax:
                             </span>
                             <Select @bind-Value="taxes.TaxName" @bind-Key="taxes.TaxId" TDto="TaxDto" TFilter="TaxesFilter" />
-                            <ValidationMessage For="@(() => taxes.TaxName)" />
+                            <ValidationMessage For="() => taxes.TaxName" />
                         </span>
                         <span>
                             <span class="badge rounded-pill shadow-sm">
@@ -49,15 +52,15 @@
                     </CustomActions>
                     <ExtraData>
                         <Field Name="Total" For="@(() => dto.Total)">
-                            <h5>@dto.Total.Rnd()</h5>
+                            <h5>@dto.Total?.TrimZeroes()</h5>
                         </Field>
                     </ExtraData>
                 </Grid>
             </div>
         </div>
 
-        <Field Name="Item Net Amount" For="@(() => dto.ItemNetAmount)">
-            <h5>@dto.ItemNetAmount.Rnd()</h5>
+        <Field Name="Item Net Amount" For="() => dto.ItemNetAmount">
+            <h5>@dto.ItemNetAmount?.TrimZeroes()</h5>
         </Field>
 
     </div>

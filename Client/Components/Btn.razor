@@ -117,7 +117,7 @@ else
 
             await confirm.Closing;
 
-            if (confirm.Value.CastTo<bool?>() is not true)
+            if (confirm.Value?.CastTo<bool?>() is not true)
                 context.PreventNavigation();
         }
     }

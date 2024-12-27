@@ -1,4 +1,6 @@
 ﻿@page "/EInvoices"
+@using EInvoiceDemo.Shared.DTOs.Customers
+@using EInvoiceDemo.Shared.DTOs.EInvoice
 
 <Grid TForm=EInvoice TDto=EInvoiceDto TFilter=EInvoicesFilter TableDesignType=TableDesign.Table MultiSelect=true ActionsAsModal=false>
     <FilterTemplate Context="filter">

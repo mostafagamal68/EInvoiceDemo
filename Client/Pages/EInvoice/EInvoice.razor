@@ -1,5 +1,7 @@
 ﻿@page "/EInvoice/{Id:guid?}"
 @using EInvoiceDemo.Client.Pages.Customer
+@using EInvoiceDemo.Shared.DTOs.Customers
+@using EInvoiceDemo.Shared.DTOs.EInvoice
 @inherits GeneralComponent
 @inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoice
 @implements IForm
@@ -8,20 +10,20 @@
     <DataAnnotationsValidator />
     <div class="col-md-12 my-1">
 
-        <Field Name="Code" For="@(() => dto.Code)">
+        <Field Name="Code" For="() => dto.Code">
             <InputNumber class="form-control" @bind-Value="dto.Code" />
         </Field>
 
-        <Field Name="Type" For="@(() => dto.EInvoiceType)">
+        <Field Name="Type" For="() => dto.EInvoiceType">
             <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadios=true />
         </Field>
 
-        <Field Name="Customer" For="@(() => dto.CustomerName)">
+        <Field Name="Customer" For="() => dto.CustomerName">
             <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId"
                     TDto="CustomerDto" TFilter="CustomersFilter" />
         </Field>
 
-        <Field Name="Date" For="@(() => dto.DateTimeIssued)">
+        <Field Name="Date" For="() => dto.DateTimeIssued">
             <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="dto.DateTimeIssued" class="form-control" />
         </Field>
 
@@ -29,9 +31,9 @@
             <div class="card-body">
                 <div class="col-md-3 mb-1">
                     <Btn class="btn-violet" Text="Add Item" Icon="bi bi-check-circle"
-                         ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", async () => Calculate())
+                         ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", Calculate)
                                     .AddParameter(c => c.List, dto.EInvoiceLines)
-                                    .AddParameter(c => c.dto, new EInvoiceLineDto() { EInvoiceId = dto.Id })
+                                    .AddParameter(c => c.dto, new EInvoiceLineDto { EInvoiceId = dto.Id })
                                     .Build()
                                 ))" />
                 </div>
@@ -41,9 +43,9 @@
                           WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false Context=line>
                         <CustomActions>
                             <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
-                                 ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", async () => Calculate())
+                                 ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", Calculate)
                                             .AddParameter(c => c.List, dto.EInvoiceLines)
-                                            .AddParameter(c => c.dto, (EInvoiceLineDto)line.Clone())
+                                            .AddParameter(c => c.dto, line.Clone())
                                             .Build()
                                         ))" />
                         </CustomActions>
@@ -52,8 +54,8 @@
             </div>
         </div>
 
-        <Field Name="Net Amount" For="@(() => dto.NetAmount)">
-            <h5>@dto.NetAmount.Rnd()</h5>
+        <Field Name="Net Amount" For="() => dto.NetAmount">
+            <h5>@dto.NetAmount.TrimZeroes()</h5>
         </Field>
 
     </div>
@@ -78,7 +80,7 @@
 
     private async Task GetEInvoice()
     {
-        if (!InModal) 
+        if (!InModal)
             HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
         LoaderService.ToggleLoader();
         if (Id.HasValue)
@@ -137,6 +139,9 @@
         }
     }
 
-    private void Calculate()
-        => dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
+    private Task Calculate()
+    {
+        dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
+        return Task.CompletedTask;
+    }
 }

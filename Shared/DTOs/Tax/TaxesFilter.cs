@@ -1,6 +1,6 @@
 ﻿using EInvoiceDemo.Shared.Models;
 
-namespace EInvoiceDemo.Shared.DTOs;
+namespace EInvoiceDemo.Shared.DTOs.Tax;
 
 public class TaxesFilter : GlobalFilter<TaxDto>
 {

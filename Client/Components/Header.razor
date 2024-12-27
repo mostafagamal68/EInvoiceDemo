@@ -1,9 +1,13 @@
 ﻿@inject HeaderService service
+@inject NavigationManager Navigation
 @implements IDisposable
+
 <PageTitle>@service.Title</PageTitle>
 <div class="top-row px-4">
     <h3>@service.Title</h3>
-    <a href="https://www.codezone-eg.com/" target="_blank">About</a>
+    <AuthorizeView>
+        <button class="btn btn-outline-secondary border-0 shadow-none" @onclick=Logout>Logout</button>
+    </AuthorizeView>
 </div>
 
 @code {
@@ -14,5 +18,9 @@
     public void Dispose()
     {
         service.OnChange -= StateHasChanged;
+    }
+    private void Logout()
+    {
+        Navigation.NavigateTo($"/logout?returnUrl={Uri.EscapeDataString(Navigation.Uri)}", true);
     }
 }

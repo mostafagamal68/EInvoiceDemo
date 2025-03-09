@@ -4,8 +4,8 @@
 @inject IGenericService<TFilter, TDto> service
 @inject IJSRuntime JS
 
-<EditForm Model="Dto">
-    <DataAnnotationsValidator />
+<EditForm Model="Dto" AdditionalAttributes="AdditionalAttributes">
+    <ObjectGraphDataAnnotationsValidator />
     @if (InModal)
     {
         <div class="modal-body" @ref=bodyElement>
@@ -35,26 +35,48 @@
 </EditForm>
 
 @code {
+    [Parameter]
     public TDto Dto { get; set; } = new();
+
+
     public IGenericService<TFilter, TDto> Service => service;
 
     [Parameter] public Guid? Id { get; set; }
     [Parameter] public EventCallback<Form<TDto, TFilter>> OnLoadCreate { get; set; }
     [Parameter] public EventCallback<Form<TDto, TFilter>> OnLoadUpdate { get; set; }
+    [Parameter] public EventCallback<Form<TDto, TFilter>> AfterLoad { get; set; }
+    [Parameter] public EventCallback<TDto> OnSubmit { get; set; }
+    [Parameter] public Func<TDto, Task<bool>> SubmitLogic { get; set; }
+    [Parameter] public EventCallback<Form<TDto, TFilter>> HandleCopy { get; set; }
     [Parameter] public RenderFragment<TDto> ChildContent { get; set; }
     [Parameter] public RenderFragment<TDto>? Actions { get; set; }
+    [Parameter] public bool ShowActions { get; set; } = true;
+    [Parameter] public bool ShowNew { get; set; } = true;
+    [Parameter] public bool ShowCopy { get; set; } = true;
+    [Parameter] public bool ShowDelete { get; set; } = true;
+    [Parameter(CaptureUnmatchedValues = true)]
+    public Dictionary<string, object> AdditionalAttributes { get; set; }
 
     string item;
     bool savedWithNew;
     ElementReference bodyElement;
     RenderFragment formFooter =>
     @<div class="d-flex justify-content-end align-items-center gap-2">
-    @Actions?.Invoke(Dto)
-    @if (Id.HasValue)
+        @Actions?.Invoke(Dto)
+        @if (Id.HasValue && ShowActions)
+    {
+    if (ShowNew)
     {
         <Btn class="btn-info" Text="New" ClickAction="New" />
+    }
+    if (ShowCopy)
+    {
         <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
+    }
+    if (ShowDelete)
+    {
         <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
+    }
     }
         @if (savedWithNew)
     {
@@ -64,17 +86,24 @@
     }
     else
     {
+        @if (Id.HasValue)
+    {
+        <Btn class="btn-success" Text="Save" ValidateModel=true ClickAction=HandleValidSubmit CloseAfterSave=InModal />
+    }
+    else
+    {
         <Btn class="btn-success" Text="Save" ValidateModel=true ClickAction=HandleValidSubmit CloseAfterSave=InModal>
             <li><Btn Text="Save & New" ValidateModel=true ClickAction=SaveThenNew IsSubBtn=true /></li>
         </Btn>
+    }
     }
     </div>
     ;
 
     protected override async Task OnInitializedAsync()
-    { 
+    {
         item = typeof(TDto).Name.Replace("Dto", "");
-        await GetData(); 
+        await GetData();
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -93,25 +122,34 @@
 
         LoaderService.ToggleLoader();
 
-        if (Id.HasValue)
+        if (ShowActions)
         {
-            Dto = await service.GetSingle(Id);
-            if (OnLoadUpdate.HasDelegate)
-                await OnLoadUpdate.InvokeAsync(this);
+            if (Id.HasValue)
+            {
+                Dto = await service.GetSingle(Id);
+                if (OnLoadUpdate.HasDelegate)
+                    await OnLoadUpdate.InvokeAsync(this);
+            }
+            else
+            {
+                Dto.Id = Guid.NewGuid();
+                if (OnLoadCreate.HasDelegate)
+                    await OnLoadCreate.InvokeAsync(this);
+            }
         }
-        else
-        {
-            Dto.Id = Guid.NewGuid();
-            if (OnLoadCreate.HasDelegate)
-                await OnLoadCreate.InvokeAsync(this);
-        }
+
+        if (AfterLoad.HasDelegate)
+            await AfterLoad.InvokeAsync(this);
 
         LoaderService.ToggleLoader();
     }
 
     private async Task<bool> HandleValidSubmit()
     {
-        var successeded = await SendRequest();
+        if (OnSubmit.HasDelegate)
+            await OnSubmit.InvokeAsync(Dto);
+
+        var successeded = await (SubmitLogic is not null ? SubmitLogic(Dto) : SendRequest());
         if (successeded) Id = Dto.Id;
         return successeded;
     }
@@ -148,6 +186,8 @@
     {
         Id = null;
         await GetData();
+        if (HandleCopy.HasDelegate)
+            await HandleCopy.InvokeAsync(this);
     }
 
     private async Task Delete()

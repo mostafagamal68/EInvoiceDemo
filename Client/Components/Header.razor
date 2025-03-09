@@ -6,7 +6,12 @@
 <div class="top-row px-4">
     <h3>@service.Title</h3>
     <AuthorizeView>
-        <button class="btn btn-outline-secondary border-0 shadow-none" @onclick=Logout>Logout</button>
+        <Authorized>
+            <button class="btn btn-outline-secondary border-0 shadow-none" @onclick=Logout>Logout</button>
+        </Authorized>
+        <NotAuthorized>
+            <button class="btn btn-outline-secondary border-0 shadow-none" @onclick=Login>Login</button>
+        </NotAuthorized>
     </AuthorizeView>
 </div>
 
@@ -22,5 +27,9 @@
     private void Logout()
     {
         Navigation.NavigateTo($"/logout?returnUrl={Uri.EscapeDataString(Navigation.Uri)}", true);
+    }
+    private void Login()
+    {
+        Navigation.NavigateTo($"authentication/login?returnUrl={Uri.EscapeDataString(Navigation.Uri)}", true);
     }
 }

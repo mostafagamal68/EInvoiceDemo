@@ -69,28 +69,28 @@ else
     ElementReference Element;
     RenderFragment Button =>
     @<a @ref=Element class=@(IsSubBtn ? "dropdown-item " : "btn shadow-sm " + Classes) @onclick=RunAction disabled=@IsActionRun role="button" @attributes=AdditionalAttributes>
-    @if (IsActionRun)
+        @if (IsActionRun)
     {
-        switch (SpinnerType)
-        {
-            case SpinnerType.Grow:
-                <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
-            break;
-            case SpinnerType.Border:
-                <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
-            break;
-        }
+    switch (SpinnerType)
+    {
+    case SpinnerType.Grow:
+        <span class="spinner-grow spinner-grow-sm mx-1" role="status"></span>
+    break;
+    case SpinnerType.Border:
+        <span class="spinner-border spinner-border-sm mx-1" role="status"></span>
+    break;
+    }
     }
     else
     {
-        if (Text.HasValue())
-        {
-            <span class="mx-1">@Text</span>
-        }
-        if (Icon.HasValue())
-        {
-            <i class="@Icon mx-1"></i>
-        }
+    if (Text.HasValue())
+    {
+        <span class="mx-1">@Text</span>
+    }
+    if (Icon.HasValue())
+    {
+        <i class="@Icon mx-1"></i>
+    }
     }
     </a>
     ;
@@ -110,9 +110,9 @@ else
                 typeof(ConfirmDialog),
                 "There are unsaved changes!",
                 new Dictionary<string, object>
-                {
+                    {
                     { nameof(ConfirmDialog.Text), "Do you want to leave?" }
-                },
+                    },
                 null);
 
             await confirm.Closing;
@@ -139,6 +139,10 @@ else
                             ModalService.Close(Modal);
                         else
                             await JS.InvokeVoidAsync("history.back");
+                    }
+                    else
+                    {
+                        EditContext.MarkAsUnmodified();
                     }
                 }
             }

@@ -1,7 +1,7 @@
 using EInvoiceDemo.Server;
+using EInvoiceDemo.Server.Components;
 using EInvoiceDemo.Server.Data;
 using EInvoiceDemo.Server.Services;
-using EInvoiceDemo.Shared.Models;
 using EInvoiceDemo.Shared.Services;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
@@ -10,12 +10,16 @@ var builder = WebApplication.CreateBuilder(args);
 var configuration = builder.Configuration;
 var services = builder.Services;
 
+services.AddRazorComponents()
+    .AddInteractiveWebAssemblyComponents();
+
 builder.Host.UseSerilog(
     (context, configuration) => configuration.ReadFrom.Configuration(context.Configuration));
 
 services.AddDbContext<EInvoiceContext>(
     op => op.UseSqlServer(configuration.GetConnectionString("DefaultConnection")));
 services.AddControllers();
+services.AddRazorPages();
 services.AddEndpointsApiExplorer();
 services.AddExceptionHandler<ExceptionHandler>();
 services.AddProblemDetails();
@@ -44,7 +48,10 @@ app.UseSerilogRequestLogging();
 app.UseExceptionHandler();
 app.UseRouting();
 
+app.MapRazorComponents<App>()
+    .AddInteractiveWebAssemblyRenderMode()
+    .AddAdditionalAssemblies(typeof(EInvoiceDemo.Client._Imports).Assembly);
 app.MapControllers();
-app.MapFallbackToFile("index.html");
+app.MapRazorPages();
 
 app.Run();

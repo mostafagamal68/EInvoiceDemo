@@ -27,7 +27,7 @@
             @if (ActionsAsModal)
             {
                 <Btn class="btn-violet" Icon="bi bi-plus-circle"
-                     ClickAction="@(async () => await ModalService.Show(new ModalBuilder<TForm>("Add", Filter).Build()))" />
+                ClickAction="@(async () => await ModalService.Show(new ModalBuilder<TForm>("Add", Filter).Build()))" />
             }
             else
             {
@@ -118,13 +118,13 @@
                             @if (WithEdit)
                             {
                                 <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
-                                     ClickAction="() => Edit(item.Id)" />
+                                ClickAction="() => Edit(item.Id)" />
                             }
 
                             @if (WithDelete)
                             {
                                 <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
-                                     ClickAction="async () => await Delete(item.Id)" />
+                                ClickAction="async () => await Delete(item.Id)" />
                             }
                         </div>
                     </li>
@@ -175,7 +175,7 @@
                                         </a>
                                         <div class="dropdown-menu px-2">
                                             <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
-                                                 ClickAction="async () => await Bulk(BulkOperation.Delete)" />
+                                            ClickAction="async () => await Bulk(BulkOperation.Delete)" />
                                             @if (MultiSelectActions != null)
                                             {
 
@@ -223,13 +223,13 @@
                                     @if (WithEdit)
                                     {
                                         <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
-                                             ClickAction="() => Edit(item.Id)" />
+                                        ClickAction="() => Edit(item.Id)" />
                                     }
 
                                     @if (WithDelete)
                                     {
                                         <Btn class="btn-sm btn-danger" Icon="bi bi-trash"
-                                             ClickAction="async () => await Delete(item.Id)" />
+                                        ClickAction="async () => await Delete(item.Id)" />
                                     }
                                 </td>
                             </tr>
@@ -259,10 +259,9 @@
 }
 
 @code {
-    bool SelectAll;
+    private bool SelectAll { get; set; }
 
-    [Parameter]
-    public TFilter Model { get; set; } = new();
+    private TFilter Model { get; set; } = new();
 
     private string Search
     {
@@ -278,6 +277,9 @@
             propertyInfo.SetValue(Model, value);
         }
     }
+
+    [Parameter]
+    public List<TDto> Items { get; set; }
 
     [Parameter]
     public Expression<Func<TFilter, string>> SearchProperty { get; set; }
@@ -299,6 +301,9 @@
 
     [Parameter]
     public TableDesign? TableDesignType { get; set; }
+
+    [Parameter]
+    public bool ReadOnly { get; set; }
 
     [Parameter]
     public bool MultiSelect { get; set; }
@@ -353,6 +358,8 @@
     {
         if (EditContext is null)
             Model = await Service.GetList(Model);
+        else
+            Model.Items = Items;
     }
 
     private async Task Edit(Guid id)

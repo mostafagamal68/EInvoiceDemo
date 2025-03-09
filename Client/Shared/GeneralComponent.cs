@@ -45,7 +45,7 @@ public class GeneralComponent : ComponentBase
         var confirm = ModalService.Show(typeof(ConfirmDialog), title, parameters, null);
         await confirm.Closing;
 
-        return confirm.Value.CastTo<bool?>() == true;
+        return confirm.Value?.CastTo<bool?>() == true;
     }
 
     public async Task<bool> ShowDeleteConfirmation(string item)

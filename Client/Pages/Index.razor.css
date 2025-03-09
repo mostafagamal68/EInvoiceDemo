@@ -9,4 +9,5 @@
     background-color: var(--tertiary-color);
     transform: scale(1.1);
     transition: 500ms ease-in-out;
+    z-index: 5;
 }

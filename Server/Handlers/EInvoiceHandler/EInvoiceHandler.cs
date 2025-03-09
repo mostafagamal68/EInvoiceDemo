@@ -1,9 +1,10 @@
 ﻿using EInvoiceDemo.Server.Mappers;
 using EInvoiceDemo.Server.Models;
 using EInvoiceDemo.Server.Repositories;
+using EInvoiceDemo.Server.Repositories.EInvoiceRepo;
 using EInvoiceDemo.Shared.DTOs.EInvoice;
 
-namespace EInvoiceDemo.Server.Handlers;
+namespace EInvoiceDemo.Server.Handlers.EInvoiceHandler;
 
 public class EInvoiceHandler(IEInvoiceRepository einvoiceRepository,
                              IGenericRepository<EInvoiceLine> lineRepository,

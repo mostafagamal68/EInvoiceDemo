@@ -2,146 +2,76 @@
 @using EInvoiceDemo.Client.Pages.Customer
 @using EInvoiceDemo.Shared.DTOs.Customers
 @using EInvoiceDemo.Shared.DTOs.EInvoice
-@inherits GeneralComponent
-@inject IGenericService<EInvoicesFilter, EInvoiceDto> einvoice
+@inject IModalService ModalService
 @implements IForm
 
-<EditForm Model="dto">
-    <DataAnnotationsValidator />
-    <div class="col-md-12 my-1">
-
-        <Field Name="Code" For="() => dto.Code">
-            <InputNumber class="form-control" @bind-Value="dto.Code" />
-        </Field>
-
-        <Field Name="Type" For="() => dto.EInvoiceType">
-            <Options T=EInvoiceTypeEnum @bind-Value=dto.EInvoiceType DisplayName=@nameof(dto.EInvoiceType) AsRadios=true />
-        </Field>
-
-        <Field Name="Customer" For="() => dto.CustomerName">
-            <Select AutoComplete="true" @bind-Value="dto.CustomerName" @bind-Key="dto.CustomerId"
-                    TDto="CustomerDto" TFilter="CustomersFilter" />
-        </Field>
-
-        <Field Name="Date" For="() => dto.DateTimeIssued">
-            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="dto.DateTimeIssued" class="form-control" />
-        </Field>
-
-        <div class="card rounded-3 my-1">
-            <div class="card-body">
-                <div class="col-md-3 mb-1">
-                    <Btn class="btn-violet" Text="Add Item" Icon="bi bi-check-circle"
-                         ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", Calculate)
-                                    .AddParameter(c => c.List, dto.EInvoiceLines)
-                                    .AddParameter(c => c.dto, new EInvoiceLineDto { EInvoiceId = dto.Id })
-                                    .Build()
-                                ))" />
-                </div>
-                @if (!LoaderService.IsLoading)
-                {
-                    <Grid TForm=EInvoiceLine TDto=EInvoiceLineDto TFilter=EInvoiceLineFilter Model=lineFilter TableDesignType=TableDesign.List
-                          WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false Context=line>
-                        <CustomActions>
-                            <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
-                                 ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("EInvoice Line", Calculate)
-                                            .AddParameter(c => c.List, dto.EInvoiceLines)
-                                            .AddParameter(c => c.dto, line.Clone())
-                                            .Build()
-                                        ))" />
-                        </CustomActions>
-                    </Grid>
-                }
-            </div>
-        </div>
-
-        <Field Name="Net Amount" For="() => dto.NetAmount">
-            <h5>@dto.NetAmount.TrimZeroes()</h5>
-        </Field>
-
-    </div>
-    <div class="d-flex justify-content-end align-items-center gap-2 flex-wrap">
-        @if (Id.HasValue)
-        {
-            <Btn class="btn-info" Text="New" ClickAction="New" />
-            <Btn class="btn-secondary" Text="Copy" ClickAction="Copy" />
-            <Btn class="btn-danger" Text="Delete" ClickAction="Delete" />
-        }
-        <Btn class="btn-success" Text="Save" ValidateModel="true" ClickAction="HandleValidSubmit" CloseAfterSave="true"></Btn>
-    </div>
-</EditForm>
-@code {
-    [Parameter]
-    public Guid? Id { get; set; }
-
-    EInvoiceDto dto = new();
-    EInvoiceLineFilter lineFilter = new();
-
-    protected override async Task OnInitializedAsync() => await GetEInvoice();
-
-    private async Task GetEInvoice()
-    {
-        if (!InModal)
-            HeaderService.ChangeHeaderAndTitle($"{(Id.HasValue ? "Edit" : "Add")} {nameof(EInvoice)}");
-        LoaderService.ToggleLoader();
-        if (Id.HasValue)
-            dto = await einvoice.GetSingle(Id);
-        else
-        {
-            dto.Id = Guid.NewGuid();
-            dto.Code = await einvoice.GetCode();
-        }
-        lineFilter.Items = dto.EInvoiceLines;
-        LoaderService.ToggleLoader();
-    }
-    private async Task HandleValidSubmit()
-    {
-        HttpResponseMessage httpResponseMessage;
-        if (!Id.HasValue)
-        {
-            httpResponseMessage = await einvoice.Create(dto);
-            if (httpResponseMessage.IsSuccessStatusCode)
-                Id = dto.Id;
-            // GoTo("EInvoice", "EInvoice ", true, dto.EInvoiceId);
-        }
-        else
-            httpResponseMessage = await einvoice.Edit(dto);
-        await ShowResultMessage(httpResponseMessage);
-    }
-    private async Task New()
-    {
-        Id = null;
-        dto = new EInvoiceDto();
-        await GetEInvoice();
-    }
-    private async Task Copy()
-    {
-        Id = null;
-        await GetEInvoice();
-        dto.EInvoiceLines.ForEach(c =>
+<Form Id="Id"
+      TDto="EInvoiceDto"
+      TFilter="EInvoicesFilter"
+      OnLoadCreate="async form => form.Dto.Code = await form.Service.GetCode()"
+      HandleCopy="form => form.Dto.EInvoiceLines.ForEach(c =>
             {
                 c.Id = Guid.NewGuid();
-                c.EInvoiceId = dto.Id;
+                c.EInvoiceId = form.Dto.Id;
                 c.EInvoiceLineTaxes.ForEach(x =>
                     {
                         x.Id = Guid.NewGuid();
                         x.EInvoiceLineId = c.Id;
                     });
-            });
-    }
-    private async Task Delete()
-    {
-        if (await ShowDeleteConfirmation("EInvoice"))
-        {
-            var response = await einvoice.Delete(Id);
-            if (response.IsSuccessStatusCode)
-                GoTo("EInvoices");
-            await ShowResultMessage(response);
-        }
-    }
+            })">
+    <Field Name="Code" For="() => context.Code">
+        <InputNumber class="form-control" @bind-Value="context.Code" />
+    </Field>
 
-    private Task Calculate()
+    <Field Name="Type" For="() => context.EInvoiceType">
+        <Options T=EInvoiceTypeEnum @bind-Value=context.EInvoiceType DisplayName=@nameof(context.EInvoiceType) AsRadios=true />
+    </Field>
+
+    <Field Name="Customer" For="() => context.CustomerName">
+        <Select AutoComplete="true" @bind-Value="context.CustomerName" @bind-Key="context.CustomerId"
+                TDto="CustomerDto" TFilter="CustomersFilter" />
+    </Field>
+
+    <Field Name="Date" For="() => context.DateTimeIssued">
+        <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="context.DateTimeIssued" class="form-control" />
+    </Field>
+
+    <div class="card rounded-3 my-1">
+        <div class="card-body">
+            <div class="col-md-3 mb-1">
+                <Btn class="btn-violet" Text="Add Item" Icon="bi bi-check-circle"
+                     ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("Add", () => Calculate(context))
+                                    .AddParameter(c => c.List, context.EInvoiceLines)
+                                    .AddParameter(c => c.Dto, new EInvoiceLineDto { EInvoiceId = context.Id })
+                                    .Build()
+                                ))" />
+            </div>
+            <Grid TForm=EInvoiceLine TDto=EInvoiceLineDto TFilter=EInvoiceLineFilter Items=context.EInvoiceLines TableDesignType=TableDesign.List
+                  WithEdit=false WithDelete=false ShowSort=false WithPagination=false ShowActions=false Context=line>
+                <CustomActions>
+                    <Btn class="btn-sm btn-warning" Icon="bi bi-pencil-square"
+                         ClickAction="@(async () => await ModalService.Show(new ModalBuilder<EInvoiceLine>("Edit", () => Calculate(context))
+                                .AddParameter(c => c.List, context.EInvoiceLines)
+                                .AddParameter(c => c.Dto, line.Clone())
+                                .Build()
+                            ))" />
+                </CustomActions>
+            </Grid>
+        </div>
+    </div>
+
+    <Field Name="Net Amount" For="() => context.NetAmount">
+        <h5>@context.NetAmount.TrimZeroes()</h5>
+    </Field>
+</Form>
+
+@code {
+    [Parameter]
+    public Guid? Id { get; set; }
+
+    private Task Calculate(EInvoiceDto context)
     {
-        dto.NetAmount = dto.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
+        context.NetAmount = context.EInvoiceLines.Sum(c => c.ItemNetAmount) ?? 0;
         return Task.CompletedTask;
     }
 }

@@ -4,39 +4,44 @@
 <h1>E-Invoice</h1>
 
 <div class="row">
-    <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center">
-        <div class="card rounded-3 shadow-box py-3 my-3" @onclick="@(()=>GoTo("Items"))">
+    <div class="col-lg-3 col-md-6 col-12 p-0 m-2">
+        <div class="card rounded-3 shadow-box py-3">
             <div class="card-body text-center">
                 <h1><i class="bi bi-diagram-3"></i></h1>
                 <h3>Items</h3>
+                <a href="/Items" class="stretched-link"></a>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center">
-        <div class="card rounded-3 shadow-box py-3 my-3" @onclick="@(()=>GoTo("Customers"))">
+    <div class="col-lg-3 col-md-6 col-12 p-0 m-2">
+        <div class="card rounded-3 shadow-box py-3">
             <div class="card-body text-center">
                 <h1><i class="bi bi-person-gear"></i></h1>
                 <h3>Customers</h3>
+                <a href="/Customers" class="stretched-link"></a>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center">
-        <div class="card rounded-3 shadow-box py-3 my-3" @onclick="@(()=>GoTo("Taxes"))">
+    <div class="col-lg-3 col-md-6 col-12 p-0 m-2">
+        <div class="card rounded-3 shadow-box py-3">
             <div class="card-body text-center">
                 <h1><i class="bi bi-tag"></i></h1>
                 <h3>Taxes</h3>
+                <a href="/Taxes" class="stretched-link"></a>
             </div>
         </div>
     </div>
-    <div class="col-lg-3 col-md-6 col-sm-12 d-flex justify-content-center">
-        <div class="card rounded-3 shadow-box py-3 my-3" @onclick="@(()=>GoTo("EInvoices"))">
+    <div class="col-lg-3 col-md-6 col-12 p-0 m-2">
+        <div class="card rounded-3 shadow-box py-3">
             <div class="card-body text-center">
                 <h1><i class="bi bi-receipt"></i></h1>
                 <h3>E-Invoices</h3>
+                <a href="/EInvoices" class="stretched-link"></a>
             </div>
         </div>
     </div>
 </div>
+
 @code{
     protected override void OnInitialized()
     {

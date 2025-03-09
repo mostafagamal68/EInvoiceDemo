@@ -7,7 +7,7 @@
             <a role="button" class="page-link" @onclick="() => Get(Pagination.CurrentPage - 1)">Previous</a>
         </li>
         <li class="page-item active-page">
-            <select class="form-select form-select-sm shadow-none" value="@(Pagination.CurrentPage + 1)" @onchange=PageChanged>
+            <select class="form-select form-select-sm shadow-none rounded-0" value="@(Pagination.CurrentPage + 1)" @onchange=PageChanged>
                 @for (int p = 1; p <= Pagination.PagesCount; p++)
                 {
                     <option value="@p">@p</option>                    
@@ -21,7 +21,7 @@
             <a role="button" class="page-link" @onclick="() => Get(Pagination.PagesCount - 1)">Last</a>
         </li>
         <li>
-            <select class="form-select form-select-sm shadow-none" value="@Pagination.RowsCount" @onchange=RowsChanged>
+            <select class="form-select form-select-sm shadow-none rounded-start-0" value="@Pagination.RowsCount" @onchange=RowsChanged>
                 <option value="1">1</option>
                 <option value="5">5</option>
                 <option value="10">10</option>

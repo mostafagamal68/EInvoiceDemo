@@ -2,7 +2,7 @@
 using EInvoiceDemo.Server.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace EInvoiceDemo.Server.Repositories;
+namespace EInvoiceDemo.Server.Repositories.EInvoiceRepo;
 
 internal class EInvoiceRepository(EInvoiceContext context)
     : GenericRepository<EInvoice>(context)
